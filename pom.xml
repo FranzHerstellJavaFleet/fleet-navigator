@@ -252,8 +252,9 @@
                         <buildArg>-H:IncludeResources=application.*.yaml</buildArg>
                         <buildArg>-H:IncludeResources=application.*.properties</buildArg>
 
-                        <!-- Reflection hints (Spring Boot + Hibernate) -->
+                        <!-- Class initialization -->
                         <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,org.slf4j.impl.StaticLoggerBinder</buildArg>
+                        <buildArg>--initialize-at-run-time=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</buildArg>
 
                         <!-- Allow incomplete classpath -->
                         <buildArg>--allow-incomplete-classpath</buildArg>
