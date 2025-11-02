@@ -397,6 +397,13 @@ Port 2025 - Das Geburtsjahr von Fleet Navigator
 
 ---
 
+## 📥 Download
+
+Native Binaries (ohne JDK!) für Windows, macOS und Linux sind unter **Releases** verfügbar:
+https://github.com/FranzHerstellJavaFleet/fleet-navigator/releases
+
+---
+
 **🌟 Gefällt dir Fleet Navigator? Gib uns einen Stern auf GitHub!**
 
 https://github.com/FranzHerstellJavaFleet/fleet-navigator
