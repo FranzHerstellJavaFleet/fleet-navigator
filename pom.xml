@@ -100,6 +100,13 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>2.0.30</version>
+            <exclusions>
+                <!-- Exclude commons-logging to avoid conflict with spring-jcl -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring Boot Cache -->
@@ -254,7 +261,6 @@
 
                         <!-- Class initialization -->
                         <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,org.slf4j.impl.StaticLoggerBinder</buildArg>
-                        <buildArg>--initialize-at-run-time=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</buildArg>
 
                         <!-- Allow incomplete classpath -->
                         <buildArg>--allow-incomplete-classpath</buildArg>
