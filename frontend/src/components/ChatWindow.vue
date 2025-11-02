@@ -5,6 +5,9 @@
       <!-- Welcome Message - Show when NO chat is selected -->
       <div v-if="!chatStore.currentChat" class="flex items-center justify-center min-h-full">
         <div class="text-center max-w-3xl mx-auto px-4">
+          <!-- System Health Banner -->
+          <SystemHealthBanner class="mb-6 text-left" />
+
           <!-- Animated Logo - JavaFleet Segelboot -->
           <div class="mb-8 flex justify-center">
             <div class="relative">
@@ -179,6 +182,7 @@ import {
 import { useChatStore } from '../stores/chatStore'
 import MessageBubble from './MessageBubble.vue'
 import MessageInput from './MessageInput.vue'
+import SystemHealthBanner from './SystemHealthBanner.vue'
 
 const chatStore = useChatStore()
 const messagesContainer = ref(null)

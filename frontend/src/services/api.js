@@ -148,6 +148,11 @@ export default {
     return response.data
   },
 
+  async getSystemHealth() {
+    const response = await api.get('/system/health')
+    return response.data
+  },
+
   // Abort request
   async abortRequest(requestId) {
     const response = await api.post(`/chat/abort/${requestId}`)
