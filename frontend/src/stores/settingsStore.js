@@ -1,0 +1,108 @@
+import { defineStore } from 'pinia'
+import { ref, watch } from 'vue'
+
+const STORAGE_KEY = 'fleet-navigator-settings'
+
+// Default settings
+const defaultSettings = {
+  // General
+  language: 'de',
+  theme: 'auto',
+
+  // Model Settings
+  markdownEnabled: true,  // Markdown-Formatierung in Antworten
+  streamingEnabled: true,
+  temperature: 0.7,
+  topP: 0.9,
+  topK: 40,
+  repeatPenalty: 1.1,
+  contextLength: 32768,  // Erhöht für lange Ausgaben
+  maxTokens: 32768,      // Erhöht für 15+ Seiten Text (~40k tokens)
+
+  // Vision
+  autoSelectVisionModel: true,
+  preferredVisionModel: 'llava:13b',
+  visionChainEnabled: true,  // Vision Model Output an Haupt-Model weiterreichen
+
+  // Advanced
+  debugMode: false
+}
+
+export const useSettingsStore = defineStore('settings', () => {
+  // Load settings from localStorage or use defaults
+  const loadSettings = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const storedSettings = JSON.parse(stored)
+        // Merge: defaults first, then stored values (but ensure all new defaults are present)
+        // This ensures new settings get their defaults even if not in localStorage
+        const merged = { ...defaultSettings, ...storedSettings }
+
+        // Log if we're using stored settings
+        console.log('✅ Settings loaded from localStorage')
+        console.log('📊 maxTokens:', merged.maxTokens, 'temperature:', merged.temperature)
+
+        return merged
+      }
+    } catch (e) {
+      console.error('Failed to load settings from localStorage', e)
+    }
+    console.log('📝 Using default settings')
+    return { ...defaultSettings }
+  }
+
+  const settings = ref(loadSettings())
+
+  // Watch for changes and save to localStorage
+  watch(settings, (newSettings) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings))
+    } catch (e) {
+      console.error('Failed to save settings to localStorage', e)
+    }
+  }, { deep: true })
+
+  // Actions
+  function updateSettings(newSettings) {
+    settings.value = { ...settings.value, ...newSettings }
+  }
+
+  function resetToDefaults() {
+    settings.value = { ...defaultSettings }
+  }
+
+  function getSetting(key) {
+    return settings.value[key]
+  }
+
+  function setSetting(key, value) {
+    settings.value[key] = value
+  }
+
+  // Vision Model helpers
+  function getVisionModels() {
+    return [
+      'llava:7b',
+      'llava:13b',
+      'moondream:latest',
+      'bakllava:latest'
+    ]
+  }
+
+  function isVisionModel(modelName) {
+    if (!modelName) return false
+    const visionKeywords = ['llava', 'vision', 'bakllava', 'moondream']
+    return visionKeywords.some(keyword => modelName.toLowerCase().includes(keyword))
+  }
+
+  return {
+    settings,
+    updateSettings,
+    resetToDefaults,
+    getSetting,
+    setSetting,
+    getVisionModels,
+    isVisionModel
+  }
+})

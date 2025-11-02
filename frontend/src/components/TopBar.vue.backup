@@ -1,0 +1,296 @@
+<template>
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+    <div class="flex items-center justify-between">
+      <!-- Current Chat Title -->
+      <div class="flex-1">
+        <h2 v-if="chatStore.currentChat" class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ chatStore.currentChat.title }}
+        </h2>
+        <h2 v-else class="text-lg font-semibold text-gray-400 dark:text-gray-500">
+          Wähle oder erstelle einen neuen Chat
+        </h2>
+      </div>
+
+      <!-- Right Side Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Current Default Model Display -->
+        <div class="flex items-center space-x-3">
+          <!-- System Prompt Title (if set) -->
+          <div v-if="chatStore.systemPromptTitle" class="flex items-center space-x-2 px-3 py-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+            <span class="text-sm text-purple-600 dark:text-purple-400">💭</span>
+            <span class="text-sm font-medium text-purple-900 dark:text-purple-100">
+              {{ chatStore.systemPromptTitle }}
+            </span>
+          </div>
+
+          <!-- Model -->
+          <div class="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Model:</span>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">
+              {{ chatStore.selectedModel }} ⭐
+            </span>
+          </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button
+          @click="$emit('toggle-theme')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fleet-orange-500 hover:bg-fleet-orange-50 dark:hover:bg-fleet-orange-900 transition-colors text-xl"
+          :title="darkMode ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'"
+        >
+          {{ darkMode ? '☀️' : '🌙' }}
+        </button>
+
+        <!-- System Prompt Button -->
+        <button
+          @click="showSystemPrompt = !showSystemPrompt"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fleet-orange-500 hover:bg-fleet-orange-50 dark:hover:bg-fleet-orange-900 transition-colors text-xl"
+          :class="{ 'border-fleet-orange-500 bg-fleet-orange-50 dark:bg-fleet-orange-900': showSystemPrompt }"
+          title="System Prompt bearbeiten"
+        >
+          💭
+        </button>
+
+        <!-- DISTRIBUTED AGENTS (NEW!) -->
+        <!-- Email Agent Button -->
+        <button
+          @click="$emit('toggle-email-agent')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors text-xl relative"
+          title="Email Agent (Coming Soon)"
+        >
+          📧
+          <span class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full" title="Coming Soon"></span>
+        </button>
+
+        <!-- Document Agent Button -->
+        <button
+          @click="$emit('toggle-document-agent')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-xl relative"
+          title="Dokumenten Agent (Coming Soon)"
+        >
+          📄
+          <span class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full" title="Coming Soon"></span>
+        </button>
+
+        <!-- OS Agent Button -->
+        <button
+          @click="$emit('toggle-os-agent')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-xl relative"
+          title="OS Agent (Coming Soon)"
+        >
+          💻
+          <span class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full" title="Coming Soon"></span>
+        </button>
+
+        <!-- Model Manager Button -->
+        <button
+          @click="$emit('toggle-model-manager')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fleet-orange-500 hover:bg-fleet-orange-50 dark:hover:bg-fleet-orange-900 transition-colors text-xl"
+          title="Modelle verwalten"
+        >
+          🔧
+        </button>
+
+        <!-- System Monitor Toggle -->
+        <button
+          @click="$emit('toggle-monitor')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fleet-orange-500 hover:bg-fleet-orange-50 dark:hover:bg-fleet-orange-900 transition-colors text-xl"
+          title="System Monitor anzeigen"
+        >
+          📊
+        </button>
+
+        <!-- Settings Button -->
+        <button
+          @click="$emit('toggle-settings')"
+          class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fleet-orange-500 hover:bg-fleet-orange-50 dark:hover:bg-fleet-orange-900 transition-colors text-xl"
+          title="Einstellungen öffnen"
+        >
+          ⚙️
+        </button>
+      </div>
+    </div>
+
+    <!-- System Prompt Editor -->
+    <div v-if="showSystemPrompt" class="mt-3 fade-in">
+      <!-- Gespeicherte Vorlagen -->
+      <div v-if="promptTemplates.length > 0" class="mb-3">
+        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Gespeicherte Vorlagen:</div>
+        <div class="space-y-1 max-h-32 overflow-y-auto">
+          <div
+            v-for="template in promptTemplates"
+            :key="template.id"
+            class="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded text-sm group"
+          >
+            <button
+              @click="loadTemplate(template)"
+              class="flex-1 text-left truncate hover:text-fleet-orange-500"
+            >
+              {{ template.name }}
+            </button>
+            <button
+              @click="deleteTemplate(template.id)"
+              class="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 text-xs ml-2"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <textarea
+        v-model="chatStore.systemPrompt"
+        placeholder="System-Prompt eingeben (z.B. 'Du bist ein hilfreicher Java-Experte...')"
+        rows="4"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:border-fleet-orange-500 text-sm resize-none"
+      ></textarea>
+
+      <!-- Buttons -->
+      <div class="mt-2 flex justify-between items-center">
+        <button
+          @click="showSaveTemplateModal = true"
+          v-if="chatStore.systemPrompt.trim()"
+          class="px-3 py-1 text-sm text-fleet-orange-600 dark:text-fleet-orange-400 hover:text-fleet-orange-700 dark:hover:text-fleet-orange-300"
+        >
+          💾 Als Vorlage speichern
+        </button>
+        <div class="flex space-x-2 ml-auto">
+          <button
+            @click="chatStore.setSystemPrompt('', null)"
+            class="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
+          >
+            Löschen
+          </button>
+          <button
+            @click="showSystemPrompt = false"
+            class="px-3 py-1 bg-fleet-orange-500 hover:bg-fleet-orange-600 text-white rounded text-sm"
+          >
+            Fertig
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Template Modal -->
+    <div
+      v-if="showSaveTemplateModal"
+      @click="showSaveTemplateModal = false"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div @click.stop class="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 shadow-xl">
+        <h3 class="text-lg font-bold mb-4 dark:text-white">Vorlage speichern</h3>
+        <input
+          v-model="newTemplateName"
+          @keydown.enter="saveTemplate"
+          @keydown.esc="showSaveTemplateModal = false"
+          type="text"
+          placeholder="Name der Vorlage (z.B. 'Java Experte')"
+          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:border-fleet-orange-500 mb-4"
+          ref="templateNameInput"
+        />
+        <div class="flex justify-end space-x-2">
+          <button
+            @click="showSaveTemplateModal = false"
+            class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-lg transition-colors dark:text-gray-100"
+          >
+            Abbrechen
+          </button>
+          <button
+            @click="saveTemplate"
+            :disabled="!newTemplateName.trim()"
+            class="px-4 py-2 bg-fleet-orange-500 hover:bg-fleet-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, nextTick, watch } from 'vue'
+import { useChatStore } from '../stores/chatStore'
+
+const props = defineProps({
+  darkMode: Boolean
+})
+
+defineEmits(['toggle-monitor', 'toggle-theme', 'toggle-model-manager', 'toggle-settings'])
+
+const chatStore = useChatStore()
+const showSystemPrompt = ref(false)
+const showSaveTemplateModal = ref(false)
+const newTemplateName = ref('')
+const promptTemplates = ref([])
+const templateNameInput = ref(null)
+
+onMounted(async () => {
+  await chatStore.loadModels()
+  loadTemplates()
+})
+
+// Load templates from database
+async function loadTemplates() {
+  try {
+    const api = (await import('../services/api.js')).default
+    promptTemplates.value = await api.getAllSystemPrompts()
+  } catch (e) {
+    console.error('Failed to load templates:', e)
+    promptTemplates.value = []
+  }
+}
+
+// Save current prompt as template to database
+async function saveTemplate() {
+  if (!newTemplateName.value.trim() || !chatStore.systemPrompt.trim()) return
+
+  try {
+    const api = (await import('../services/api.js')).default
+    const template = {
+      name: newTemplateName.value.trim(),
+      content: chatStore.systemPrompt,
+      isDefault: false
+    }
+
+    await api.createSystemPrompt(template)
+    await loadTemplates() // Reload from database
+
+    newTemplateName.value = ''
+    showSaveTemplateModal.value = false
+  } catch (e) {
+    console.error('Failed to save template:', e)
+    alert('Fehler beim Speichern des Templates!')
+  }
+}
+
+// Load a template
+function loadTemplate(template) {
+  chatStore.setSystemPrompt(template.content, template.name)
+}
+
+// Delete a template from database
+async function deleteTemplate(templateId) {
+  if (confirm('Diese Vorlage löschen?')) {
+    try {
+      const api = (await import('../services/api.js')).default
+      await api.deleteSystemPrompt(templateId)
+      await loadTemplates() // Reload from database
+    } catch (e) {
+      console.error('Failed to delete template:', e)
+      alert('Fehler beim Löschen des Templates!')
+    }
+  }
+}
+
+// Watch for modal open to focus input
+watch(() => showSaveTemplateModal.value, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    if (templateNameInput.value) {
+      templateNameInput.value.focus()
+    }
+  }
+})
+</script>
