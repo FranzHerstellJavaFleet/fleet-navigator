@@ -25,6 +25,7 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 - ✅ **Privatsphäre**: Alle Daten bleiben auf deinem Computer
 - ✅ **Kostenlos**: Keine monatlichen Gebühren
 - ✅ **Offline**: Funktioniert ohne Internet (nach dem Setup)
+- ✅ **Brief-Agent**: Generiert Briefe und öffnet sie automatisch in Word/LibreOffice
 - ✅ **Brief-Vorlagen**: Fertige Vorlagen für häufige Schreibanlässe
 - ✅ **Multi-Sprache**: Deutsch, Englisch und viele mehr
 - ✅ **Dokumente**: PDFs und Bilder hochladen und analysieren
@@ -203,6 +204,55 @@ Bei komplexen Aufgaben: Teile sie in mehrere Fragen auf.
 - **4-8 GB RAM**: `llama3.2` oder `qwen2.5:3b`
 - **16 GB RAM**: `qwen2.5:7b` oder `llama3.1:8b`
 - **32 GB+ RAM**: `qwen2.5:14b` oder `llama3.1:70b`
+
+---
+
+## 📝 Brief-Agent - Automatische Textverarbeitung
+
+Der Brief-Agent ist ein **besonderes Feature** für Briefe und Dokumente:
+
+### Wie funktioniert's?
+
+1. **Klicke auf "Briefe"** in der Sidebar
+2. **Wähle eine Vorlage** oder beschreibe deinen Brief
+3. **AI generiert den Brief** mit deinen persönlichen Daten
+4. **Brief öffnet sich automatisch** in deiner Textverarbeitung
+5. **Rechtschreibprüfung**, Formatierung, als PDF speichern oder drucken
+
+### Welche Textverarbeitung?
+
+Der Brief-Agent unterstützt **mehrere Programme**:
+
+| Betriebssystem | Programme |
+|----------------|-----------|
+| **Windows** | Microsoft Word, LibreOffice, OnlyOffice, Notepad |
+| **macOS** | Microsoft Word, LibreOffice, OnlyOffice, TextEdit |
+| **Linux** | LibreOffice, OnlyOffice, WPS Office, AbiWord, gedit |
+
+**Empfehlung:**
+- **Windows**: Microsoft Word (wenn vorhanden) oder LibreOffice (kostenlos)
+- **macOS/Linux**: LibreOffice (kostenlos)
+
+### Wo werden Briefe gespeichert?
+
+Alle generierten Briefe werden in diesem Ordner abgelegt:
+
+- **Windows**: `C:\Users\[Dein Name]\FleetNavigator\Documents\`
+- **macOS**: `/Users/[Dein Name]/FleetNavigator/Documents/`
+- **Linux**: `/home/[Dein Name]/FleetNavigator/Documents/`
+
+### Persönliche Daten
+
+Beim ersten Start erstellt Fleet Navigator **Platzhalter-Daten** (Max Mustermann, Musterweg 1, 12345 Musterstadt).
+
+**Diese Daten MUSST du ersetzen!**
+
+1. Klicke auf **"Einstellungen"** in der Sidebar
+2. Gehe zu **"Persönliche Daten"**
+3. Trage deine echten Daten ein
+4. Speichern
+
+Ab jetzt werden **alle Briefe automatisch** mit deinen Daten erstellt!
 
 ---
 

@@ -1,6 +1,7 @@
 package io.javafleet.fleetnavigator.service;
 
 import io.javafleet.fleetnavigator.model.LetterTemplate;
+import io.javafleet.fleetnavigator.model.PersonalInfo;
 import io.javafleet.fleetnavigator.model.SystemPrompt;
 import io.javafleet.fleetnavigator.repository.LetterTemplateRepository;
 import io.javafleet.fleetnavigator.repository.SystemPromptRepository;
@@ -18,6 +19,7 @@ import java.util.Locale;
  * Initialisiert Default-Daten beim ersten Start
  * - Brief-Vorlagen (Deutsch & Englisch)
  * - System-Prompts für verschiedene Anwendungsfälle
+ * - Platzhalter für persönliche Daten (Max Mustermann)
  */
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class DefaultDataInitializer {
 
     private final LetterTemplateRepository letterTemplateRepository;
     private final SystemPromptRepository systemPromptRepository;
+    private final PersonalInfoService personalInfoService;
 
     @EventListener(ApplicationReadyEvent.class)
     @Order(2) // Nach SystemHealthCheckService (Order 1)
@@ -50,6 +53,14 @@ public class DefaultDataInitializer {
             log.info("✅ System prompts initialized");
         } else {
             log.info("🤖 System prompts already exist, skipping initialization");
+        }
+
+        if (!personalInfoService.hasPersonalInfo()) {
+            log.info("👤 Initializing placeholder personal info (Max Mustermann)...");
+            initializePlaceholderPersonalInfo(isGerman);
+            log.info("✅ Placeholder personal info initialized");
+        } else {
+            log.info("👤 Personal info already exists, skipping initialization");
         }
     }
 
@@ -325,5 +336,39 @@ public class DefaultDataInitializer {
                 "Adapt your explanations to the learner's level of knowledge.");
         teacher.setActive(false);
         systemPromptRepository.save(teacher);
+    }
+
+    private void initializePlaceholderPersonalInfo(boolean german) {
+        PersonalInfo maxMustermann = new PersonalInfo();
+
+        if (german) {
+            maxMustermann.setFirstName("Max");
+            maxMustermann.setLastName("Mustermann");
+            maxMustermann.setStreet("Musterweg");
+            maxMustermann.setHouseNumber("1");
+            maxMustermann.setPostalCode("12345");
+            maxMustermann.setCity("Musterstadt");
+            maxMustermann.setCountry("Deutschland");
+            maxMustermann.setPhone("+49 123 456789");
+            maxMustermann.setMobile("+49 170 1234567");
+            maxMustermann.setEmail("max.mustermann@beispiel.de");
+
+            log.info("✅ Created German placeholder: Max Mustermann, Musterweg 1, 12345 Musterstadt");
+        } else {
+            maxMustermann.setFirstName("John");
+            maxMustermann.setLastName("Doe");
+            maxMustermann.setStreet("Example Street");
+            maxMustermann.setHouseNumber("1");
+            maxMustermann.setPostalCode("12345");
+            maxMustermann.setCity("Sample City");
+            maxMustermann.setCountry("USA");
+            maxMustermann.setPhone("+1 555 123-4567");
+            maxMustermann.setMobile("+1 555 987-6543");
+            maxMustermann.setEmail("john.doe@example.com");
+
+            log.info("✅ Created English placeholder: John Doe, Example Street 1, 12345 Sample City");
+        }
+
+        personalInfoService.savePersonalInfo(maxMustermann);
     }
 }
