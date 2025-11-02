@@ -240,8 +240,6 @@
                     <buildArgs>
                         <!-- Memory settings -->
                         <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-                        <buildArg>-H:+PrintClassInitialization</buildArg>
-                        <buildArg>--verbose</buildArg>
                         <buildArg>--no-fallback</buildArg>
 
                         <!-- JNI support (für OSHI/Hardware-Monitoring) -->
