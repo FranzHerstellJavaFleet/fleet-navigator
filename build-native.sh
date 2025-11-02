@@ -22,19 +22,11 @@ echo "📦 GraalVM Version:"
 java -version
 echo ""
 
-echo "🧹 Cleaning previous builds..."
-mvn clean
-
-echo ""
-echo "🔨 Building JAR with frontend..."
-mvn package -DskipTests
-
-echo ""
-echo "🎯 Building Native Image..."
-echo "   This may take 5-15 minutes depending on your system..."
+echo "🎯 Building Native Image with integrated frontend..."
+echo "   This may take 10-15 minutes depending on your system..."
 echo ""
 
-mvn -Pnative native:compile -DskipTests
+mvn -Pnative clean package -DskipTests
 
 echo ""
 echo "✅ Build Complete!"

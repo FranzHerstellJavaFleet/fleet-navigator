@@ -41,28 +41,12 @@ try {
     exit 1
 }
 
-# Clean
-Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Yellow
-mvn clean
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Clean failed!" -ForegroundColor Red
-    exit 1
-}
-
-# Build JAR
-Write-Host "`n🔨 Building JAR with frontend..." -ForegroundColor Yellow
-mvn package -DskipTests
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ JAR build failed!" -ForegroundColor Red
-    exit 1
-}
-
 # Build Native Image
-Write-Host "`n🎯 Building Native Image..." -ForegroundColor Yellow
+Write-Host "`n🎯 Building Native Image with integrated frontend..." -ForegroundColor Yellow
 Write-Host "   This may take 10-15 minutes depending on your system...`n" -ForegroundColor Gray
 
 $startTime = Get-Date
-mvn -Pnative native:compile -DskipTests
+mvn -Pnative clean package -DskipTests
 $exitCode = $LASTEXITCODE
 $endTime = Get-Date
 $duration = $endTime - $startTime
