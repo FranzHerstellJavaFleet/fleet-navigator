@@ -33,10 +33,11 @@
             Powered by <span class="font-semibold text-fleet-orange-500">JavaFleet Systems Consulting</span>
           </p>
 
-          <!-- Suggestion Cards -->
+          <!-- Suggestion Cards - Benutzerfreundliche Einstiegspunkte -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Brief schreiben -->
             <button
-              @click="sendSuggestion('Was ist Java?')"
+              @click="sendSuggestion('Hilf mir beim Schreiben eines Bewerbungsschreibens für eine Stelle als [Deine Position]')"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -50,15 +51,16 @@
             >
               <div class="flex items-center gap-3 mb-2">
                 <div class="p-2 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                  <LightBulbIcon class="w-6 h-6 text-blue-500" />
+                  <DocumentTextIcon class="w-6 h-6 text-blue-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">Was ist Java?</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">📝 Brief schreiben</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Lerne Java Programmierung</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Bewerbung, Kündigung, Geschäftsbrief</div>
             </button>
 
+            <!-- Fragen stellen -->
             <button
-              @click="sendSuggestion('Erkläre Spring Boot')"
+              @click="sendSuggestion('Erkläre mir, wie Photosynthese funktioniert')"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -72,15 +74,16 @@
             >
               <div class="flex items-center gap-3 mb-2">
                 <div class="p-2 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                  <BoltIcon class="w-6 h-6 text-green-500" />
+                  <LightBulbIcon class="w-6 h-6 text-green-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">Erkläre Spring Boot</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">💬 Fragen stellen</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Framework Grundlagen</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Zu jedem Thema - Wissenschaft, Geschichte, Alltag</div>
             </button>
 
+            <!-- Übersetzen -->
             <button
-              @click="sendSuggestion('Schreibe ein REST API Beispiel')"
+              @click="sendSuggestion('Übersetze folgenden Text ins Englische: [Dein Text hier]')"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -94,15 +97,16 @@
             >
               <div class="flex items-center gap-3 mb-2">
                 <div class="p-2 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
-                  <CodeBracketIcon class="w-6 h-6 text-purple-500" />
+                  <LanguageIcon class="w-6 h-6 text-purple-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">REST API Beispiel</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">🌐 Übersetzen</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Code-Beispiel</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Texte in viele Sprachen übersetzen</div>
             </button>
 
+            <!-- Lernen -->
             <button
-              @click="sendSuggestion('Best Practices für Microservices')"
+              @click="sendSuggestion('Erkläre mir Schritt für Schritt: Was ist künstliche Intelligenz?')"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -116,11 +120,57 @@
             >
               <div class="flex items-center gap-3 mb-2">
                 <div class="p-2 rounded-xl bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors">
-                  <CubeTransparentIcon class="w-6 h-6 text-orange-500" />
+                  <AcademicCapIcon class="w-6 h-6 text-orange-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">Microservices Best Practices</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">📚 Lernen</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Architektur-Tipps</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Komplexe Themen einfach erklärt</div>
+            </button>
+
+            <!-- Programmieren -->
+            <button
+              @click="sendSuggestion('Schreibe mir ein Python-Skript, das [beschreibe deine Aufgabe]')"
+              class="
+                group p-5 rounded-2xl
+                bg-white/80 dark:bg-gray-800/80
+                backdrop-blur-sm
+                border border-gray-200/50 dark:border-gray-700/50
+                hover:border-fleet-orange-400 dark:hover:border-fleet-orange-500
+                transition-all duration-300
+                transform hover:scale-105 hover:shadow-xl
+                text-left
+              "
+            >
+              <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 rounded-xl bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors">
+                  <CodeBracketIcon class="w-6 h-6 text-indigo-500" />
+                </div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">💻 Programmieren</div>
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Code schreiben und verstehen</div>
+            </button>
+
+            <!-- Kreativ schreiben -->
+            <button
+              @click="sendSuggestion('Schreibe mir ein Gedicht über den Herbst')"
+              class="
+                group p-5 rounded-2xl
+                bg-white/80 dark:bg-gray-800/80
+                backdrop-blur-sm
+                border border-gray-200/50 dark:border-gray-700/50
+                hover:border-fleet-orange-400 dark:hover:border-fleet-orange-500
+                transition-all duration-300
+                transform hover:scale-105 hover:shadow-xl
+                text-left
+              "
+            >
+              <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 rounded-xl bg-pink-500/10 group-hover:bg-pink-500/20 transition-colors">
+                  <SparklesIcon class="w-6 h-6 text-pink-500" />
+                </div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">✨ Kreativ sein</div>
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Gedichte, Geschichten, Ideen</div>
             </button>
           </div>
         </div>
@@ -174,10 +224,12 @@
 import { ref, watch, nextTick } from 'vue'
 import {
   LightBulbIcon,
-  BoltIcon,
   CodeBracketIcon,
-  CubeTransparentIcon,
-  CpuChipIcon
+  CpuChipIcon,
+  DocumentTextIcon,
+  LanguageIcon,
+  AcademicCapIcon,
+  SparklesIcon
 } from '@heroicons/vue/24/outline'
 import { useChatStore } from '../stores/chatStore'
 import MessageBubble from './MessageBubble.vue'
