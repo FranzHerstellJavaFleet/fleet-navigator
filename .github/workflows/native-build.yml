@@ -85,12 +85,14 @@ jobs:
             ${{ matrix.artifact-name }}.zip
           retention-days: 30
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ${{ matrix.artifact-name }}.tar.gz
-            ${{ matrix.artifact-name }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Disabled temporarily due to "Too many retries" errors
+      # Create release manually after successful builds
+      # - name: Create Release
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: |
+      #       ${{ matrix.artifact-name }}.tar.gz
+      #       ${{ matrix.artifact-name }}.zip
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
