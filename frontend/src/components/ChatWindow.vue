@@ -24,20 +24,20 @@
 
           <!-- Welcome Text -->
           <h2 class="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent mb-3">
-            Willkommen bei Fleet Navigator
+            {{ t('welcome.title') }}
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">
-            Starte eine Konversation mit deiner AI-Flotte
+            {{ t('welcome.subtitle') }}
           </p>
           <p class="text-sm text-gray-500 dark:text-gray-500 mb-8">
-            Powered by <span class="font-semibold text-fleet-orange-500">JavaFleet Systems Consulting</span>
+            {{ t('app.poweredBy') }}
           </p>
 
           <!-- Suggestion Cards - Benutzerfreundliche Einstiegspunkte -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Brief schreiben -->
             <button
-              @click="sendSuggestion('Hilf mir beim Schreiben eines Bewerbungsschreibens für eine Stelle als [Deine Position]')"
+              @click="sendSuggestion(t('welcome.suggestions.letter.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -53,14 +53,14 @@
                 <div class="p-2 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
                   <DocumentTextIcon class="w-6 h-6 text-blue-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">📝 Brief schreiben</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.letter.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Bewerbung, Kündigung, Geschäftsbrief</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.letter.description') }}</div>
             </button>
 
             <!-- Fragen stellen -->
             <button
-              @click="sendSuggestion('Erkläre mir, wie Photosynthese funktioniert')"
+              @click="sendSuggestion(t('welcome.suggestions.question.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -76,14 +76,14 @@
                 <div class="p-2 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
                   <LightBulbIcon class="w-6 h-6 text-green-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">💬 Fragen stellen</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.question.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Zu jedem Thema - Wissenschaft, Geschichte, Alltag</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.question.description') }}</div>
             </button>
 
             <!-- Übersetzen -->
             <button
-              @click="sendSuggestion('Übersetze folgenden Text ins Englische: [Dein Text hier]')"
+              @click="sendSuggestion(t('welcome.suggestions.translate.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -99,14 +99,14 @@
                 <div class="p-2 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
                   <LanguageIcon class="w-6 h-6 text-purple-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">🌐 Übersetzen</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.translate.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Texte in viele Sprachen übersetzen</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.translate.description') }}</div>
             </button>
 
             <!-- Lernen -->
             <button
-              @click="sendSuggestion('Erkläre mir Schritt für Schritt: Was ist künstliche Intelligenz?')"
+              @click="sendSuggestion(t('welcome.suggestions.learn.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -122,14 +122,14 @@
                 <div class="p-2 rounded-xl bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors">
                   <AcademicCapIcon class="w-6 h-6 text-orange-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">📚 Lernen</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.learn.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Komplexe Themen einfach erklärt</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.learn.description') }}</div>
             </button>
 
             <!-- Programmieren -->
             <button
-              @click="sendSuggestion('Schreibe mir ein Python-Skript, das [beschreibe deine Aufgabe]')"
+              @click="sendSuggestion(t('welcome.suggestions.code.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -145,14 +145,14 @@
                 <div class="p-2 rounded-xl bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors">
                   <CodeBracketIcon class="w-6 h-6 text-indigo-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">💻 Programmieren</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.code.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Code schreiben und verstehen</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.code.description') }}</div>
             </button>
 
             <!-- Kreativ schreiben -->
             <button
-              @click="sendSuggestion('Schreibe mir ein Gedicht über den Herbst')"
+              @click="sendSuggestion(t('welcome.suggestions.creative.prompt'))"
               class="
                 group p-5 rounded-2xl
                 bg-white/80 dark:bg-gray-800/80
@@ -168,9 +168,9 @@
                 <div class="p-2 rounded-xl bg-pink-500/10 group-hover:bg-pink-500/20 transition-colors">
                   <SparklesIcon class="w-6 h-6 text-pink-500" />
                 </div>
-                <div class="font-semibold text-gray-800 dark:text-gray-100">✨ Kreativ sein</div>
+                <div class="font-semibold text-gray-800 dark:text-gray-100">{{ t('welcome.suggestions.creative.title') }}</div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">Gedichte, Geschichten, Ideen</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 ml-11">{{ t('welcome.suggestions.creative.description') }}</div>
             </button>
           </div>
         </div>
@@ -201,7 +201,7 @@
             <div class="w-2.5 h-2.5 bg-fleet-orange-500 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
             <div class="w-2.5 h-2.5 bg-fleet-orange-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
             <span class="ml-2 text-fleet-orange-500 dark:text-fleet-orange-400 font-medium text-sm">
-              Denke nach...
+              {{ t('loading.thinking') }}
             </span>
           </div>
           <!-- Typing indicator bars -->
@@ -232,11 +232,13 @@ import {
   SparklesIcon
 } from '@heroicons/vue/24/outline'
 import { useChatStore } from '../stores/chatStore'
+import { useLocale } from '../composables/useLocale'
 import MessageBubble from './MessageBubble.vue'
 import MessageInput from './MessageInput.vue'
 import SystemHealthBanner from './SystemHealthBanner.vue'
 
 const chatStore = useChatStore()
+const { t } = useLocale()
 const messagesContainer = ref(null)
 
 // Auto-scroll to bottom when new messages arrive
