@@ -15,7 +15,10 @@
     <!-- Content Area: Sidebar + Main -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
-      <Sidebar @select-project="handleSelectProject" />
+      <Sidebar
+        @select-project="handleSelectProject"
+        @new-chat="handleNewChat"
+      />
 
       <!-- Main Content -->
       <div class="flex-1 flex flex-col">
@@ -153,6 +156,12 @@ async function handleSelectProject(project) {
     console.error('Failed to load project:', err)
     selectedProject.value = project
   }
+}
+
+// Handle new chat - close project view and start new chat
+function handleNewChat() {
+  selectedProject.value = null
+  chatStore.startNewChat()
 }
 
 // Refresh project after file changes

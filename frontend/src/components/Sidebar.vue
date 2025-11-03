@@ -573,7 +573,7 @@ const sortedUnassignedChats = computed(() => {
   })
 })
 
-const emit = defineEmits(['select-project'])
+const emit = defineEmits(['select-project', 'new-chat'])
 
 onMounted(async () => {
   await chatStore.loadChats()
@@ -620,7 +620,7 @@ function getProjectChatCount(projectId) {
 
 // Handle new chat button
 function handleNewChat() {
-  chatStore.startNewChat()
+  emit('new-chat')
 }
 
 // Handle new project button
