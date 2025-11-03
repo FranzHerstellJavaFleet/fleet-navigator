@@ -404,5 +404,158 @@ export default {
 
   async deletePersonalInfo() {
     await api.delete('/personal-info')
+  },
+
+  // ============================================================================
+  // CUSTOM MODELS
+  // ============================================================================
+
+  // Get all custom models
+  async getAllCustomModels() {
+    const response = await api.get('/custom-models')
+    return response.data
+  },
+
+  // Get custom model by ID
+  async getCustomModelById(id) {
+    const response = await api.get(`/custom-models/${id}`)
+    return response.data
+  },
+
+  // Get ancestry chain for a custom model
+  async getCustomModelAncestry(id) {
+    const response = await api.get(`/custom-models/${id}/ancestry`)
+    return response.data
+  },
+
+  // Create custom model with streaming progress
+  async createCustomModel(request, progressCallback) {
+    return new Promise((resolve, reject) => {
+      fetch('/api/custom-models', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        let modelId = null
+
+        function processChunk({ done, value }) {
+          if (done) {
+            resolve({ modelId })
+            return
+          }
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              const data = line.substring(5).trim()
+              try {
+                const parsed = JSON.parse(data)
+                if (parsed.status) {
+                  progressCallback(parsed.status)
+                }
+                if (parsed.modelId) {
+                  modelId = parsed.modelId
+                }
+                if (parsed.error) {
+                  reject(new Error(parsed.error))
+                }
+              } catch (e) {
+                // Plain text
+                progressCallback(data)
+              }
+            }
+          }
+
+          reader.read().then(processChunk).catch(reject)
+        }
+
+        reader.read().then(processChunk).catch(reject)
+      }).catch(reject)
+    })
+  },
+
+  // Update custom model (creates new version) with streaming
+  async updateCustomModel(id, request, progressCallback) {
+    return new Promise((resolve, reject) => {
+      fetch(`/api/custom-models/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        let result = {}
+
+        function processChunk({ done, value }) {
+          if (done) {
+            resolve(result)
+            return
+          }
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              const data = line.substring(5).trim()
+              try {
+                const parsed = JSON.parse(data)
+                if (parsed.status) {
+                  progressCallback(parsed.status)
+                }
+                if (parsed.modelId) {
+                  result.modelId = parsed.modelId
+                }
+                if (parsed.version) {
+                  result.version = parsed.version
+                }
+                if (parsed.error) {
+                  reject(new Error(parsed.error))
+                }
+              } catch (e) {
+                // Plain text
+                progressCallback(data)
+              }
+            }
+          }
+
+          reader.read().then(processChunk).catch(reject)
+        }
+
+        reader.read().then(processChunk).catch(reject)
+      }).catch(reject)
+    })
+  },
+
+  // Delete custom model
+  async deleteCustomModel(id) {
+    const response = await api.delete(`/custom-models/${id}`)
+    return response.data
+  },
+
+  // Generate Modelfile preview
+  async generateModelfilePreview(request) {
+    const response = await api.post('/custom-models/generate-modelfile', request)
+    return response.data
   }
 }

@@ -774,4 +774,63 @@ public class OllamaService {
         if (bytes < 1024 * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
         return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
     }
+
+    /**
+     * Create a custom model using Ollama's create API with streaming progress
+     * @param modelName Name for the new model (e.g. "nova:latest")
+     * @param modelfile Complete Modelfile content
+     * @param progressConsumer Consumer for progress updates
+     */
+    public void createModel(String modelName, String modelfile, Consumer<String> progressConsumer) throws IOException {
+        String url = ollamaBaseUrl + "/api/create";
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("name", modelName);
+        requestBody.put("modelfile", modelfile);
+        requestBody.put("stream", true);
+
+        String json = objectMapper.writeValueAsString(requestBody);
+
+        RequestBody body = RequestBody.create(
+                json, MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        Call call = client.newCall(request);
+
+        try (Response response = call.execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Ollama create model error: " + response);
+            }
+
+            // Read streaming response
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(response.body().byteStream()))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    JsonNode jsonNode = objectMapper.readTree(line);
+
+                    // Extract status message
+                    if (jsonNode.has("status")) {
+                        String status = jsonNode.get("status").asText();
+                        progressConsumer.accept(status);
+                        log.debug("Create model progress: {}", status);
+                    }
+
+                    // Check if done
+                    if (jsonNode.has("done") && jsonNode.get("done").asBoolean()) {
+                        log.info("Model creation completed: {}", modelName);
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error creating model: {}", modelName, e);
+            throw e;
+        }
+    }
 }
