@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write  # Required for creating releases
+
 jobs:
   build-native:
     strategy:
@@ -58,8 +61,9 @@ jobs:
       - name: Build Native Image (macOS)
         if: runner.os == 'macOS'
         run: |
-          # macOS uses ARM64 (Apple Silicon) - no -march needed, native defaults
-          mvn -Pnative clean package -DskipTests
+          # Build for x86-64 for maximum compatibility (Intel Macs)
+          mvn -Pnative clean package -DskipTests \
+            -Dnative.buildArg=-march=x86-64
 
       - name: Build Native Image (Windows)
         if: runner.os == 'Windows'
