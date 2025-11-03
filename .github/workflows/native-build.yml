@@ -55,15 +55,16 @@ jobs:
       - name: Build Native Image (Linux)
         if: runner.os == 'Linux'
         run: |
+          # Use x86-64 baseline (v1) for maximum CPU compatibility
           mvn -Pnative clean package -DskipTests \
-            -Dnative.buildArg=-march=x86-64
+            "-Dnative.buildArg=--native-compiler-options=-march=x86-64"
 
       - name: Build Native Image (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Build for x86-64 for maximum compatibility (Intel Macs)
+          # Build for x86-64 baseline for maximum compatibility (Intel Macs)
           mvn -Pnative clean package -DskipTests \
-            -Dnative.buildArg=-march=x86-64
+            "-Dnative.buildArg=--native-compiler-options=-march=x86-64"
 
       - name: Setup Visual Studio (Windows)
         if: runner.os == 'Windows'
