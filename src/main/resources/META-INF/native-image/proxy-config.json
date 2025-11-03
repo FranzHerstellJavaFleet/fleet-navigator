@@ -4,5 +4,8 @@
   },
   {
     "interfaces": ["com.sun.jna.Library"]
+  },
+  {
+    "interfaces": ["oshi.jna.platform.linux.LinuxLibc"]
   }
 ]

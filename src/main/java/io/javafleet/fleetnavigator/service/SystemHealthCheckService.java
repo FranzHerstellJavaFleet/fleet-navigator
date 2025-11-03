@@ -49,7 +49,9 @@ public class SystemHealthCheckService {
         this.systemInfo = new SystemInfo();
     }
 
-    @EventListener(ApplicationReadyEvent.class)
+    // Health check disabled on startup for native image compatibility
+    // Call this method manually via REST API: GET /api/system/health
+    // @EventListener(ApplicationReadyEvent.class)
     public void performHealthCheck() {
         log.info("🔍 Starting system health check...");
 
