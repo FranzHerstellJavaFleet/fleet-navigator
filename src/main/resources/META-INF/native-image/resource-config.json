@@ -30,6 +30,9 @@
       },
       {
         "pattern": "\\Qorg/hibernate/validator/\\E.*"
+      },
+      {
+        "pattern": "\\Qmodel-metadata.json\\E"
       }
     ]
   },
