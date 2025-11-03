@@ -64,20 +64,31 @@
             </span>
           </div>
 
-          <!-- Model -->
-          <div class="
-            flex items-center space-x-2 px-3 py-2
-            bg-gradient-to-br from-gray-100 to-gray-50
-            dark:from-gray-700/50 dark:to-gray-800/50
-            rounded-lg border border-gray-200 dark:border-gray-700
-            shadow-sm
-          ">
+          <!-- Model (Clickable - Opens Model Manager) -->
+          <button
+            @click="$emit('toggle-model-manager')"
+            class="
+              flex items-center space-x-2 px-3 py-2
+              bg-gradient-to-br from-gray-100 to-gray-50
+              dark:from-gray-700/50 dark:to-gray-800/50
+              rounded-lg border border-gray-200 dark:border-gray-700
+              shadow-sm
+              hover:from-gray-200 hover:to-gray-100
+              dark:hover:from-gray-600/50 dark:hover:to-gray-700/50
+              hover:border-gray-300 dark:hover:border-gray-600
+              hover:shadow-md
+              transition-all duration-200
+              cursor-pointer
+              transform hover:scale-105 active:scale-95
+            "
+            title="Modellverwaltung öffnen"
+          >
             <CpuChipIcon class="w-4 h-4 text-gray-600 dark:text-gray-400" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">
               {{ chatStore.selectedModel }}
             </span>
             <span class="text-xs">⭐</span>
-          </div>
+          </button>
         </div>
 
         <!-- Theme Toggle -->
