@@ -371,24 +371,88 @@
         @click="showAssignProjectModal = false"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
       >
-        <div @click.stop class="bg-gray-800/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 w-96 shadow-2xl">
+        <div @click.stop class="bg-gray-800/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 w-[480px] shadow-2xl">
           <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
             <FolderIcon class="w-5 h-5 text-purple-400" />
             Projekt zuordnen
           </h3>
           <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-2">Chat: {{ assigningChat?.title }}</label>
-            <select
-              v-model="selectedProjectId"
-              class="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            >
-              <option :value="null">Kein Projekt</option>
-              <option v-for="project in sortedProjects" :key="project.id" :value="project.id">
-                {{ project.name }}
-              </option>
-            </select>
+            <label class="block text-sm text-gray-400 mb-3">Chat: <span class="text-white font-medium">{{ assigningChat?.title }}</span></label>
+
+            <!-- ListBox with Projects -->
+            <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <!-- "Kein Projekt" Option -->
+              <button
+                @click="selectedProjectId = null"
+                class="
+                  w-full text-left px-4 py-3 rounded-xl
+                  transition-all duration-200
+                  flex items-center gap-3
+                  border-2
+                "
+                :class="selectedProjectId === null
+                  ? 'bg-purple-900/40 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                  : 'bg-gray-700/30 border-gray-600/30 hover:bg-gray-700/50 hover:border-gray-500/50'"
+              >
+                <div class="flex-shrink-0 p-2 rounded-lg bg-gray-600/50">
+                  <XMarkIcon class="w-5 h-5 text-gray-400" />
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium text-white">Kein Projekt</div>
+                  <div class="text-xs text-gray-400">Chat keinem Projekt zuordnen</div>
+                </div>
+                <div v-if="selectedProjectId === null" class="flex-shrink-0">
+                  <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Project Options -->
+              <button
+                v-for="project in sortedProjects"
+                :key="project.id"
+                @click="selectedProjectId = project.id"
+                class="
+                  w-full text-left px-4 py-3 rounded-xl
+                  transition-all duration-200
+                  flex items-center gap-3
+                  border-2
+                "
+                :class="selectedProjectId === project.id
+                  ? 'bg-purple-900/40 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                  : 'bg-gray-700/30 border-gray-600/30 hover:bg-gray-700/50 hover:border-gray-500/50'"
+              >
+                <div class="flex-shrink-0 p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20">
+                  <FolderIcon class="w-5 h-5 text-purple-400" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-white truncate">{{ project.name }}</div>
+                  <div v-if="project.description" class="text-xs text-gray-400 truncate">{{ project.description }}</div>
+                  <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                    <span class="flex items-center gap-1">
+                      <ChatBubbleLeftRightIcon class="w-3 h-3" />
+                      {{ getProjectChatCount(project.id) }} Chats
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <DocumentTextIcon class="w-3 h-3" />
+                      {{ project.contextFiles?.length || 0 }} Dateien
+                    </span>
+                  </div>
+                </div>
+                <div v-if="selectedProjectId === project.id" class="flex-shrink-0">
+                  <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
-          <div class="flex justify-end gap-2">
+          <div class="flex justify-end gap-2 pt-4 border-t border-gray-700/50">
             <button
               @click="showAssignProjectModal = false"
               class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl transition-all transform hover:scale-105"
@@ -515,7 +579,8 @@ import {
   TrashIcon,
   ClockIcon,
   CpuChipIcon,
-  ArrowUpTrayIcon
+  ArrowUpTrayIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 import api from '../services/api'
 import { useToast } from '../composables/useToast'
