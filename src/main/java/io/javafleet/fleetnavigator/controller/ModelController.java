@@ -216,6 +216,7 @@ public class ModelController {
 
     /**
      * GET /api/models/default - Get the default model
+     * Priority: 1. User-selected default from DB, 2. Fallback to phi:latest (Microsoft Phi - small and efficient)
      */
     @GetMapping("/default")
     public ResponseEntity<Map<String, String>> getDefaultModel() {
@@ -223,7 +224,7 @@ public class ModelController {
         if (defaultModel.isPresent()) {
             return ResponseEntity.ok(Map.of("model", defaultModel.get().getName()));
         } else {
-            return ResponseEntity.ok(Map.of("model", "qwen2.5-coder:7b")); // Fallback
+            return ResponseEntity.ok(Map.of("model", "phi:latest")); // Fallback to Microsoft Phi
         }
     }
 

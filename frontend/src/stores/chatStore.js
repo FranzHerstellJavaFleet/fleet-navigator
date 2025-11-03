@@ -30,7 +30,7 @@ export const useChatStore = defineStore('chat', () => {
   const isLoading = ref(false)
   const error = ref(null)
   const models = ref([])
-  const selectedModel = ref('qwen2.5-coder:7b')
+  const selectedModel = ref('phi:latest') // Microsoft Phi - small and efficient default
   const systemPrompt = ref(lastPrompt.content)
   const systemPromptTitle = ref(lastPrompt.title)
   const streamingEnabled = ref(true)  // Default: Streaming aktiviert

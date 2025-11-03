@@ -39,10 +39,20 @@ public class ModelMetadataService {
 
     /**
      * Get the default model
+     * If no default is set, automatically sets phi:latest as default
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<ModelMetadata> getDefaultModel() {
-        return metadataRepository.findByIsDefaultTrue();
+        Optional<ModelMetadata> defaultModel = metadataRepository.findByIsDefaultTrue();
+
+        // If no default model is set, automatically set phi:latest as default
+        if (defaultModel.isEmpty()) {
+            log.info("No default model found in DB, setting phi:latest as default");
+            setDefaultModel("phi:latest");
+            return metadataRepository.findByIsDefaultTrue();
+        }
+
+        return defaultModel;
     }
 
     /**
