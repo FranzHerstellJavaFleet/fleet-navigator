@@ -261,9 +261,13 @@
                         <buildArg>--allow-incomplete-classpath</buildArg>
 
                         <!-- Build optimizations -->
-                        <!-- Use x86-64 baseline for maximum compatibility across different CPUs -->
-                        <buildArg>-march=x86-64</buildArg>
                         <buildArg>--gc=serial</buildArg>
+
+                        <!-- Note: -march is set per-platform in GitHub Actions workflow -->
+                        <!-- Do not set -march here as it needs to be platform-specific:
+                             - Linux/Windows x86-64: -march=x86-64
+                             - macOS ARM64: -march=armv8-a (or compatibility mode)
+                        -->
                     </buildArgs>
                 </configuration>
                 <executions>
