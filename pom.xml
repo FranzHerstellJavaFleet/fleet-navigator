@@ -234,6 +234,47 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
+                <version>${native-buildtools.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <imageName>fleet-navigator</imageName>
+                    <mainClass>io.javafleet.fleetnavigator.FleetNavigatorApplication</mainClass>
+                    <buildArgs>
+                        <!-- Memory settings -->
+                        <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                        <buildArg>--no-fallback</buildArg>
+
+                        <!-- JNI support (für OSHI/Hardware-Monitoring) -->
+                        <buildArg>--enable-all-security-services</buildArg>
+                        <buildArg>-H:+JNI</buildArg>
+
+                        <!-- Resource handling -->
+                        <buildArg>-H:+AddAllCharsets</buildArg>
+                        <buildArg>-H:IncludeResourceBundles=org.hibernate.validator.ValidationMessages</buildArg>
+
+                        <!-- Static resources (Frontend) -->
+                        <buildArg>-H:IncludeResources=static/.*</buildArg>
+                        <buildArg>-H:IncludeResources=templates/.*</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.yml</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.yaml</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.properties</buildArg>
+
+                        <!-- Allow incomplete classpath -->
+                        <buildArg>--allow-incomplete-classpath</buildArg>
+
+                        <!-- Build optimizations -->
+                        <buildArg>--gc=serial</buildArg>
+                    </buildArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>compile-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             -->
         </plugins>
