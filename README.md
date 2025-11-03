@@ -277,6 +277,41 @@ Falls nicht: `ollama serve`
 ollama pull llama3.2
 ```
 
+### "Ollama ist nicht erreichbar" (404-Fehler)
+**Symptom:** Fehlermeldung "Ollama API error: 404 Not Found"
+
+**Ursache:** Ollama läuft nicht oder ist nicht gestartet
+
+**Lösung je nach Betriebssystem:**
+
+#### Windows
+1. Prüfe, ob Ollama läuft:
+   - Schaue in der Taskleiste nach dem Ollama-Symbol (🦙)
+   - Wenn nicht vorhanden: Starte "Ollama" aus dem Startmenü
+2. Oder öffne PowerShell und gib ein:
+   ```powershell
+   curl http://localhost:11434/api/tags
+   ```
+   Falls Fehler: Ollama läuft nicht → Neu starten
+
+#### macOS/Linux
+1. Öffne ein Terminal und starte Ollama:
+   ```bash
+   ollama serve
+   ```
+2. Lasse dieses Terminal-Fenster geöffnet
+3. In einem neuen Terminal-Fenster: Starte Fleet Navigator
+
+#### Prüfung
+Öffne im Browser: http://localhost:11434/api/tags
+
+**Erwartetes Ergebnis:**
+```json
+{"models":[...]}
+```
+
+Falls "Connection refused": Ollama ist nicht installiert → Siehe Installation oben
+
 ### Antworten sind sehr langsam
 **Ursachen:**
 - Zu wenig RAM → Nutze kleineres Modell

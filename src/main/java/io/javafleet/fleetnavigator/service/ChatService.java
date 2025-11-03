@@ -471,9 +471,27 @@ public class ChatService {
                 log.error("Error during streaming", e);
                 if (!isCompleted[0]) {
                     try {
+                        // Create user-friendly error message
+                        String errorMessage = e.getMessage();
+                        if (errorMessage != null && errorMessage.contains("404") && errorMessage.contains("Ollama")) {
+                            errorMessage = "⚠️ Ollama ist nicht erreichbar!\n\n" +
+                                    "Bitte stelle sicher, dass Ollama läuft:\n" +
+                                    "• Windows: Starte Ollama Desktop App\n" +
+                                    "• Linux/Mac: Terminal: 'ollama serve'\n" +
+                                    "• Prüfe: http://localhost:11434/api/tags\n\n" +
+                                    "Installation: https://ollama.com/download";
+                        } else if (errorMessage != null && errorMessage.contains("Connection refused")) {
+                            errorMessage = "⚠️ Verbindung zu Ollama fehlgeschlagen!\n\n" +
+                                    "Ollama läuft nicht auf Port 11434.\n" +
+                                    "Bitte starte Ollama und versuche es erneut.";
+                        }
+
+                        // Escape quotes for JSON
+                        String escapedMessage = errorMessage.replace("\"", "\\\"").replace("\n", "\\n");
+
                         emitter.send(SseEmitter.event()
                                 .name("error")
-                                .data("{\"error\":\"" + e.getMessage() + "\"}"));
+                                .data("{\"error\":\"" + escapedMessage + "\"}"));
                     } catch (IOException ex) {
                         log.error("Error sending error event", ex);
                     }
