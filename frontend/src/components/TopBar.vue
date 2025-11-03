@@ -170,68 +170,116 @@
       leave-to-class="opacity-0 max-h-0"
     >
       <div v-if="showSystemPrompt" class="mt-3 overflow-hidden">
-        <!-- Gespeicherte Vorlagen -->
-        <div v-if="promptTemplates.length > 0" class="mb-3">
-          <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Gespeicherte Vorlagen:</div>
-          <div class="space-y-1 max-h-32 overflow-y-auto">
-            <div
+        <!-- System Prompt Selection ListBox -->
+        <div v-if="promptTemplates.length > 0" class="mb-4">
+          <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">System Prompt auswählen:</div>
+          <div class="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            <!-- "Kein System Prompt" Option -->
+            <button
+              @click="clearSystemPrompt"
+              class="
+                w-full text-left px-4 py-3 rounded-xl
+                transition-all duration-200
+                flex items-center gap-3
+                border-2
+              "
+              :class="!chatStore.systemPrompt
+                ? 'bg-purple-900/40 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                : 'bg-gray-700/30 dark:bg-gray-700/30 bg-gray-100 border-gray-300 dark:border-gray-600/30 hover:bg-gray-200 dark:hover:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500/50'"
+            >
+              <div class="flex-shrink-0 p-2 rounded-lg bg-gray-600/50 dark:bg-gray-600/50">
+                <XMarkIcon class="w-5 h-5 text-gray-400" />
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-900 dark:text-white">Kein System Prompt</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Standard-Verhalten ohne spezielle Anweisungen</div>
+              </div>
+              <div v-if="!chatStore.systemPrompt" class="flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            <!-- Prompt Template Options -->
+            <button
               v-for="template in promptTemplates"
               :key="template.id"
+              @click="loadTemplate(template)"
               class="
-                flex items-center justify-between p-2
-                bg-gray-50 dark:bg-gray-700/50
-                hover:bg-gray-100 dark:hover:bg-gray-700
-                rounded-lg
-                border border-transparent hover:border-gray-200 dark:hover:border-gray-600
-                text-sm group
+                w-full text-left px-4 py-3 rounded-xl
                 transition-all duration-200
+                flex items-center gap-3
+                border-2 group
+                relative
               "
+              :class="chatStore.systemPromptTitle === template.name
+                ? 'bg-purple-900/40 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                : 'bg-gray-700/30 dark:bg-gray-700/30 bg-gray-100 border-gray-300 dark:border-gray-600/30 hover:bg-gray-200 dark:hover:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500/50'"
             >
-              <button
-                @click="loadTemplate(template)"
-                class="flex-1 text-left truncate text-gray-700 dark:text-gray-300 hover:text-fleet-orange-500 transition-colors"
-              >
-                {{ template.name }}
-              </button>
-              <button
-                @click="deleteTemplate(template.id)"
-                class="
-                  opacity-0 group-hover:opacity-100
-                  p-1 rounded
-                  text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20
-                  transition-all duration-200
-                "
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
-            </div>
+              <div class="flex-shrink-0 p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20">
+                <ChatBubbleLeftRightIcon class="w-5 h-5 text-purple-400" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-gray-900 dark:text-white truncate">{{ template.name }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                  {{ template.content.substring(0, 100) }}{{ template.content.length > 100 ? '...' : '' }}
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="!template.isDefault"
+                  @click.stop="deleteTemplate(template.id)"
+                  class="
+                    opacity-0 group-hover:opacity-100
+                    p-2 rounded-lg
+                    text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30
+                    transition-all duration-200
+                  "
+                  title="Vorlage löschen"
+                >
+                  <TrashIcon class="w-4 h-4" />
+                </button>
+                <div v-if="chatStore.systemPromptTitle === template.name" class="flex-shrink-0">
+                  <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
-        <!-- Textarea -->
-        <textarea
-          v-model="chatStore.systemPrompt"
-          placeholder="System-Prompt eingeben (z.B. 'Du bist ein hilfreicher Java-Experte...')"
-          rows="4"
-          class="
-            w-full px-4 py-3
-            bg-white dark:bg-gray-900
-            border border-gray-300 dark:border-gray-600
-            text-gray-900 dark:text-gray-100
-            rounded-xl
-            focus:outline-none focus:ring-2 focus:ring-fleet-orange-500 focus:border-transparent
-            text-sm resize-none
-            transition-all duration-200
-          "
-        ></textarea>
-
-        <!-- Buttons -->
-        <div class="mt-2 flex justify-between items-center">
+        <!-- Custom Prompt Textarea (Optional) -->
+        <div class="mb-4">
+          <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Oder eigenen Prompt eingeben:
+          </div>
+          <textarea
+            v-model="chatStore.systemPrompt"
+            placeholder="System-Prompt eingeben (z.B. 'Du bist ein hilfreicher Java-Experte...')"
+            rows="4"
+            class="
+              w-full px-4 py-3
+              bg-white dark:bg-gray-900
+              border border-gray-300 dark:border-gray-600
+              text-gray-900 dark:text-gray-100
+              rounded-xl
+              focus:outline-none focus:ring-2 focus:ring-fleet-orange-500 focus:border-transparent
+              text-sm resize-none
+              transition-all duration-200
+            "
+            @input="chatStore.systemPromptTitle = null"
+          ></textarea>
           <button
             @click="showSaveTemplateModal = true"
-            v-if="chatStore.systemPrompt.trim()"
+            v-if="chatStore.systemPrompt.trim() && !chatStore.systemPromptTitle"
             class="
-              flex items-center gap-2
+              mt-2 flex items-center gap-2
               px-3 py-1.5 text-sm
               text-fleet-orange-600 dark:text-fleet-orange-400
               hover:text-fleet-orange-700 dark:hover:text-fleet-orange-300
@@ -243,35 +291,24 @@
             <BookmarkIcon class="w-4 h-4" />
             Als Vorlage speichern
           </button>
-          <div class="flex gap-2">
-            <button
-              @click="clearSystemPrompt"
-              class="
-                px-4 py-1.5 text-sm
-                text-gray-600 dark:text-gray-400
-                hover:text-gray-900 dark:hover:text-gray-100
-                hover:bg-gray-100 dark:hover:bg-gray-700
-                rounded-lg
-                transition-all duration-200
-              "
-            >
-              Löschen
-            </button>
-            <button
-              @click="showSystemPrompt = false"
-              class="
-                px-4 py-1.5 text-sm
-                bg-fleet-orange-500 hover:bg-fleet-orange-600
-                text-white
-                rounded-lg shadow-sm
-                hover:shadow-md
-                transition-all duration-200
-                transform hover:scale-105 active:scale-95
-              "
-            >
-              Fertig
-            </button>
-          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-2 pt-4 border-t border-gray-300 dark:border-gray-700/50">
+          <button
+            @click="showSystemPrompt = false"
+            class="
+              px-4 py-2 text-sm
+              bg-fleet-orange-500 hover:bg-fleet-orange-600
+              text-white
+              rounded-xl shadow-sm
+              hover:shadow-md
+              transition-all duration-200
+              transform hover:scale-105 active:scale-95
+            "
+          >
+            Fertig
+          </button>
         </div>
       </div>
     </Transition>
@@ -336,7 +373,8 @@ import {
   CpuChipIcon,
   TrashIcon,
   BookmarkIcon,
-  Bars3Icon
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 import { useChatStore } from '../stores/chatStore'
 import { useSettingsStore } from '../stores/settingsStore'
