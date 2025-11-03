@@ -175,6 +175,11 @@ export default {
   },
 
   // System Prompt Templates
+  async getSystemPrompts() {
+    const response = await api.get('/system-prompts')
+    return response
+  },
+
   async getAllSystemPrompts() {
     const response = await api.get('/system-prompts')
     return response.data

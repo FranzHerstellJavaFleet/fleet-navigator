@@ -37,10 +37,10 @@ public class DemoChatsInitializer {
             return;
         }
 
-        Locale systemLocale = Locale.getDefault();
-        boolean isGerman = systemLocale.getLanguage().equals("de");
+        boolean isGerman = detectGermanLocale();
+        String language = isGerman ? "German (Deutsch)" : "English";
 
-        log.info("💬 Creating demo chats for new users...");
+        log.info("💬 Creating demo chats for new users in {}...", language);
 
         if (isGerman) {
             createGermanDemoChats();
@@ -49,6 +49,36 @@ public class DemoChatsInitializer {
         }
 
         log.info("✅ Demo chats initialized");
+    }
+
+    /**
+     * Detects German locale from multiple sources (more reliable in native image)
+     */
+    private boolean detectGermanLocale() {
+        // 1. Check Java Locale
+        Locale defaultLocale = Locale.getDefault();
+        if (defaultLocale.getLanguage().equals("de")) {
+            return true;
+        }
+
+        // 2. Check environment variables (works better in native image)
+        String lang = System.getenv("LANG");
+        if (lang != null && lang.toLowerCase().startsWith("de")) {
+            return true;
+        }
+
+        String language = System.getenv("LANGUAGE");
+        if (language != null && language.toLowerCase().startsWith("de")) {
+            return true;
+        }
+
+        // 3. Check user.language system property
+        String userLanguage = System.getProperty("user.language");
+        if (userLanguage != null && userLanguage.equals("de")) {
+            return true;
+        }
+
+        return false;
     }
 
     private void createGermanDemoChats() {

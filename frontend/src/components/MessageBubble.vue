@@ -60,7 +60,7 @@
       </div>
 
       <!-- Message Content -->
-      <div class="prose dark:prose-invert max-w-none" v-html="formattedContent"></div>
+      <div class="prose dark:prose-invert max-w-none message-content" v-html="renderedContent"></div>
 
       <!-- Streaming Indicator -->
       <div v-if="message.isStreaming" class="mt-3 flex items-center gap-2">
@@ -121,50 +121,17 @@ const messageClasses = computed(() => {
   }
 })
 
-const formattedContent = computed(() => {
-  let content = props.message.content
+// Render content - backend now sends HTML-formatted content
+const renderedContent = computed(() => {
+  const content = props.message.content
 
-  // Only apply markdown if enabled in settings
-  if (!settingsStore.settings.markdownEnabled) {
+  // For user messages, escape HTML
+  if (isUser.value) {
     return escapeHtml(content)
   }
 
-  // Enhanced markdown formatting
-  // Code blocks with language syntax
-  content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    const languageLabel = lang ? `<span class="absolute top-2 right-2 text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">${lang}</span>` : ''
-    return `<pre class="relative bg-gray-900 dark:bg-black text-gray-100 p-4 rounded-xl mt-3 mb-3 overflow-x-auto border border-gray-700/50 shadow-lg">${languageLabel}<code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
-  })
-
-  // Inline code
-  content = content.replace(/`([^`]+)`/g, (match, code) => {
-    return `<code class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded text-sm font-mono border border-gray-300 dark:border-gray-600">${escapeHtml(code)}</code>`
-  })
-
-  // Headers
-  content = content.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-4 mb-2 text-gray-900 dark:text-gray-100">$1</h3>')
-  content = content.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-5 mb-3 text-gray-900 dark:text-gray-100">$1</h2>')
-  content = content.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4 text-gray-900 dark:text-gray-100">$1</h1>')
-
-  // Bold (before italic to avoid conflicts)
-  content = content.replace(/\*\*([^\*]+)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>')
-
-  // Italic
-  content = content.replace(/\*([^\*]+)\*/g, '<em class="italic">$1</em>')
-
-  // Unordered lists
-  content = content.replace(/^\- (.*$)/gim, '<li class="ml-6 mb-1">$1</li>')
-  content = content.replace(/(<li class="ml-6 mb-1">.*<\/li>)/s, '<ul class="my-2 list-disc">$1</ul>')
-
-  // Ordered lists
-  content = content.replace(/^\d+\. (.*$)/gim, '<li class="ml-6 mb-1">$1</li>')
-
-  // Links
-  content = content.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" class="text-blue-600 dark:text-blue-400 hover:underline font-medium" target="_blank" rel="noopener noreferrer">$1</a>')
-
-  // Blockquotes
-  content = content.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-blue-500 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 pl-4 py-2 my-3 italic text-gray-700 dark:text-gray-300 rounded-r">$1</blockquote>')
-
+  // For AI messages, the backend sends HTML-formatted content
+  // Just return it directly (v-html will render it)
   return content
 })
 
@@ -234,5 +201,14 @@ async function copyToClipboard() {
 
 :deep(.prose strong) {
   @apply text-gray-900 dark:text-gray-100;
+}
+
+/* HTML Content Styling */
+:deep(.message-content p) {
+  @apply mb-3 last:mb-0;
+}
+
+:deep(.message-content br) {
+  @apply block my-1;
 }
 </style>

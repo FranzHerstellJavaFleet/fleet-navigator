@@ -1,5 +1,5 @@
 <template>
-  <div class="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 flex-shrink-0">
+  <div class="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-2 sm:p-4 flex-shrink-0 sticky bottom-0 z-10">
     <div class="max-w-4xl mx-auto">
       <!-- Uploaded Files Display -->
       <TransitionGroup name="file" tag="div" class="mb-2 flex flex-wrap gap-2">
@@ -64,12 +64,12 @@
       </Transition>
 
       <!-- Main Input Row -->
-      <div class="flex items-end gap-2">
+      <div class="flex items-end gap-1 sm:gap-2">
         <!-- File Upload Button -->
         <button
           @click="triggerFileInput"
           class="
-            p-3 rounded-xl
+            p-2 sm:p-3 rounded-xl
             text-gray-600 dark:text-gray-300
             hover:text-fleet-orange-500 dark:hover:text-fleet-orange-400
             hover:bg-gray-100 dark:hover:bg-gray-700
@@ -80,7 +80,7 @@
           :disabled="chatStore.isLoading"
           title="Datei anhängen (PDF, TXT, MD, PNG, JPG)"
         >
-          <PaperClipIcon class="w-6 h-6" />
+          <PaperClipIcon class="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         <input
           ref="fileInput"
@@ -90,77 +90,6 @@
           multiple
           class="hidden"
         />
-
-        <!-- Letter Template Button -->
-        <div class="relative">
-          <button
-            @click="showTemplateMenu = !showTemplateMenu"
-            class="
-              p-3 rounded-xl
-              text-gray-600 dark:text-gray-300
-              hover:text-blue-500 dark:hover:text-blue-400
-              hover:bg-gray-100 dark:hover:bg-gray-700
-              transition-all duration-200
-              transform hover:scale-110 active:scale-95
-              disabled:opacity-50 disabled:cursor-not-allowed
-            "
-            :disabled="chatStore.isLoading"
-            title="Briefvorlage auswählen"
-          >
-            <DocumentTextIcon class="w-6 h-6" />
-          </button>
-
-          <!-- Template Dropdown Menu -->
-          <Transition name="fade">
-            <div
-              v-if="showTemplateMenu"
-              class="
-                absolute bottom-full left-0 mb-2
-                w-80 max-h-96 overflow-y-auto
-                bg-white dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-xl shadow-2xl
-                z-50
-              "
-              @click.stop
-            >
-              <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Briefvorlagen</h3>
-              </div>
-
-              <div v-if="letterTemplates.length > 0" class="p-2">
-                <button
-                  v-for="template in letterTemplates"
-                  :key="template.id"
-                  @click="selectTemplate(template)"
-                  class="
-                    w-full text-left p-3 rounded-lg
-                    hover:bg-gray-100 dark:hover:bg-gray-700
-                    transition-colors
-                    group
-                  "
-                >
-                  <div class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                    {{ template.name }}
-                  </div>
-                  <div v-if="template.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ template.description }}
-                  </div>
-                  <div v-if="template.category" class="mt-1">
-                    <span class="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                      {{ template.category }}
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              <div v-else class="p-8 text-center text-gray-500 dark:text-gray-400">
-                <p class="text-sm">Keine Vorlagen verfügbar</p>
-                <p class="text-xs mt-1">Erstelle Vorlagen in den Einstellungen</p>
-              </div>
-            </div>
-          </Transition>
-        </div>
 
         <!-- Text Input with Glassmorphism -->
         <div class="flex-1 relative">
@@ -197,7 +126,7 @@
           v-if="chatStore.isLoading"
           @click="handleStop"
           class="
-            px-6 py-3 rounded-xl
+            px-3 sm:px-6 py-3 rounded-xl
             bg-gradient-to-r from-red-500 to-red-600
             hover:from-red-400 hover:to-red-500
             text-white font-semibold
@@ -209,7 +138,7 @@
           title="Generierung stoppen"
         >
           <StopIcon class="w-5 h-5" />
-          <span>Stop</span>
+          <span class="hidden sm:inline">Stop</span>
         </button>
 
         <!-- Send Button -->
@@ -218,7 +147,7 @@
           @click="handleSend"
           :disabled="!inputText.trim() || chatStore.isLoading"
           class="
-            px-6 py-3 rounded-xl
+            px-3 sm:px-6 py-3 rounded-xl
             bg-gradient-to-r from-fleet-orange-500 to-orange-600
             hover:from-fleet-orange-400 hover:to-orange-500
             text-white font-semibold
@@ -296,25 +225,12 @@ const isUploading = ref(false)
 const uploadProgress = ref('')
 const errorMessage = ref('')
 
-// Letter Templates
-const letterTemplates = ref([])
-const showTemplateMenu = ref(false)
-
 // Get showAbortModal from App.vue
 const showAbortModal = inject('showAbortModal')
 
 // Computed properties
 const hasImages = computed(() => uploadedFiles.value.some(f => f.type === 'image'))
 const isVisionModel = computed(() => settingsStore.isVisionModel(chatStore.selectedModel))
-
-// Load letter templates on mount
-onMounted(async () => {
-  try {
-    letterTemplates.value = await api.getLetterTemplates()
-  } catch (err) {
-    console.error('Error loading letter templates:', err)
-  }
-})
 
 // Get file icon component
 function getFileIcon(type) {
@@ -436,20 +352,6 @@ function adjustHeight() {
     textareaRef.value.style.height = 'auto'
     textareaRef.value.style.height = textareaRef.value.scrollHeight + 'px'
   }
-}
-
-// Letter Template Functions
-function selectTemplate(template) {
-  inputText.value = template.prompt
-  showTemplateMenu.value = false
-
-  // Focus textarea and adjust height
-  if (textareaRef.value) {
-    textareaRef.value.focus()
-    adjustHeight()
-  }
-
-  success(`Vorlage "${template.name}" eingefügt`)
 }
 </script>
 

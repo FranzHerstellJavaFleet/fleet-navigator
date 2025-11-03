@@ -1,31 +1,34 @@
 <template>
-  <div class="h-screen flex overflow-hidden bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100" :class="darkMode ? 'dark' : ''">
-    <!-- Sidebar -->
-    <Sidebar @select-project="handleSelectProject" />
+  <div class="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100" :class="darkMode ? 'dark' : ''">
+    <!-- Top Bar (Full Width) -->
+    <TopBar
+      @toggle-monitor="showMonitor = !showMonitor"
+      @toggle-model-manager="showModelManager = !showModelManager"
+      @toggle-settings="showSettings = !showSettings"
+      @toggle-email-agent="showEmailAgent = !showEmailAgent"
+      @toggle-document-agent="showDocumentAgent = !showDocumentAgent"
+      @toggle-os-agent="showOSAgent = !showOSAgent"
+      @toggle-theme="toggleDarkMode"
+      :dark-mode="darkMode"
+    />
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Top Bar -->
-      <TopBar
-        @toggle-monitor="showMonitor = !showMonitor"
-        @toggle-model-manager="showModelManager = !showModelManager"
-        @toggle-settings="showSettings = !showSettings"
-        @toggle-email-agent="showEmailAgent = !showEmailAgent"
-        @toggle-document-agent="showDocumentAgent = !showDocumentAgent"
-        @toggle-os-agent="showOSAgent = !showOSAgent"
-        @toggle-theme="toggleDarkMode"
-        :dark-mode="darkMode"
-      />
+    <!-- Content Area: Sidebar + Main -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <Sidebar @select-project="handleSelectProject" />
 
-      <!-- Project View or Chat Window -->
-      <ProjectView
-        v-if="selectedProject"
-        :project="selectedProject"
-        :project-chats="projectChats"
-        @close="selectedProject = null"
-        @refresh="refreshProject"
-      />
-      <ChatWindow v-else />
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col">
+        <!-- Project View or Chat Window -->
+        <ProjectView
+          v-if="selectedProject"
+          :project="selectedProject"
+          :project-chats="projectChats"
+          @close="selectedProject = null"
+          @refresh="refreshProject"
+        />
+        <ChatWindow v-else />
+      </div>
     </div>
 
     <!-- System Monitor (collapsible) -->

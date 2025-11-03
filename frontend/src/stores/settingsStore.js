@@ -8,6 +8,7 @@ const defaultSettings = {
   // General
   language: 'de',
   theme: 'auto',
+  sidebarCollapsed: false,  // Sidebar collapsed state
 
   // Model Settings
   markdownEnabled: true,  // Markdown-Formatierung in Antworten
@@ -96,6 +97,10 @@ export const useSettingsStore = defineStore('settings', () => {
     return visionKeywords.some(keyword => modelName.toLowerCase().includes(keyword))
   }
 
+  function toggleSidebar() {
+    settings.value.sidebarCollapsed = !settings.value.sidebarCollapsed
+  }
+
   return {
     settings,
     updateSettings,
@@ -103,6 +108,7 @@ export const useSettingsStore = defineStore('settings', () => {
     getSetting,
     setSetting,
     getVisionModels,
-    isVisionModel
+    isVisionModel,
+    toggleSidebar
   }
 })

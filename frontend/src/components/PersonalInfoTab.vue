@@ -261,7 +261,7 @@ import {
   InformationCircleIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline'
-import * as api from '../services/api'
+import api from '../services/api'
 import { useToast } from '../composables/useToast'
 
 const { success, error: errorToast } = useToast()

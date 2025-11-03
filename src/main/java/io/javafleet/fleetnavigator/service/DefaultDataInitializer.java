@@ -30,10 +30,10 @@ public class DefaultDataInitializer {
     @Order(2) // Nach SystemHealthCheckService (Order 1)
     @Transactional
     public void initializeDefaultData() {
-        Locale systemLocale = Locale.getDefault();
-        boolean isGerman = systemLocale.getLanguage().equals("de");
+        boolean isGerman = detectGermanLocale();
+        String detectedLanguage = isGerman ? "German (Deutsch)" : "English";
 
-        log.info("🌍 System locale detected: {} ({})", systemLocale, isGerman ? "German" : "English");
+        log.info("🌍 System locale detected: {} - Initializing in {}", Locale.getDefault(), detectedLanguage);
 
         if (letterTemplateRepository.count() == 0) {
             log.info("📝 Initializing default letter templates...");
@@ -50,6 +50,41 @@ public class DefaultDataInitializer {
         } else {
             log.info("👤 Personal info already exists, skipping initialization");
         }
+    }
+
+    /**
+     * Detects German locale from multiple sources (more reliable in native image)
+     */
+    private boolean detectGermanLocale() {
+        // 1. Check Java Locale
+        Locale defaultLocale = Locale.getDefault();
+        if (defaultLocale.getLanguage().equals("de")) {
+            log.debug("German detected via Locale.getDefault(): {}", defaultLocale);
+            return true;
+        }
+
+        // 2. Check environment variables (works better in native image)
+        String lang = System.getenv("LANG");
+        if (lang != null && lang.toLowerCase().startsWith("de")) {
+            log.debug("German detected via LANG environment variable: {}", lang);
+            return true;
+        }
+
+        String language = System.getenv("LANGUAGE");
+        if (language != null && language.toLowerCase().startsWith("de")) {
+            log.debug("German detected via LANGUAGE environment variable: {}", language);
+            return true;
+        }
+
+        // 3. Check user.language system property
+        String userLanguage = System.getProperty("user.language");
+        if (userLanguage != null && userLanguage.equals("de")) {
+            log.debug("German detected via user.language property: {}", userLanguage);
+            return true;
+        }
+
+        log.debug("No German locale detected, defaulting to English");
+        return false;
     }
 
     private void initializeLetterTemplates(boolean german) {

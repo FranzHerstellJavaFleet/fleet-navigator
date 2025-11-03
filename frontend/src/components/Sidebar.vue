@@ -1,14 +1,10 @@
 <template>
-  <div class="flex flex-col h-full bg-gradient-to-b from-gray-900 to-gray-950 text-white w-64 border-r border-gray-700/50">
-    <!-- Logo & Header -->
+  <div
+    v-if="!settingsStore.settings.sidebarCollapsed"
+    class="flex flex-col h-full w-64 bg-gradient-to-b from-gray-900 to-gray-950 text-white border-r border-gray-700/50 transition-all duration-300"
+  >
+    <!-- Header -->
     <div class="p-4 border-b border-gray-700/50 bg-gray-900/50 backdrop-blur-sm">
-      <div class="flex items-center space-x-2 mb-4">
-        <Logo :size="32" />
-        <h1 class="text-xl font-bold bg-gradient-to-r from-fleet-orange-400 to-fleet-orange-600 bg-clip-text text-transparent">
-          Fleet Navigator
-        </h1>
-      </div>
-
       <!-- New Buttons with Icons -->
       <div class="flex gap-2">
         <button
@@ -504,6 +500,7 @@
 
 <script setup>
 import { useChatStore } from '../stores/chatStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import {
   FolderIcon,
@@ -520,12 +517,12 @@ import {
   CpuChipIcon,
   ArrowUpTrayIcon
 } from '@heroicons/vue/24/outline'
-import Logo from './Logo.vue'
 import api from '../services/api'
 import { useToast } from '../composables/useToast'
 
 const { success, error: errorToast } = useToast()
 const chatStore = useChatStore()
+const settingsStore = useSettingsStore()
 
 // Chat-related
 const openChatMenuId = ref(null)

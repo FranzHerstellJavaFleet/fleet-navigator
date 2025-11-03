@@ -150,11 +150,14 @@ public class ChatService {
             );
         }
 
+        // Convert response to HTML for better formatting in frontend
+        String htmlResponse = convertToHtml(response);
+
         // Save assistant message
         Message assistantMessage = new Message();
         assistantMessage.setChat(chat);
         assistantMessage.setRole(MessageRole.ASSISTANT);
-        assistantMessage.setContent(response);
+        assistantMessage.setContent(htmlResponse);
         assistantMessage.setTokens(ollamaService.estimateTokens(response));
         assistantMessage = messageRepository.save(assistantMessage);
 
@@ -166,7 +169,7 @@ public class ChatService {
 
         return new ChatResponse(
                 chat.getId(),
-                response,
+                htmlResponse,  // Return HTML-formatted response
                 assistantMessage.getTokens(),
                 chat.getModel(),
                 requestId  // Include request ID for tracking
@@ -679,5 +682,85 @@ public class ChatService {
         }
 
         return result.isEmpty() ? "New Chat" : result;
+    }
+
+    /**
+     * Convert plain text response to HTML with proper code block formatting
+     * Similar to DocumentAgent approach, but enhanced for code
+     */
+    private String convertToHtml(String plainText) {
+        if (plainText == null || plainText.trim().isEmpty()) {
+            return plainText;
+        }
+
+        // Step 1: Extract and protect code blocks
+        java.util.List<String> codeBlocks = new java.util.ArrayList<>();
+        java.util.regex.Pattern codeBlockPattern = java.util.regex.Pattern.compile("```([\\s\\S]*?)```");
+        java.util.regex.Matcher codeBlockMatcher = codeBlockPattern.matcher(plainText);
+        StringBuffer protectedBuffer = new StringBuffer();
+
+        while (codeBlockMatcher.find()) {
+            codeBlocks.add(codeBlockMatcher.group());
+            codeBlockMatcher.appendReplacement(protectedBuffer, "###CODEBLOCK" + (codeBlocks.size() - 1) + "###");
+        }
+        codeBlockMatcher.appendTail(protectedBuffer);
+        String protectedText = protectedBuffer.toString();
+
+        // Step 2: Escape HTML special characters (except in code blocks)
+        String escaped = protectedText
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
+
+        // Step 3: Convert double newlines to paragraph breaks
+        escaped = escaped.replace("\n\n", "</p><p>");
+
+        // Step 4: Convert single newlines to <br>
+        escaped = escaped.replace("\n", "<br>\n");
+
+        // Step 5: Wrap in paragraph tags
+        String html = "<p>" + escaped + "</p>";
+
+        // Step 6: Restore code blocks with proper formatting
+        for (int i = 0; i < codeBlocks.size(); i++) {
+            String codeBlock = codeBlocks.get(i);
+
+            // Extract language and code
+            String langPattern = "```(\\w+)?\\n([\\s\\S]*?)```";
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(langPattern);
+            java.util.regex.Matcher matcher = pattern.matcher(codeBlock);
+
+            String formattedCode;
+            if (matcher.find()) {
+                String lang = matcher.group(1) != null ? matcher.group(1) : "";
+                String code = matcher.group(2);
+
+                // Normalize line breaks in code - replace literal \n with actual newlines
+                code = code.replace("\\n", "\n");
+
+                // Escape HTML in code
+                code = code.replace("&", "&amp;")
+                          .replace("<", "&lt;")
+                          .replace(">", "&gt;")
+                          .replace("\n", "<br>\n");  // Convert newlines to <br> for HTML
+
+                // Format as HTML code block with proper spacing
+                formattedCode = "</p><pre style=\"background: #1e1e1e; color: #d4d4d4; padding: 1rem; " +
+                              "border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; white-space: pre-wrap;\">" +
+                              "<code>" + code + "</code></pre><p>";
+            } else {
+                formattedCode = codeBlock;
+            }
+
+            html = html.replace("###CODEBLOCK" + i + "###", formattedCode);
+        }
+
+        // Step 7: Clean up empty paragraphs
+        html = html.replace("<p></p>", "");
+        html = html.replace("<p><br>\n</p>", "");
+        html = html.replaceAll("<p>\\s*</p>", "");
+
+        return html;
     }
 }

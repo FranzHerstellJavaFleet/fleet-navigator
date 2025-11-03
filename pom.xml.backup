@@ -229,13 +229,57 @@
             </plugin>
 
             <!-- GraalVM Native Image Plugin -->
-            <!-- DISABLED in default build - only active with -Pnative profile -->
-            <!--
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
+                <version>${native-buildtools.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <imageName>fleet-navigator</imageName>
+                    <mainClass>io.javafleet.fleetnavigator.FleetNavigatorApplication</mainClass>
+                    <buildArgs>
+                        <!-- Memory settings -->
+                        <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                        <buildArg>--no-fallback</buildArg>
+
+                        <!-- JNI support (für OSHI/Hardware-Monitoring) -->
+                        <buildArg>--enable-all-security-services</buildArg>
+                        <buildArg>-H:+JNI</buildArg>
+
+                        <!-- Resource handling -->
+                        <buildArg>-H:+AddAllCharsets</buildArg>
+                        <buildArg>-H:IncludeResourceBundles=org.hibernate.validator.ValidationMessages</buildArg>
+
+                        <!-- Static resources (Frontend) -->
+                        <buildArg>-H:IncludeResources=static/.*</buildArg>
+                        <buildArg>-H:IncludeResources=templates/.*</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.yml</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.yaml</buildArg>
+                        <buildArg>-H:IncludeResources=application.*.properties</buildArg>
+
+                        <!-- Allow incomplete classpath -->
+                        <buildArg>--allow-incomplete-classpath</buildArg>
+
+                        <!-- Build optimizations -->
+                        <buildArg>--gc=serial</buildArg>
+
+                        <!-- Note: -march is set per-platform in GitHub Actions workflow -->
+                        <!-- Do not set -march here as it needs to be platform-specific:
+                             - Linux/Windows x86-64: -march=x86-64
+                             - macOS ARM64: -march=armv8-a (or compatibility mode)
+                        -->
+                    </buildArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>compile-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
-            -->
         </plugins>
     </build>
 
@@ -260,48 +304,6 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-buildtools.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <imageName>fleet-navigator</imageName>
-                            <mainClass>io.javafleet.fleetnavigator.FleetNavigatorApplication</mainClass>
-                            <buildArgs>
-                                <!-- Memory settings -->
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-                                <buildArg>--no-fallback</buildArg>
-
-                                <!-- JNI support (für OSHI/Hardware-Monitoring) -->
-                                <buildArg>--enable-all-security-services</buildArg>
-                                <buildArg>-H:+JNI</buildArg>
-
-                                <!-- Resource handling -->
-                                <buildArg>-H:+AddAllCharsets</buildArg>
-                                <buildArg>-H:IncludeResourceBundles=org.hibernate.validator.ValidationMessages</buildArg>
-
-                                <!-- Static resources (Frontend) -->
-                                <buildArg>-H:IncludeResources=static/.*</buildArg>
-                                <buildArg>-H:IncludeResources=templates/.*</buildArg>
-                                <buildArg>-H:IncludeResources=application.*.yml</buildArg>
-                                <buildArg>-H:IncludeResources=application.*.yaml</buildArg>
-                                <buildArg>-H:IncludeResources=application.*.properties</buildArg>
-
-                                <!-- Allow incomplete classpath -->
-                                <buildArg>--allow-incomplete-classpath</buildArg>
-
-                                <!-- Build optimizations -->
-                                <buildArg>--gc=serial</buildArg>
-                                <!-- NOTE: -march removed for portability -->
-                            </buildArgs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>

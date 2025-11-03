@@ -7,14 +7,43 @@
     shadow-sm
   ">
     <div class="flex items-center justify-between">
-      <!-- Current Chat Title -->
-      <div class="flex-1">
-        <h2 v-if="chatStore.currentChat" class="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          {{ chatStore.currentChat.title }}
-        </h2>
-        <h2 v-else class="text-lg font-semibold text-gray-400 dark:text-gray-500">
-          Wähle oder erstelle einen neuen Chat
-        </h2>
+      <!-- Left Side: Hamburger + Logo + Title -->
+      <div class="flex items-center space-x-4">
+        <!-- Hamburger Menu Button -->
+        <button
+          @click="settingsStore.toggleSidebar()"
+          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          :title="settingsStore.settings.sidebarCollapsed ? 'Sidebar einblenden' : 'Sidebar ausblenden'"
+        >
+          <Bars3Icon class="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        </button>
+
+        <!-- Logo + App Title (clickable link to website) -->
+        <a
+          href="https://www.java-developer.online"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+          title="Visit java-developer.online"
+        >
+          <Logo :size="32" />
+          <h1 class="text-xl font-bold bg-gradient-to-r from-fleet-orange-400 to-fleet-orange-600 bg-clip-text text-transparent">
+            Fleet Navigator
+          </h1>
+        </a>
+
+        <!-- Divider -->
+        <div class="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+        <!-- Current Chat Title -->
+        <div class="flex-1">
+          <h2 v-if="chatStore.currentChat" class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+            {{ chatStore.currentChat.title }}
+          </h2>
+          <h2 v-else class="text-lg font-semibold text-gray-400 dark:text-gray-500">
+            Wähle oder erstelle einen neuen Chat
+          </h2>
+        </div>
       </div>
 
       <!-- Right Side Controls -->
@@ -306,19 +335,23 @@ import {
   Cog6ToothIcon,
   CpuChipIcon,
   TrashIcon,
-  BookmarkIcon
+  BookmarkIcon,
+  Bars3Icon
 } from '@heroicons/vue/24/outline'
 import { useChatStore } from '../stores/chatStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import api from '../services/api'
 
-// Reusable Button Component (inline)
+// Components
 import ActionButton from './ActionButton.vue'
+import Logo from './Logo.vue'
 
 defineProps({
   darkMode: Boolean
 })
 
 const chatStore = useChatStore()
+const settingsStore = useSettingsStore()
 const showSystemPrompt = ref(false)
 const showSaveTemplateModal = ref(false)
 const newTemplateName = ref('')

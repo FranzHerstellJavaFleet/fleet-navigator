@@ -640,7 +640,10 @@ import {
 } from '@heroicons/vue/24/outline'
 import api from '../services/api'
 import { useChatStore } from '../stores/chatStore'
+import { useToast } from '../composables/useToast'
 import { canModelHandleContext, getIncompatibilityReason, getSafeContextLimit } from '../utils/modelContextWindows'
+
+const { success } = useToast()
 
 defineEmits(['close'])
 
@@ -755,8 +758,15 @@ async function refreshModels() {
 async function setAsDefault(modelName) {
   try {
     await api.setDefaultModel(modelName)
+
+    // Immediately update chatStore selected model for instant feedback
+    chatStore.setSelectedModel(modelName)
+
+    // Show success message
+    success(`Modell "${modelName}" als Standard gesetzt`)
+
+    // Then reload to get backend confirmation
     await loadModels()
-    // Update chatStore to reflect new default model
     await chatStore.loadModels()
   } catch (error) {
     console.error('Failed to set default model:', error)

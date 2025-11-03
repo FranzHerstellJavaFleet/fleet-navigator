@@ -4,6 +4,8 @@
 
 Eine benutzerfreundliche Anwendung für Gespräche mit künstlicher Intelligenz - entwickelt von JavaFleet Systems Consulting.
 
+![Fleet Navigator Screenshot](screenshotFleetNavigator.png)
+
 ---
 
 ## 🎯 Für wen ist Fleet Navigator?
@@ -27,8 +29,12 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 - ✅ **Offline**: Funktioniert ohne Internet (nach dem Setup)
 - ✅ **Brief-Agent**: Generiert Briefe und öffnet sie automatisch in Word/LibreOffice
 - ✅ **Brief-Vorlagen**: Fertige Vorlagen für häufige Schreibanlässe
-- ✅ **Multi-Sprache**: Deutsch, Englisch und viele mehr
+- ✅ **System Prompts**: 12+ vorkonfigurierte Persönlichkeiten (Karla, Steuerberater, Pirat, Shakespeare, uvm.)
+- ✅ **Brief-Assistenten**: Spezialisierte Prompts für Behördenbriefe (Kita, Finanzamt, Stadtverwaltung)
+- ✅ **Multi-Sprache**: Deutsch, Englisch - automatische Erkennung der Systemsprache
 - ✅ **Dokumente**: PDFs und Bilder hochladen und analysieren
+- ✅ **Projekte & Chats**: Organisiere deine Gespräche in Projekten
+- ✅ **Collapsible Sidebar**: Mehr Platz durch ausblendbare Seitenleiste
 - ✅ **System-Check**: Prüft automatisch, ob alles richtig installiert ist
 
 ---
