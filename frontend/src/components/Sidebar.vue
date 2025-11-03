@@ -580,11 +580,25 @@ onMounted(async () => {
   await chatStore.loadGlobalStats()
   await loadProjects()
   document.addEventListener('click', closeMenus)
+  document.addEventListener('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeMenus)
+  document.removeEventListener('keydown', handleKeyDown)
 })
+
+// Handle keyboard shortcuts
+function handleKeyDown(event) {
+  // Check if Delete or Entf key is pressed
+  if (event.key === 'Delete' || event.key === 'Entf') {
+    // Only trigger if a chat is currently selected
+    if (chatStore.currentChat) {
+      event.preventDefault()
+      deleteChat(chatStore.currentChat.id)
+    }
+  }
+}
 
 function closeMenus() {
   openChatMenuId.value = null
@@ -658,7 +672,12 @@ function cancelRenameChat() {
 
 async function deleteChat(chatId) {
   openChatMenuId.value = null
-  if (confirm('Diesen Chat löschen?')) {
+
+  // Find the chat to get its title
+  const chat = chatStore.chats.find(c => c.id === chatId)
+  const chatTitle = chat ? chat.title : 'Diesen Chat'
+
+  if (confirm(`"${chatTitle}" wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`)) {
     try {
       await chatStore.deleteChat(chatId)
       success('Chat gelöscht')
