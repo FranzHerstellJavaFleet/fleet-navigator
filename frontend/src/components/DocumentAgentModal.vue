@@ -103,22 +103,16 @@
         <!-- Scrollable Content -->
         <div class="overflow-y-auto max-h-[calc(90vh-180px)] p-6">
 
-          <!-- Saved Templates Selection -->
-          <div v-if="letterTemplates.length > 0" class="mb-4">
-            <div class="flex items-center justify-between mb-2">
+          <!-- Brief Templates Selection ListBox -->
+          <div v-if="letterTemplates.length > 0" class="mb-6">
+            <div class="flex items-center justify-between mb-3">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Gespeicherte Vorlagen ({{ filteredTemplates.length }})
+                📝 Brief-Vorlage auswählen ({{ filteredTemplates.length }})
               </label>
-              <button
-                @click="showTemplatesExpanded = !showTemplatesExpanded"
-                class="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
-              >
-                {{ showTemplatesExpanded ? 'Weniger' : 'Alle' }} anzeigen
-              </button>
             </div>
 
             <!-- Search and Filter -->
-            <div class="mb-2 space-y-2">
+            <div class="mb-3 space-y-2">
               <input
                 v-model="templateSearch"
                 type="text"
@@ -162,48 +156,54 @@
               </div>
             </div>
 
-            <!-- Templates List -->
-            <div
-              :class="[
-                'grid grid-cols-1 gap-2 overflow-y-auto',
-                showTemplatesExpanded ? 'max-h-96' : 'max-h-40'
-              ]"
-            >
+            <!-- Templates ListBox -->
+            <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               <button
                 v-for="template in filteredTemplates"
                 :key="template.id"
                 @click="loadTemplate(template)"
                 :disabled="isGenerating"
                 class="
-                  text-left p-3 rounded-lg
-                  bg-gradient-to-br from-gray-50 to-gray-100
-                  dark:from-gray-700 dark:to-gray-800
-                  border border-gray-200 dark:border-gray-600
-                  hover:border-green-400 dark:hover:border-green-500
-                  hover:shadow-md
+                  w-full text-left px-4 py-3 rounded-xl
                   transition-all duration-200
+                  flex items-start gap-3
+                  border-2
                   disabled:opacity-50 disabled:cursor-not-allowed
                   group
                 "
+                :class="selectedTemplateId === template.id
+                  ? 'bg-green-900/40 dark:bg-green-900/40 border-green-500/50 shadow-lg shadow-green-500/20'
+                  : 'bg-gray-50 dark:bg-gray-700/30 border-gray-200 dark:border-gray-600/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-green-400 dark:hover:border-green-500/50'"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex-1 min-w-0">
-                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 truncate">
-                      {{ template.name }}
-                    </div>
-                    <div v-if="template.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                      {{ template.description }}
-                    </div>
+                <div class="flex-shrink-0 p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20">
+                  <DocumentTextIcon class="w-5 h-5 text-green-500 dark:text-green-400" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900 dark:text-white truncate">
+                    {{ template.name }}
                   </div>
-                  <span v-if="template.category" class="ml-2 px-2 py-1 text-xs rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-nowrap">
-                    {{ template.category }}
-                  </span>
+                  <div v-if="template.description" class="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                    {{ template.description }}
+                  </div>
+                  <div v-if="template.category" class="mt-2">
+                    <span class="inline-flex items-center px-2 py-1 text-xs rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                      {{ template.category }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="selectedTemplateId === template.id" class="flex-shrink-0 mt-1">
+                  <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
                 </div>
               </button>
 
               <!-- No Results -->
-              <div v-if="filteredTemplates.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p class="text-sm">Keine Vorlagen gefunden</p>
+              <div v-if="filteredTemplates.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <DocumentTextIcon class="w-16 h-16 mx-auto mb-3 opacity-30" />
+                <p class="text-sm font-medium">Keine Vorlagen gefunden</p>
                 <p class="text-xs mt-1">Versuche eine andere Suche oder Kategorie</p>
               </div>
             </div>
@@ -572,6 +572,7 @@ const newTemplate = ref({
 const templateSearch = ref('')
 const selectedCategory = ref(null)
 const showTemplatesExpanded = ref(false)
+const selectedTemplateId = ref(null)
 
 // Computed: Get unique categories from templates
 const templateCategories = computed(() => {
@@ -640,6 +641,7 @@ const loadTemplates = async () => {
 // Load template into prompt
 const loadTemplate = (template) => {
   prompt.value = template.prompt
+  selectedTemplateId.value = template.id
   successToast(`Vorlage "${template.name}" geladen`)
 }
 
