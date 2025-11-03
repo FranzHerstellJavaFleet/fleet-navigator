@@ -261,7 +261,8 @@
                         <buildArg>--allow-incomplete-classpath</buildArg>
 
                         <!-- Build optimizations -->
-                        <buildArg>-march=native</buildArg>
+                        <!-- Use x86-64 baseline for maximum compatibility across different CPUs -->
+                        <buildArg>-march=x86-64</buildArg>
                         <buildArg>--gc=serial</buildArg>
                     </buildArgs>
                 </configuration>

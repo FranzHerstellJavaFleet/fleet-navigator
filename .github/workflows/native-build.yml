@@ -51,7 +51,8 @@ jobs:
 
       - name: Build Native Image (Linux/macOS)
         if: runner.os != 'Windows'
-        run: mvn -Pnative clean package -DskipTests
+        run: |
+          mvn -Pnative clean package -DskipTests
 
       - name: Build Native Image (Windows)
         if: runner.os == 'Windows'
@@ -85,14 +86,15 @@ jobs:
             ${{ matrix.artifact-name }}.zip
           retention-days: 30
 
-      # Disabled temporarily due to "Too many retries" errors
-      # Create release manually after successful builds
-      # - name: Create Release
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: |
-      #       ${{ matrix.artifact-name }}.tar.gz
-      #       ${{ matrix.artifact-name }}.zip
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ matrix.artifact-name }}.tar.gz
+            ${{ matrix.artifact-name }}.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
