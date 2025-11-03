@@ -76,8 +76,8 @@ jobs:
         run: |
           # Use GitHub Actions runner's Visual Studio with explicit AMD64 architecture
           & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64
-          # Windows: Skip toolchain checking to prevent x86/AMD64 confusion
-          mvn -Pnative clean package -DskipTests "-Dnative.buildArg=-H:-CheckToolchain"
+          # Windows: Use compatibility mode for older CPUs
+          mvn -Pnative clean package -DskipTests "-Dnative.buildArg=-march=compatibility"
 
       - name: Package Binary (Linux/macOS)
         if: runner.os != 'Windows'
