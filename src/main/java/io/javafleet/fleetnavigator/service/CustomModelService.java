@@ -182,10 +182,15 @@ public class CustomModelService {
     public String generateModelfile(String baseModel, String systemPrompt,
                                       Double temperature, Double topP,
                                       Integer topK, Double repeatPenalty) {
+        // Validate baseModel is not empty
+        if (baseModel == null || baseModel.trim().isEmpty()) {
+            throw new IllegalArgumentException("Base model is required and cannot be empty");
+        }
+
         StringBuilder modelfile = new StringBuilder();
 
         // FROM directive (required)
-        modelfile.append("FROM ").append(baseModel).append("\n\n");
+        modelfile.append("FROM ").append(baseModel.trim()).append("\n\n");
 
         // SYSTEM directive (optional)
         if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {

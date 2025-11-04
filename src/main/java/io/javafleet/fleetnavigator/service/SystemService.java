@@ -43,28 +43,40 @@ public class SystemService {
         long freeMemory = runtime.freeMemory();
         long usedMemory = totalMemory - freeMemory;
 
-        // CPU usage (simplified - platform dependent)
-        double cpuUsage = osBean.getSystemLoadAverage();
-        if (cpuUsage < 0) {
-            cpuUsage = 0.0; // Not available on some systems
-        }
-
         // Anzahl der verfügbaren Prozessoren (Kerne)
         int cpuCores = runtime.availableProcessors();
 
-        // Versuche detaillierte CPU-Info zu bekommen (platform-specific)
+        // CPU usage - get accurate system CPU load
+        double cpuUsage = 0.0;
         double processCpuUsage = 0.0;
+
         if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
             com.sun.management.OperatingSystemMXBean sunOsBean =
                 (com.sun.management.OperatingSystemMXBean) osBean;
-            processCpuUsage = sunOsBean.getProcessCpuLoad() * 100.0;
 
-            // System CPU usage (falls verfügbar)
-            double systemCpuLoad = sunOsBean.getCpuLoad() * 100.0;
+            // Get system-wide CPU load (0.0 to 1.0, multiply by 100 for percentage)
+            double systemCpuLoad = sunOsBean.getCpuLoad();
             if (systemCpuLoad >= 0) {
-                cpuUsage = systemCpuLoad;
+                cpuUsage = systemCpuLoad * 100.0;
+            } else {
+                // Fallback: Use load average as rough estimate
+                double loadAverage = osBean.getSystemLoadAverage();
+                if (loadAverage >= 0) {
+                    // Convert load average to percentage (load / cores * 100)
+                    cpuUsage = (loadAverage / cpuCores) * 100.0;
+                    // Cap at 100%
+                    cpuUsage = Math.min(cpuUsage, 100.0);
+                }
+            }
+
+            // Process CPU usage (0.0 to 1.0, multiply by 100 for percentage)
+            double processCpuLoad = sunOsBean.getProcessCpuLoad();
+            if (processCpuLoad >= 0) {
+                processCpuUsage = processCpuLoad * 100.0;
             }
         }
+
+        log.debug("CPU Usage: system={}%, process={}%, cores={}", cpuUsage, processCpuUsage, cpuCores);
 
         // CPU-Hardware-Informationen
         if (cachedCpuModel == null) {

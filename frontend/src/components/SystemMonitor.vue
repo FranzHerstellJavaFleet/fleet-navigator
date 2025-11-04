@@ -1,5 +1,14 @@
 <template>
-  <div class="w-80 bg-gradient-to-b from-gray-900 to-gray-950 text-white border-l border-gray-700/50 overflow-y-auto custom-scrollbar">
+  <div class="
+    fixed right-0 h-full w-80
+    bg-gradient-to-b from-gray-900 to-gray-950
+    text-white
+    border-l border-gray-700/50
+    overflow-y-auto custom-scrollbar
+    shadow-2xl
+    z-40
+    pt-16
+  ">
     <!-- Header with Glassmorphism -->
     <div class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 p-4 mb-4">
       <div class="flex items-center justify-between">

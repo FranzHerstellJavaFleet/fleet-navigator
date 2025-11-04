@@ -35,6 +35,9 @@ public class Message {
     @Column
     private Integer tokens;
 
+    @Column(name = "model_name", length = 100)
+    private String modelName;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

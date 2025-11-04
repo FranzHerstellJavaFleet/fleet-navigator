@@ -84,26 +84,41 @@ public class CustomModelController {
     @PostMapping
     public SseEmitter createCustomModel(@RequestBody CreateCustomModelRequest request) {
         log.info("Creating custom model: {}", request.getName());
+        log.info("DEBUG - Request baseModel: '{}'", request.getBaseModel());
+        log.info("DEBUG - Request systemPrompt: '{}'", request.getSystemPrompt());
+        log.info("DEBUG - Request temperature: {}", request.getTemperature());
 
         SseEmitter emitter = new SseEmitter(600_000L); // 10 minute timeout
 
         executorService.execute(() -> {
+            CustomModel customModel = null;
             try {
-                // 1. Create model entry in database
+                // 1. Prepare model creation
                 emitter.send(SseEmitter.event()
                         .name("start")
-                        .data("{\"status\":\"Erstelle Modell-Eintrag in Datenbank...\"}"));
+                        .data("{\"status\":\"Bereite Modell-Erstellung vor...\"}"));
 
-                CustomModel customModel = customModelService.createCustomModel(request);
+                log.info("Creating custom model '{}' based on '{}'", request.getName(), request.getBaseModel());
 
-                // 2. Create model in Ollama with progress updates
+                // 2. Create model in Ollama FIRST (prevents zombie models)
                 emitter.send(SseEmitter.event()
                         .name("progress")
                         .data("{\"status\":\"Erstelle Modell in Ollama...\"}"));
 
+                // Ensure model name has :latest tag if no tag specified
+                String modelNameWithTag = request.getName().contains(":")
+                    ? request.getName()
+                    : request.getName() + ":latest";
+
+                // Use new Ollama API format (since v0.5.5): separate fields instead of modelfile string
                 ollamaService.createModel(
-                        customModel.getName(),
-                        customModel.getModelfile(),
+                        modelNameWithTag,
+                        request.getBaseModel(),
+                        request.getSystemPrompt(),
+                        request.getTemperature(),
+                        request.getTopP(),
+                        request.getTopK(),
+                        request.getRepeatPenalty(),
                         progress -> {
                             try {
                                 emitter.send(SseEmitter.event()
@@ -116,7 +131,16 @@ public class CustomModelController {
                         }
                 );
 
-                // 3. Send completion event
+                // 3. ONLY if Ollama succeeded: Save to database
+                emitter.send(SseEmitter.event()
+                        .name("progress")
+                        .data("{\"status\":\"Speichere in Datenbank...\"}"));
+
+                // Update request with tagged name before saving to database
+                request.setName(modelNameWithTag);
+                customModel = customModelService.createCustomModel(request);
+
+                // 4. Send completion event
                 emitter.send(SseEmitter.event()
                         .name("done")
                         .data("{\"status\":\"Modell erfolgreich erstellt!\",\"modelId\":" + customModel.getId() + "}"));
@@ -126,6 +150,17 @@ public class CustomModelController {
 
             } catch (Exception e) {
                 log.error("Error during custom model creation", e);
+
+                // If we created Ollama model but DB failed, try to clean up Ollama
+                if (customModel == null) {
+                    try {
+                        log.warn("Cleaning up Ollama model '{}' due to creation failure", request.getName());
+                        ollamaService.deleteModel(request.getName());
+                    } catch (Exception cleanupEx) {
+                        log.error("Failed to cleanup Ollama model after error", cleanupEx);
+                    }
+                }
+
                 try {
                     emitter.send(SseEmitter.event()
                             .name("error")
@@ -150,22 +185,35 @@ public class CustomModelController {
         SseEmitter emitter = new SseEmitter(600_000L);
 
         executorService.execute(() -> {
+            CustomModel newVersion = null;
+            String tempModelName = null;
             try {
-                // 1. Create new version in database
+                // 1. Get original model to generate new version name
                 emitter.send(SseEmitter.event()
                         .name("start")
-                        .data("{\"status\":\"Erstelle neue Version in Datenbank...\"}"));
+                        .data("{\"status\":\"Vorbereite Update...\"}"));
 
-                CustomModel newVersion = customModelService.updateCustomModel(id, request);
+                CustomModel originalModel = customModelService.getCustomModelById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Custom model not found: " + id));
 
-                // 2. Create new version in Ollama
+                // Generate new version name (e.g., mymodel:v2)
+                int nextVersion = originalModel.getVersion() + 1;
+                tempModelName = originalModel.getName().split(":")[0] + ":v" + nextVersion;
+
+                // 2. Create new version in Ollama FIRST (use original base model, updates don't change base)
                 emitter.send(SseEmitter.event()
                         .name("progress")
                         .data("{\"status\":\"Erstelle neue Version in Ollama...\"}"));
 
+                // Use new Ollama API format (since v0.5.5): separate fields instead of modelfile string
                 ollamaService.createModel(
-                        newVersion.getName(),
-                        newVersion.getModelfile(),
+                        tempModelName,
+                        originalModel.getBaseModel(),
+                        request.getSystemPrompt() != null ? request.getSystemPrompt() : originalModel.getSystemPrompt(),
+                        request.getTemperature() != null ? request.getTemperature() : originalModel.getTemperature(),
+                        request.getTopP() != null ? request.getTopP() : originalModel.getTopP(),
+                        request.getTopK() != null ? request.getTopK() : originalModel.getTopK(),
+                        request.getRepeatPenalty() != null ? request.getRepeatPenalty() : originalModel.getRepeatPenalty(),
                         progress -> {
                             try {
                                 emitter.send(SseEmitter.event()
@@ -178,7 +226,14 @@ public class CustomModelController {
                         }
                 );
 
-                // 3. Send completion
+                // 4. ONLY if Ollama succeeded: Save to database
+                emitter.send(SseEmitter.event()
+                        .name("progress")
+                        .data("{\"status\":\"Speichere in Datenbank...\"}"));
+
+                newVersion = customModelService.updateCustomModel(id, request);
+
+                // 5. Send completion
                 emitter.send(SseEmitter.event()
                         .name("done")
                         .data("{\"status\":\"Neue Version erstellt!\",\"modelId\":" + newVersion.getId() + ",\"version\":" + newVersion.getVersion() + "}"));
@@ -188,6 +243,17 @@ public class CustomModelController {
 
             } catch (Exception e) {
                 log.error("Error during custom model update", e);
+
+                // If we created Ollama model but DB failed, try to clean up Ollama
+                if (newVersion == null && tempModelName != null) {
+                    try {
+                        log.warn("Cleaning up Ollama model '{}' due to update failure", tempModelName);
+                        ollamaService.deleteModel(tempModelName);
+                    } catch (Exception cleanupEx) {
+                        log.error("Failed to cleanup Ollama model after error", cleanupEx);
+                    }
+                }
+
                 try {
                     emitter.send(SseEmitter.event()
                             .name("error")

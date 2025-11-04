@@ -98,6 +98,22 @@ public class ChatController {
     }
 
     /**
+     * PATCH /api/chat/{chatId}/model - Update chat model
+     */
+    @PatchMapping("/{chatId}/model")
+    public ResponseEntity<ChatDTO> updateChatModel(
+            @PathVariable Long chatId,
+            @RequestBody UpdateModelRequest request) {
+        log.info("Updating chat {} model to: {}", chatId, request.getModel());
+        try {
+            ChatDTO chat = chatService.updateChatModel(chatId, request.getModel());
+            return ResponseEntity.ok(chat);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * DELETE /api/chat/{chatId} - Delete a chat
      */
     @DeleteMapping("/{chatId}")

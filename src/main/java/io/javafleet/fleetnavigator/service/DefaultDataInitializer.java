@@ -87,6 +87,14 @@ public class DefaultDataInitializer {
         return false;
     }
 
+    /**
+     * Public method to re-seed letter templates after reset
+     */
+    public void initializeLetterTemplates() {
+        boolean isGerman = detectGermanLocale();
+        initializeLetterTemplates(isGerman);
+    }
+
     private void initializeLetterTemplates(boolean german) {
         if (german) {
             initializeGermanLetterTemplates();
@@ -175,6 +183,14 @@ public class DefaultDataInitializer {
         letterTemplateRepository.save(business);
 
         log.info("✅ Created {} English letter templates", 3);
+    }
+
+    /**
+     * Public method to re-seed placeholder personal info after reset
+     */
+    public void initializePlaceholderPersonalInfo() {
+        boolean isGerman = detectGermanLocale();
+        initializePlaceholderPersonalInfo(isGerman);
     }
 
     private void initializePlaceholderPersonalInfo(boolean german) {

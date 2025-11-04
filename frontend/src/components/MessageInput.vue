@@ -1,6 +1,8 @@
 <template>
-  <div class="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-2 sm:p-4 flex-shrink-0 sticky bottom-0 z-10">
-    <div class="max-w-4xl mx-auto">
+  <div class="message-input-container p-2 sm:p-4 flex-shrink-0 sticky bottom-0 z-10 relative overflow-visible">
+    <!-- Enhanced Glassmorphism Background -->
+    <div class="glassmorphism-backdrop"></div>
+    <div class="max-w-4xl mx-auto relative z-10">
       <!-- Uploaded Files Display -->
       <TransitionGroup name="file" tag="div" class="mb-2 flex flex-wrap gap-2">
         <div
@@ -64,7 +66,7 @@
       </Transition>
 
       <!-- Main Input Row -->
-      <div class="flex items-end gap-1 sm:gap-2">
+      <div class="flex items-stretch gap-4 sm:gap-6">
         <!-- File Upload Button -->
         <button
           @click="triggerFileInput"
@@ -76,6 +78,7 @@
             transition-all duration-200
             transform hover:scale-110 active:scale-95
             disabled:opacity-50 disabled:cursor-not-allowed
+            flex items-center
           "
           :disabled="chatStore.isLoading"
           title="Datei anhängen (PDF, TXT, MD, PNG, JPG)"
@@ -101,24 +104,22 @@
             placeholder="Nachricht eingeben... (Shift+Enter für neue Zeile)"
             rows="1"
             class="
-              w-full px-4 py-3 pr-12 rounded-xl
-              border border-gray-300 dark:border-gray-600
-              bg-white dark:bg-gray-700
+              w-full px-4 rounded-xl
+              border border-gray-300/30 dark:border-gray-600/30
+              bg-white/60 dark:bg-gray-700/60
+              backdrop-blur-md
               text-gray-900 dark:text-gray-100
               placeholder-gray-400 dark:placeholder-gray-500
-              focus:outline-none focus:ring-2 focus:ring-fleet-orange-500 focus:border-transparent
+              focus:outline-none focus:ring-0 focus:border-gray-300/30 dark:focus:border-gray-600/30
               resize-none
               transition-all duration-200
               disabled:opacity-50 disabled:cursor-not-allowed
+              overflow-hidden
             "
+            style="line-height: 1.5rem; padding-top: 0.75rem; padding-bottom: 0.75rem; height: 48px; box-sizing: border-box; outline: none !important; border-radius: 0.75rem; scrollbar-width: none; -ms-overflow-style: none;"
             :disabled="chatStore.isLoading"
             ref="textareaRef"
           ></textarea>
-
-          <!-- Character Count Badge -->
-          <div class="absolute bottom-2 right-2 text-xs text-gray-400 dark:text-gray-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm px-2 py-1 rounded-lg">
-            {{ inputText.length }}
-          </div>
         </div>
 
         <!-- Stop Button (when loading) -->
@@ -126,15 +127,16 @@
           v-if="chatStore.isLoading"
           @click="handleStop"
           class="
-            px-3 sm:px-6 py-3 rounded-xl
+            px-3 sm:px-6 rounded-xl
             bg-gradient-to-r from-red-500 to-red-600
             hover:from-red-400 hover:to-red-500
             text-white font-semibold
-            shadow-lg hover:shadow-xl
+            disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-200
-            transform hover:scale-105 active:scale-95
-            flex items-center gap-2
+            flex items-center justify-center gap-2
+            flex-shrink-0
           "
+          style="height: 48px; box-sizing: border-box; box-shadow: none;"
           title="Generierung stoppen"
         >
           <StopIcon class="w-5 h-5" />
@@ -147,45 +149,21 @@
           @click="handleSend"
           :disabled="!inputText.trim() || chatStore.isLoading"
           class="
-            px-3 sm:px-6 py-3 rounded-xl
+            px-3 sm:px-6 rounded-xl
             bg-gradient-to-r from-fleet-orange-500 to-orange-600
             hover:from-fleet-orange-400 hover:to-orange-500
             text-white font-semibold
-            shadow-lg hover:shadow-xl
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-200
-            transform hover:scale-105 active:scale-95
-            flex items-center gap-2
+            flex items-center justify-center gap-2
+            flex-shrink-0
           "
+          style="height: 48px; box-sizing: border-box; box-shadow: none;"
           title="Nachricht senden (Enter)"
         >
           <PaperAirplaneIcon class="w-5 h-5" />
           <span class="hidden sm:inline">Senden</span>
         </button>
-      </div>
-
-      <!-- Status Bar -->
-      <div class="mt-2 flex items-center justify-between text-xs">
-        <div class="flex items-center gap-4">
-          <!-- Token Counter -->
-          <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-            <CpuChipIcon class="w-4 h-4" />
-            <span>Chat Tokens:</span>
-            <span class="text-fleet-orange-500 font-semibold">{{ chatStore.currentChatTokens }}</span>
-          </div>
-
-          <!-- Streaming Status -->
-          <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-            <component :is="chatStore.streamingEnabled ? BoltIcon : DocumentTextIcon" class="w-4 h-4" />
-            <span>{{ chatStore.streamingEnabled ? 'Streaming' : 'Normal' }}</span>
-          </div>
-
-          <!-- Upload Progress -->
-          <div v-if="isUploading" class="flex items-center gap-1.5 text-fleet-orange-500 animate-pulse">
-            <ArrowUpTrayIcon class="w-4 h-4" />
-            <span>{{ uploadProgress }}</span>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -356,6 +334,61 @@ function adjustHeight() {
 </script>
 
 <style scoped>
+/* Enhanced Glassmorphism Effect */
+.message-input-container {
+  position: relative;
+}
+
+.glassmorphism-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  /* Modern Glassmorphism with strong blur */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+  /* Light mode gradient */
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.45),
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+
+  /* Subtle border effect */
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+
+  /* Smooth transition for theme changes */
+  transition: all 0.3s ease;
+}
+
+/* Dark mode glassmorphism */
+:deep(.dark) .glassmorphism-backdrop {
+  background: linear-gradient(
+    to top,
+    rgba(17, 24, 39, 0.85),
+    rgba(17, 24, 39, 0.65),
+    rgba(17, 24, 39, 0.35),
+    transparent
+  );
+  border-top: 1px solid rgba(75, 85, 99, 0.4);
+}
+
+/* Alternative approach for dark mode if :deep doesn't work */
+.dark .glassmorphism-backdrop {
+  background: linear-gradient(
+    to top,
+    rgba(17, 24, 39, 0.85),
+    rgba(17, 24, 39, 0.65),
+    rgba(17, 24, 39, 0.35),
+    transparent
+  );
+  border-top: 1px solid rgba(75, 85, 99, 0.4);
+}
+
 /* File Transition */
 .file-enter-active {
   animation: file-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);

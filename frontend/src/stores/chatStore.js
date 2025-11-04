@@ -4,6 +4,7 @@ import api from '../services/api'
 import { useSettingsStore } from './settingsStore'
 
 const PROMPT_STORAGE_KEY = 'fleet-navigator-last-prompt'
+const MODEL_STORAGE_KEY = 'fleet-navigator-selected-model'
 
 export const useChatStore = defineStore('chat', () => {
   // Load last used system prompt from localStorage
@@ -18,7 +19,14 @@ export const useChatStore = defineStore('chat', () => {
     } catch (e) {
       console.error('Failed to load last prompt', e)
     }
-    return { content: '', title: null }
+    // Default: null (will load from API)
+    return { content: null, title: null }
+  }
+
+  // Load last selected model from database (async loaded in mounted)
+  const loadLastModel = () => {
+    // Return null initially, will be loaded from DB asynchronously in loadModels()
+    return null
   }
 
   const lastPrompt = loadLastPrompt()
@@ -30,7 +38,7 @@ export const useChatStore = defineStore('chat', () => {
   const isLoading = ref(false)
   const error = ref(null)
   const models = ref([])
-  const selectedModel = ref('phi:latest') // Microsoft Phi - small and efficient default
+  const selectedModel = ref(loadLastModel()) // Load from localStorage
   const systemPrompt = ref(lastPrompt.content)
   const systemPromptTitle = ref(lastPrompt.title)
   const streamingEnabled = ref(true)  // Default: Streaming aktiviert
@@ -51,6 +59,18 @@ export const useChatStore = defineStore('chat', () => {
     }
   })
 
+  // Watch selected model changes and save to localStorage
+  watch(selectedModel, (newModel) => {
+    if (newModel) {
+      try {
+        localStorage.setItem(MODEL_STORAGE_KEY, newModel)
+        console.log('💾 Saved selected model:', newModel)
+      } catch (e) {
+        console.error('Failed to save selected model', e)
+      }
+    }
+  })
+
   // Global stats
   const globalStats = ref({
     totalTokens: 0,
@@ -67,6 +87,32 @@ export const useChatStore = defineStore('chat', () => {
     ollamaAvailable: false,
     ollamaVersion: 'Unknown'
   })
+
+  // Helper function: Check if model is a custom model
+  const isCustomModel = (modelName) => {
+    if (!modelName) return false
+
+    const knownOfficialModels = [
+      'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
+      'mistral', 'mixtral',
+      'phi', 'phi3',
+      'gemma', 'gemma2',
+      'codellama',
+      'qwen', 'qwen2', 'qwen2.5', 'qwen3',
+      'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
+      'deepseek-coder', 'deepseek-coder-v2',
+      'deepseek-r1',
+      'llava',
+      'moondream',
+      'bge-m3',
+      'nomic-embed-text',
+      'mxbai-embed-large',
+      'all-minilm'
+    ]
+
+    const baseName = modelName.split(':')[0]
+    return !knownOfficialModels.includes(baseName)
+  }
 
   // Computed
   const currentChatTokens = computed(() => {
@@ -93,10 +139,39 @@ export const useChatStore = defineStore('chat', () => {
     try {
       models.value = await api.getAvailableModels()
 
-      // Load default model from backend
-      const defaultModelResponse = await api.getDefaultModel()
-      if (defaultModelResponse && defaultModelResponse.model) {
-        selectedModel.value = defaultModelResponse.model
+      // Load user's last selected model from database
+      const savedModel = await api.getSelectedModel()
+      if (savedModel) {
+        selectedModel.value = savedModel
+        console.log('✅ Loaded selected model from database:', savedModel)
+      } else {
+        // No model saved yet, use default
+        const defaultModelResponse = await api.getDefaultModel()
+        if (defaultModelResponse && defaultModelResponse.model) {
+          selectedModel.value = defaultModelResponse.model
+          console.log('📥 Using backend default model:', defaultModelResponse.model)
+        }
+      }
+
+      // ALWAYS sync system prompt with database (localStorage = cache, DB = source of truth)
+      try {
+        console.log('🔄 Synchronizing system prompt with database...')
+        const defaultPrompt = await api.getDefaultSystemPrompt()
+        if (defaultPrompt && defaultPrompt.content) {
+          systemPrompt.value = defaultPrompt.content
+          systemPromptTitle.value = defaultPrompt.name
+
+          // Sync localStorage with database
+          localStorage.setItem(PROMPT_STORAGE_KEY, JSON.stringify({
+            content: defaultPrompt.content,
+            title: defaultPrompt.name
+          }))
+
+          console.log('✅ System prompt synchronized with DB:', defaultPrompt.name)
+        }
+      } catch (promptError) {
+        console.warn('⚠️ Could not sync system prompt from DB, using localStorage:', promptError.message)
+        // Continue with localStorage values
       }
     } catch (err) {
       error.value = 'Failed to load models'
@@ -190,7 +265,7 @@ export const useChatStore = defineStore('chat', () => {
           chatId: currentChat.value?.id,
           message: messageText,
           model: selectedModel.value,
-          systemPrompt: systemPrompt.value,
+          systemPrompt: isCustomModel(selectedModel.value) ? '' : systemPrompt.value,
           stream: false,
           // Add generation parameters from settings
           maxTokens: settingsStore.settings.maxTokens,
@@ -272,7 +347,7 @@ export const useChatStore = defineStore('chat', () => {
         chatId: currentChat.value?.id,
         message: messageText,
         model: selectedModel.value,
-        systemPrompt: systemPrompt.value,
+        systemPrompt: isCustomModel(selectedModel.value) ? '' : systemPrompt.value,
         stream: true,
         // Add generation parameters from settings
         maxTokens: settingsStore.settings.maxTokens,
@@ -300,13 +375,15 @@ export const useChatStore = defineStore('chat', () => {
         requestBody.visionChainEnabled = true
         requestBody.visionModel = visionModel
 
-        // Erzwinge deutsche Ausgabe im System-Prompt
-        const deutschPrompt = 'Du antwortest IMMER auf Deutsch.'
-        requestBody.systemPrompt = requestBody.systemPrompt
-          ? deutschPrompt + '\n\n' + requestBody.systemPrompt
-          : deutschPrompt
+        // Erzwinge deutsche Ausgabe im System-Prompt (nur wenn kein Custom Model)
+        if (!isCustomModel(selectedModel.value)) {
+          const deutschPrompt = 'Du antwortest IMMER auf Deutsch.'
+          requestBody.systemPrompt = requestBody.systemPrompt
+            ? deutschPrompt + '\n\n' + requestBody.systemPrompt
+            : deutschPrompt
+        }
 
-        console.log('📤 Vision-Chaining:', visionModel, '→', selectedModel.value, '(Deutsch erzwungen)')
+        console.log('📤 Vision-Chaining:', visionModel, '→', selectedModel.value, isCustomModel(selectedModel.value) ? '(Custom Model - kein Deutsch-Prompt)' : '(Deutsch erzwungen)')
       }
 
       // We need to use fetch for POST with body, then read SSE
@@ -330,7 +407,8 @@ export const useChatStore = defineStore('chat', () => {
           content: '',
           tokens: 0,
           createdAt: new Date().toISOString(),
-          isStreaming: true
+          isStreaming: true,
+          modelName: selectedModel.value  // Fix: Speichere aktuelles Model beim Senden
         })
         messages.value.push(streamingMessage)
 
@@ -480,13 +558,60 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  function setSelectedModel(model) {
+  async function setSelectedModel(model) {
     selectedModel.value = model
+
+    // Save to database for persistence
+    try {
+      await api.saveSelectedModel(model)
+      console.log('💾 Saved selected model to database:', model)
+    } catch (e) {
+      console.error('Failed to save model to database', e)
+    }
+
+    // Automatically update current chat's model when a new model is selected
+    if (currentChat.value && currentChat.value.id) {
+      await updateCurrentChatModel(model)
+    }
+  }
+
+  async function updateCurrentChatModel(modelName) {
+    if (!currentChat.value || !currentChat.value.id) {
+      console.warn('No current chat to update model')
+      return
+    }
+
+    try {
+      console.log(`🔄 Updating chat ${currentChat.value.id} model to: ${modelName}`)
+      const response = await api.updateChatModel(currentChat.value.id, modelName)
+
+      // Update local state
+      currentChat.value.model = modelName
+
+      // Update in chat list
+      const chatIndex = chats.value.findIndex(c => c.id === currentChat.value.id)
+      if (chatIndex !== -1) {
+        chats.value[chatIndex].model = modelName
+      }
+
+      console.log('✅ Chat model updated successfully')
+      return response
+    } catch (err) {
+      console.error('Failed to update chat model:', err)
+      throw err
+    }
   }
 
   function setSystemPrompt(prompt, title = null) {
     systemPrompt.value = prompt
     systemPromptTitle.value = title
+
+    // Sync with localStorage immediately
+    localStorage.setItem(PROMPT_STORAGE_KEY, JSON.stringify({
+      content: prompt,
+      title: title
+    }))
+    console.log('✅ System prompt saved to localStorage:', title)
   }
 
   function toggleStreaming() {
@@ -547,6 +672,7 @@ export const useChatStore = defineStore('chat', () => {
     loadGlobalStats,
     loadSystemStatus,
     setSelectedModel,
+    updateCurrentChatModel,
     setSystemPrompt,
     toggleStreaming,
     startNewChat,

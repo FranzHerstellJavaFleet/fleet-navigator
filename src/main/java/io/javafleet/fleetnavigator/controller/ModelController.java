@@ -242,4 +242,76 @@ public class ModelController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    /**
+     * POST /api/models/create - Create a custom model with Modelfile
+     */
+    @PostMapping("/create")
+    public SseEmitter createModel(@RequestBody Map<String, String> request) {
+        String modelName = request.get("name");
+        String baseModel = request.get("baseModel");
+        String systemPrompt = request.get("systemPrompt");
+        String temperature = request.getOrDefault("temperature", "0.8");
+        String topP = request.getOrDefault("topP", "0.9");
+        String topK = request.getOrDefault("topK", "40");
+
+        log.info("Creating custom model: {} (base: {})", modelName, baseModel);
+
+        // Parse parameters
+        Double tempDouble = temperature != null ? Double.parseDouble(temperature) : 0.8;
+        Double topPDouble = topP != null ? Double.parseDouble(topP) : 0.9;
+        Integer topKInt = topK != null ? Integer.parseInt(topK) : 40;
+
+        SseEmitter emitter = new SseEmitter(600_000L); // 10 minute timeout
+
+        executorService.execute(() -> {
+            try {
+                // Send initial event
+                emitter.send(SseEmitter.event()
+                        .name("start")
+                        .data("{\"status\":\"Creating model\"}"));
+
+                // Create model with progress updates using new Ollama API format (since v0.5.5)
+                ollamaService.createModel(
+                        modelName,
+                        baseModel,
+                        systemPrompt,
+                        tempDouble,
+                        topPDouble,
+                        topKInt,
+                        null, // repeatPenalty
+                        progress -> {
+                    try {
+                        emitter.send(SseEmitter.event()
+                                .name("progress")
+                                .data("{\"status\":\"" + progress + "\"}"));
+                    } catch (IOException e) {
+                        log.error("Error sending progress update", e);
+                        emitter.completeWithError(e);
+                    }
+                });
+
+                // Send completion event
+                emitter.send(SseEmitter.event()
+                        .name("done")
+                        .data("{\"status\":\"Model created successfully\"}"));
+
+                emitter.complete();
+                log.info("Model creation completed for: {}", modelName);
+
+            } catch (Exception e) {
+                log.error("Error during model creation", e);
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("error")
+                            .data("{\"error\":\"" + e.getMessage() + "\"}"));
+                } catch (IOException ex) {
+                    log.error("Error sending error event", ex);
+                }
+                emitter.completeWithError(e);
+            }
+        });
+
+        return emitter;
+    }
 }

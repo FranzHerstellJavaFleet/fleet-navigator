@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-1 overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+  <div class="flex flex-col flex-1 overflow-hidden relative bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
     <!-- Messages Area with Custom Scrollbar -->
     <div ref="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
       <!-- Welcome Message - Show when NO chat is selected -->

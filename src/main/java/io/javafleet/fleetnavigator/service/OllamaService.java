@@ -781,15 +781,44 @@ public class OllamaService {
      * @param modelfile Complete Modelfile content
      * @param progressConsumer Consumer for progress updates
      */
-    public void createModel(String modelName, String modelfile, Consumer<String> progressConsumer) throws IOException {
+    public void createModel(String modelName, String baseModel, String systemPrompt,
+                            Double temperature, Double topP, Integer topK, Double repeatPenalty,
+                            Consumer<String> progressConsumer) throws IOException {
         String url = ollamaBaseUrl + "/api/create";
 
+        // NEW Ollama API format (since v0.5.5): separate fields instead of modelfile string
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("name", modelName);
-        requestBody.put("modelfile", modelfile);
+        requestBody.put("from", baseModel);  // REQUIRED: base model
         requestBody.put("stream", true);
 
+        // Add optional system prompt
+        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
+            requestBody.put("system", systemPrompt);
+        }
+
+        // Add optional parameters as nested map
+        Map<String, Object> parameters = new HashMap<>();
+        if (temperature != null) {
+            parameters.put("temperature", temperature);
+        }
+        if (topP != null) {
+            parameters.put("top_p", topP);
+        }
+        if (topK != null) {
+            parameters.put("top_k", topK);
+        }
+        if (repeatPenalty != null) {
+            parameters.put("repeat_penalty", repeatPenalty);
+        }
+        if (!parameters.isEmpty()) {
+            requestBody.put("parameter", parameters);
+        }
+
         String json = objectMapper.writeValueAsString(requestBody);
+
+        log.info("Creating model '{}' from base '{}'", modelName, baseModel);
+        log.debug("Request body: {}", json);
 
         RequestBody body = RequestBody.create(
                 json, MediaType.parse("application/json"));
@@ -813,6 +842,13 @@ public class OllamaService {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     JsonNode jsonNode = objectMapper.readTree(line);
+
+                    // Check for errors first!
+                    if (jsonNode.has("error")) {
+                        String error = jsonNode.get("error").asText();
+                        log.error("Ollama model creation failed: {}", error);
+                        throw new IOException("Ollama model creation failed: " + error);
+                    }
 
                     // Extract status message
                     if (jsonNode.has("status")) {

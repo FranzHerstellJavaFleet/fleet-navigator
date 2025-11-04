@@ -159,6 +159,7 @@ public class ChatService {
         assistantMessage.setRole(MessageRole.ASSISTANT);
         assistantMessage.setContent(htmlResponse);
         assistantMessage.setTokens(ollamaService.estimateTokens(response));
+        assistantMessage.setModelName(request.getModel());  // Store which model was used
         assistantMessage = messageRepository.save(assistantMessage);
 
         // Update global stats
@@ -445,6 +446,7 @@ public class ChatService {
                 assistantMessage.setRole(MessageRole.ASSISTANT);
                 assistantMessage.setContent(fullResponse.toString());
                 assistantMessage.setTokens(ollamaService.estimateTokens(fullResponse.toString()));
+                assistantMessage.setModelName(request.getModel());  // Store which model was used
                 messageRepository.save(assistantMessage);
 
                 // Update global stats
@@ -551,6 +553,21 @@ public class ChatService {
     }
 
     /**
+     * Update chat's model
+     */
+    @Transactional
+    public ChatDTO updateChatModel(Long chatId, String modelName) {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found: " + chatId));
+
+        chat.setModel(modelName);
+        chat = chatRepository.save(chat);
+        log.info("Updated chat {} model to: {}", chatId, modelName);
+
+        return mapToChatDTO(chat);
+    }
+
+    /**
      * Delete a chat
      */
     @Transactional
@@ -651,6 +668,7 @@ public class ChatService {
         dto.setRole(message.getRole());
         dto.setContent(message.getContent());
         dto.setTokens(message.getTokens());
+        dto.setModelName(message.getModelName());
         dto.setCreatedAt(message.getCreatedAt());
         return dto;
     }

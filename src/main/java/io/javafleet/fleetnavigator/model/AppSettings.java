@@ -41,6 +41,7 @@ public class AppSettings {
     public static final String KEY_FAST_MODEL = "model.selection.fast";
     public static final String KEY_VISION_MODEL = "model.selection.vision";
     public static final String KEY_DEFAULT_MODEL = "model.default";
+    public static final String KEY_SELECTED_MODEL = "model.selected"; // User's last selected model
     public static final String KEY_VISION_CHAINING_ENABLED = "vision.chaining.enabled";
     public static final String KEY_VISION_CHAINING_SMART_SELECTION = "vision.chaining.smart.selection";
 }

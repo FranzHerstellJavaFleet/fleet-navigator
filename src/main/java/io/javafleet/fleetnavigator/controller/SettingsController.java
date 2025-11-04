@@ -1,6 +1,7 @@
 package io.javafleet.fleetnavigator.controller;
 
 import io.javafleet.fleetnavigator.dto.ModelSelectionSettingsDTO;
+import io.javafleet.fleetnavigator.dto.ResetSelectionDTO;
 import io.javafleet.fleetnavigator.service.SettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,5 +49,48 @@ public class SettingsController {
         }
 
         return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * GET /api/settings/selected-model - Get user's last selected model
+     */
+    @GetMapping("/selected-model")
+    public ResponseEntity<String> getSelectedModel() {
+        log.info("GET /api/settings/selected-model");
+        String model = settingsService.getSelectedModel();
+        if (model == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(model);
+    }
+
+    /**
+     * POST /api/settings/selected-model - Save user's selected model
+     */
+    @PostMapping("/selected-model")
+    public ResponseEntity<Void> saveSelectedModel(@RequestBody String modelName) {
+        log.info("POST /api/settings/selected-model: {}", modelName);
+        settingsService.saveSelectedModel(modelName);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * POST /api/settings/reset-selective - DANGER ZONE: Reset selected application data
+     * This endpoint deletes only the selected categories of user data.
+     * Use only for testing/seeding purposes!
+     */
+    @PostMapping("/reset-selective")
+    public ResponseEntity<Void> resetSelectedData(@RequestBody ResetSelectionDTO selection) {
+        log.warn("⚠️ POST /api/settings/reset-selective - Resetting selected data!");
+        settingsService.resetSelectedData(
+            selection.isChats(),
+            selection.isProjects(),
+            selection.isCustomModels(),
+            selection.isSettings(),
+            selection.isPersonalInfo(),
+            selection.isTemplates(),
+            selection.isStats()
+        );
+        return ResponseEntity.ok().build();
     }
 }

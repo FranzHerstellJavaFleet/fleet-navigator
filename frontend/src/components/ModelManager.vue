@@ -39,7 +39,7 @@
           </button>
         </div>
 
-        <!-- Tabs with Icons -->
+        <!-- Main Tabs -->
         <div class="border-b border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50">
           <div class="flex">
             <button
@@ -75,42 +75,325 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <Transition name="fade">
-          <div v-if="activeTab === 'installed'" class="p-4 border-b border-gray-200/50 dark:border-gray-700/50 flex gap-3">
+        <!-- Hero Section - Currently Selected Model -->
+        <div class="px-6 py-4 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 dark:from-purple-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 border-b border-gray-200/50 dark:border-gray-700/50">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg">
+                  <CpuChipIcon class="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">Aktuelles Modell</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ chatStore.selectedModel || 'Kein Modell ausgewählt' }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span v-if="getModelCategory(chatStore.selectedModel) === 'custom'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-700 dark:text-indigo-300 rounded-lg">
+                    <SparklesIcon class="w-4 h-4" />
+                    Eigenes Modell
+                  </span>
+                  <span v-else-if="getModelCategory(chatStore.selectedModel) === 'coder'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-100 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg">
+                    <CpuChipIcon class="w-4 h-4" />
+                    Coder Modell
+                  </span>
+                  <span v-else-if="getModelCategory(chatStore.selectedModel) === 'vision'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-100 to-green-100 dark:from-green-900/40 dark:to-green-900/40 text-green-700 dark:text-green-300 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Vision Modell
+                  </span>
+                  <span v-else-if="getModelCategory(chatStore.selectedModel) === 'general'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-100 to-orange-100 dark:from-orange-900/40 dark:to-orange-900/40 text-orange-700 dark:text-orange-300 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Allgemeines Modell
+                  </span>
+                </div>
+                <div v-if="models.find(m => m.name === chatStore.selectedModel && m.isDefault)" class="text-xs text-yellow-600 dark:text-yellow-400 font-medium mt-1 flex items-center gap-1 justify-end">
+                  <StarIcon class="w-3.5 h-3.5" />
+                  Standard-Modell
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Tabs (only for Installierte Modelle) -->
+        <div v-if="activeTab === 'installed'" class="border-b border-gray-200/50 dark:border-gray-700/50 bg-gray-50/30 dark:bg-gray-900/30">
+          <div class="flex px-4">
             <button
-              @click="refreshModels"
-              :disabled="isLoading"
+              @click="installedSubTab = 'custom'"
               class="
-                px-4 py-2 rounded-xl
-                bg-gradient-to-r from-gray-200 to-gray-300
-                dark:from-gray-700 dark:to-gray-600
-                hover:from-gray-300 hover:to-gray-400
-                dark:hover:from-gray-600 dark:hover:to-gray-500
-                text-gray-800 dark:text-white
-                font-medium
-                shadow-sm hover:shadow-md
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all duration-200
-                transform hover:scale-105 active:scale-95
+                px-4 py-2 font-medium text-sm transition-all duration-200
                 flex items-center gap-2
+                relative
               "
+              :class="installedSubTab === 'custom'
+                ? 'text-purple-600 dark:text-purple-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
-              <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
-              <span>Aktualisieren</span>
+              <SparklesIcon class="w-4 h-4" />
+              <span>Eigene Modelle</span>
+              <div v-if="installedSubTab === 'custom'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500"></div>
+            </button>
+            <button
+              @click="installedSubTab = 'coder'"
+              class="
+                px-4 py-2 font-medium text-sm transition-all duration-200
+                flex items-center gap-2
+                relative
+              "
+              :class="installedSubTab === 'coder'
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              <CpuChipIcon class="w-4 h-4" />
+              <span>Coder Modelle</span>
+              <div v-if="installedSubTab === 'coder'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
+            </button>
+            <button
+              @click="installedSubTab = 'vision'"
+              class="
+                px-4 py-2 font-medium text-sm transition-all duration-200
+                flex items-center gap-2
+                relative
+              "
+              :class="installedSubTab === 'vision'
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span>Vision Modelle</span>
+              <div v-if="installedSubTab === 'vision'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></div>
+            </button>
+            <button
+              @click="installedSubTab = 'general'"
+              class="
+                px-4 py-2 font-medium text-sm transition-all duration-200
+                flex items-center gap-2
+                relative
+              "
+              :class="installedSubTab === 'general'
+                ? 'text-orange-600 dark:text-orange-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span>Allgemeine Modelle</span>
+              <div v-if="installedSubTab === 'general'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500"></div>
             </button>
           </div>
-        </Transition>
+        </div>
 
-        <!-- Search for Available Models -->
+        <!-- Action Buttons and Search -->
         <Transition name="fade">
-          <div v-if="activeTab === 'available'" class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+          <!-- Installierte Modelle: Search + Actions (based on sub-tab) -->
+          <div v-if="activeTab === 'installed'" class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+            <!-- Custom Models Sub-Tab -->
+            <div v-if="installedSubTab === 'custom'" class="flex gap-3">
+              <div class="flex-1 relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  v-model="customSearchQuery"
+                  type="text"
+                  placeholder="Eigene Modelle durchsuchen..."
+                  class="
+                    w-full pl-10 pr-4 py-2.5 rounded-xl
+                    border border-gray-300 dark:border-gray-600
+                    bg-white dark:bg-gray-700
+                    text-gray-900 dark:text-white
+                    placeholder-gray-400 dark:placeholder-gray-500
+                    focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                    transition-all duration-200
+                  "
+                />
+              </div>
+              <button
+                @click="showCreateCustomModel = true"
+                :disabled="isLoading"
+                class="
+                  px-4 py-2 rounded-xl
+                  bg-gradient-to-r from-indigo-500 to-purple-500
+                  hover:from-indigo-600 hover:to-purple-600
+                  text-white
+                  font-medium
+                  shadow-sm hover:shadow-md
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  transform hover:scale-105 active:scale-95
+                  flex items-center gap-2
+                "
+              >
+                <SparklesIcon class="w-5 h-5" />
+                <span>Neues erstellen</span>
+              </button>
+              <button
+                @click="loadCustomModels"
+                :disabled="isLoadingCustom"
+                class="
+                  px-4 py-2 rounded-xl
+                  bg-gradient-to-r from-gray-200 to-gray-300
+                  dark:from-gray-700 dark:to-gray-600
+                  hover:from-gray-300 hover:to-gray-400
+                  dark:hover:from-gray-600 dark:hover:to-gray-500
+                  text-gray-800 dark:text-white
+                  font-medium
+                  shadow-sm hover:shadow-md
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  transform hover:scale-105 active:scale-95
+                  flex items-center gap-2
+                "
+              >
+                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoadingCustom }" />
+                <span>Aktualisieren</span>
+              </button>
+            </div>
+
+            <!-- Coder Models Sub-Tab -->
+            <div v-else-if="installedSubTab === 'coder'" class="flex gap-3">
+              <div class="flex-1 relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  v-model="coderSearchQuery"
+                  type="text"
+                  placeholder="Coder Modelle durchsuchen..."
+                  class="
+                    w-full pl-10 pr-4 py-2.5 rounded-xl
+                    border border-gray-300 dark:border-gray-600
+                    bg-white dark:bg-gray-700
+                    text-gray-900 dark:text-white
+                    placeholder-gray-400 dark:placeholder-gray-500
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    transition-all duration-200
+                  "
+                />
+              </div>
+              <button
+                @click="refreshModels"
+                :disabled="isLoading"
+                class="
+                  px-4 py-2 rounded-xl
+                  bg-gradient-to-r from-gray-200 to-gray-300
+                  dark:from-gray-700 dark:to-gray-600
+                  hover:from-gray-300 hover:to-gray-400
+                  dark:hover:from-gray-600 dark:hover:to-gray-500
+                  text-gray-800 dark:text-white
+                  font-medium
+                  shadow-sm hover:shadow-md
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  transform hover:scale-105 active:scale-95
+                  flex items-center gap-2
+                "
+              >
+                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
+                <span>Aktualisieren</span>
+              </button>
+            </div>
+
+            <!-- Vision Models Sub-Tab -->
+            <div v-else-if="installedSubTab === 'vision'" class="flex gap-3">
+              <div class="flex-1 relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  v-model="visionSearchQuery"
+                  type="text"
+                  placeholder="Vision Modelle durchsuchen..."
+                  class="
+                    w-full pl-10 pr-4 py-2.5 rounded-xl
+                    border border-gray-300 dark:border-gray-600
+                    bg-white dark:bg-gray-700
+                    text-gray-900 dark:text-white
+                    placeholder-gray-400 dark:placeholder-gray-500
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+                    transition-all duration-200
+                  "
+                />
+              </div>
+              <button
+                @click="refreshModels"
+                :disabled="isLoading"
+                class="
+                  px-4 py-2 rounded-xl
+                  bg-gradient-to-r from-gray-200 to-gray-300
+                  dark:from-gray-700 dark:to-gray-600
+                  hover:from-gray-300 hover:to-gray-400
+                  dark:hover:from-gray-600 dark:hover:to-gray-500
+                  text-gray-800 dark:text-white
+                  font-medium
+                  shadow-sm hover:shadow-md
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  transform hover:scale-105 active:scale-95
+                  flex items-center gap-2
+                "
+              >
+                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
+                <span>Aktualisieren</span>
+              </button>
+            </div>
+
+            <!-- General Models Sub-Tab -->
+            <div v-else-if="installedSubTab === 'general'" class="flex gap-3">
+              <div class="flex-1 relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  v-model="generalSearchQuery"
+                  type="text"
+                  placeholder="Allgemeine Modelle durchsuchen..."
+                  class="
+                    w-full pl-10 pr-4 py-2.5 rounded-xl
+                    border border-gray-300 dark:border-gray-600
+                    bg-white dark:bg-gray-700
+                    text-gray-900 dark:text-white
+                    placeholder-gray-400 dark:placeholder-gray-500
+                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
+                    transition-all duration-200
+                  "
+                />
+              </div>
+              <button
+                @click="refreshModels"
+                :disabled="isLoading"
+                class="
+                  px-4 py-2 rounded-xl
+                  bg-gradient-to-r from-gray-200 to-gray-300
+                  dark:from-gray-700 dark:to-gray-600
+                  hover:from-gray-300 hover:to-gray-400
+                  dark:hover:from-gray-600 dark:hover:to-gray-500
+                  text-gray-800 dark:text-white
+                  font-medium
+                  shadow-sm hover:shadow-md
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  transform hover:scale-105 active:scale-95
+                  flex items-center gap-2
+                "
+              >
+                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
+                <span>Aktualisieren</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Verfügbare Modelle: Search only -->
+          <div v-else-if="activeTab === 'available'" class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
             <div class="relative">
               <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Modelle durchsuchen..."
+                placeholder="Verfügbare Modelle durchsuchen..."
                 class="
                   w-full pl-10 pr-4 py-3 rounded-xl
                   border border-gray-300 dark:border-gray-600
@@ -125,106 +408,366 @@
           </div>
         </Transition>
 
-      <!-- Installed Models List -->
+      <!-- Installed Models List - Shown based on sub-tab -->
       <div v-if="activeTab === 'installed'" class="flex-1 overflow-y-auto p-6">
-        <div v-if="isLoading" class="flex justify-center items-center py-8">
+        <!-- Loading state -->
+        <div v-if="isLoading && installedSubTab !== 'custom'" class="flex justify-center items-center py-8">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fleet-orange-500"></div>
         </div>
-
-        <div v-else-if="models.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-          Keine Modelle installiert
+        <div v-else-if="isLoadingCustom && installedSubTab === 'custom'" class="flex justify-center items-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
         </div>
 
-        <div v-else class="space-y-3">
-          <div
-            v-for="model in models"
-            :key="model.name"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors"
-            :class="canUseModel(model.name) ? 'hover:bg-gray-100 dark:hover:bg-gray-650' : 'opacity-50 cursor-not-allowed'"
-          >
-            <div class="flex items-start justify-between">
-              <!-- Model Info -->
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    {{ model.name }}
-                    <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
-                      ⚠️ Context zu groß
-                    </span>
-                  </h3>
-                  <span
-                    v-if="model.isDefault"
-                    class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full"
-                  >
-                    ⭐ Standard
-                  </span>
-                  <span
-                    v-if="hasUpdate(model.name)"
-                    class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse"
-                  >
-                    🔄 Update verfügbar
-                  </span>
+        <!-- Custom Models Sub-Tab -->
+        <div v-else-if="installedSubTab === 'custom'">
+          <div v-if="filteredCustomModels.length === 0" class="text-center py-12">
+            <SparklesIcon class="w-16 h-16 mx-auto text-purple-400 dark:text-purple-600 mb-4" />
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-2" v-if="customSearchQuery">
+              Keine eigenen Modelle gefunden für: "{{ customSearchQuery }}"
+            </p>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-2" v-else>
+              Noch keine eigenen Modelle erstellt
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-500 mb-6">
+              Erstelle dein erstes Custom Model mit eigenem System Prompt
+            </p>
+            <button
+              @click="showCreateCustomModel = true"
+              class="
+                px-6 py-3 rounded-xl
+                bg-gradient-to-r from-indigo-500 to-purple-500
+                hover:from-indigo-600 hover:to-purple-600
+                text-white font-medium
+                shadow-sm hover:shadow-md
+                transition-all duration-200
+                transform hover:scale-105 active:scale-95
+                inline-flex items-center gap-2
+              "
+            >
+              <SparklesIcon class="w-5 h-5" />
+              <span>Jetzt erstellen</span>
+            </button>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="model in filteredCustomModels"
+              :key="model.id"
+              class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-indigo-200/50 dark:border-indigo-700/50"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <SparklesIcon class="w-5 h-5 text-indigo-500" />
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                      {{ model.name }}
+                    </h3>
+                  </div>
+
+                  <div class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                    <p v-if="model.description">{{ model.description }}</p>
+                    <p><span class="font-medium">Basis-Modell:</span> {{ model.baseModel }}</p>
+                    <p v-if="model.systemPrompt" class="text-xs">
+                      <span class="font-medium">System Prompt:</span>
+                      <span class="line-clamp-2">{{ model.systemPrompt }}</span>
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500">
+                      Erstellt: {{ formatDate(model.createdAt) }}
+                    </p>
+                  </div>
                 </div>
 
-                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <div><strong>Größe:</strong> {{ model.size }}</div>
-                  <div v-if="model.releaseDate">
-                    <strong>Veröffentlicht:</strong> {{ formatDate(model.releaseDate) }}
-                  </div>
-                  <div v-if="model.trainedUntil">
-                    <strong>Trainiert bis:</strong> {{ model.trainedUntil }}
-                  </div>
-                  <div v-if="model.description">
-                    <strong>Beschreibung:</strong> {{ model.description }}
-                  </div>
-                  <div v-if="model.publisher">
-                    <strong>Herausgeber:</strong> {{ model.publisher }}
-                  </div>
-                  <div v-if="model.specialties">
-                    <strong>Spezialitäten:</strong> {{ model.specialties }}
-                  </div>
+                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <button
+                    @click="selectAndSetDefault(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-purple-500 to-indigo-500
+                      hover:from-purple-600 hover:to-indigo-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="Model auswählen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Auswählen</span>
+                  </button>
+                  <button
+                    @click="deleteCustomModel(model.id, model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-red-500 hover:bg-red-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="Löschen"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                    <span>Löschen</span>
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <!-- Actions -->
-              <div class="flex flex-col gap-2 ml-4">
-                <button
-                  v-if="!model.isDefault"
-                  @click="setAsDefault(model.name)"
-                  :disabled="!canUseModel(model.name)"
-                  class="px-3 py-1 text-white text-sm rounded transition-colors whitespace-nowrap"
-                  :class="canUseModel(model.name)
-                    ? 'bg-fleet-orange-500 hover:bg-fleet-orange-600'
-                    : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'"
-                  :title="canUseModel(model.name) ? '' : getIncompatibilityMessage(model.name)"
-                >
-                  Als Standard
-                </button>
-                <button
-                  v-if="hasUpdate(model.name)"
-                  @click="updateModel(model.name)"
-                  class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition-colors whitespace-nowrap"
-                >
-                  🔄 Update
-                </button>
-                <button
-                  @click="viewDetails(model.name)"
-                  class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition-colors"
-                >
-                  Details
-                </button>
-                <button
-                  @click="editMetadata(model)"
-                  class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-                >
-                  Bearbeiten
-                </button>
-                <button
-                  @click="confirmDelete(model.name)"
-                  class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
-                >
-                  Löschen
-                </button>
+        <!-- Coder Models Sub-Tab -->
+        <div v-else-if="installedSubTab === 'coder'">
+          <div v-if="coderModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <CpuChipIcon class="w-16 h-16 mx-auto text-blue-400 dark:text-blue-600 mb-4" />
+            <p v-if="coderSearchQuery">Keine Coder Modelle gefunden für: "{{ coderSearchQuery }}"</p>
+            <p v-else>Keine Coder Modelle installiert</p>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="model in coderModels"
+              :key="model.name"
+              class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      {{ model.name }}
+                      <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
+                        ⚠️ Context zu groß
+                      </span>
+                    </h3>
+                    <span v-if="model.isDefault" class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full">
+                      ⭐ Standard
+                    </span>
+                    <span v-if="hasUpdate(model.name)" class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse">
+                      🔄 Update verfügbar
+                    </span>
+                  </div>
+
+                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div><strong>Größe:</strong> {{ model.size }}</div>
+                    <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
+                    <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <button
+                    @click="selectAndSetDefault(model.name)"
+                    :disabled="!canUseModel(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-purple-500 to-indigo-500
+                      hover:from-purple-600 hover:to-indigo-600
+                      disabled:from-gray-400 disabled:to-gray-500
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      disabled:cursor-not-allowed disabled:transform-none
+                      flex items-center justify-center gap-2
+                    "
+                    title="Model auswählen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Auswählen</span>
+                  </button>
+                  <button
+                    @click="confirmDelete(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-red-500 hover:bg-red-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="Löschen"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                    <span>Löschen</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vision Models Sub-Tab -->
+        <div v-else-if="installedSubTab === 'vision'">
+          <div v-if="visionModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <svg class="w-16 h-16 mx-auto text-green-400 dark:text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <p v-if="visionSearchQuery">Keine Vision Modelle gefunden für: "{{ visionSearchQuery }}"</p>
+            <p v-else>Keine Vision Modelle installiert</p>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="model in visionModels"
+              :key="model.name"
+              class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200/50 dark:border-green-700/50 transition-colors hover:bg-green-100 dark:hover:bg-green-900/30"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      {{ model.name }}
+                      <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
+                        ⚠️ Context zu groß
+                      </span>
+                    </h3>
+                    <span v-if="model.isDefault" class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full">
+                      ⭐ Standard
+                    </span>
+                    <span v-if="hasUpdate(model.name)" class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse">
+                      🔄 Update verfügbar
+                    </span>
+                  </div>
+
+                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div><strong>Größe:</strong> {{ model.size }}</div>
+                    <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
+                    <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <button
+                    @click="selectAndSetDefault(model.name)"
+                    :disabled="!canUseModel(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-purple-500 to-indigo-500
+                      hover:from-purple-600 hover:to-indigo-600
+                      disabled:from-gray-400 disabled:to-gray-500
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      disabled:cursor-not-allowed disabled:transform-none
+                      flex items-center justify-center gap-2
+                    "
+                    title="Model auswählen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Auswählen</span>
+                  </button>
+                  <button
+                    @click="confirmDelete(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-red-500 hover:bg-red-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="Löschen"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                    <span>Löschen</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- General Models Sub-Tab -->
+        <div v-else-if="installedSubTab === 'general'">
+          <div v-if="generalModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <svg class="w-16 h-16 mx-auto text-orange-400 dark:text-orange-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <p v-if="generalSearchQuery">Keine allgemeinen Modelle gefunden für: "{{ generalSearchQuery }}"</p>
+            <p v-else>Keine allgemeinen Modelle installiert</p>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="model in generalModels"
+              :key="model.name"
+              class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200/50 dark:border-orange-700/50 transition-colors hover:bg-orange-100 dark:hover:bg-orange-900/30"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      {{ model.name }}
+                      <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
+                        ⚠️ Context zu groß
+                      </span>
+                    </h3>
+                    <span v-if="model.isDefault" class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full">
+                      ⭐ Standard
+                    </span>
+                    <span v-if="hasUpdate(model.name)" class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse">
+                      🔄 Update verfügbar
+                    </span>
+                  </div>
+
+                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div><strong>Größe:</strong> {{ model.size }}</div>
+                    <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
+                    <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <button
+                    @click="selectAndSetDefault(model.name)"
+                    :disabled="!canUseModel(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-purple-500 to-indigo-500
+                      hover:from-purple-600 hover:to-indigo-600
+                      disabled:from-gray-400 disabled:to-gray-500
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      disabled:cursor-not-allowed disabled:transform-none
+                      flex items-center justify-center gap-2
+                    "
+                    title="Model auswählen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Auswählen</span>
+                  </button>
+                  <button
+                    @click="confirmDelete(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-red-500 hover:bg-red-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="Löschen"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                    <span>Löschen</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -232,7 +775,7 @@
       </div>
 
       <!-- Available Models List -->
-      <div v-if="activeTab === 'available'" class="flex-1 overflow-y-auto p-6">
+      <div v-else-if="activeTab === 'available'" class="flex-1 overflow-y-auto p-6">
         <div v-if="isLoadingLibrary" class="flex justify-center items-center py-8">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fleet-orange-500"></div>
           <span class="ml-3 text-gray-600 dark:text-gray-400">Lade alle Ollama-Modelle...</span>
@@ -617,12 +1160,20 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Create Custom Model Modal -->
+  <CreateCustomModelModal
+    :show="showCreateCustomModel"
+    @close="showCreateCustomModel = false"
+    @created="handleCustomModelCreated"
+  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {
   XMarkIcon,
+  SparklesIcon,
   CpuChipIcon,
   ServerIcon,
   GlobeAltIcon,
@@ -642,6 +1193,7 @@ import api from '../services/api'
 import { useChatStore } from '../stores/chatStore'
 import { useToast } from '../composables/useToast'
 import { canModelHandleContext, getIncompatibilityReason, getSafeContextLimit } from '../utils/modelContextWindows'
+import CreateCustomModelModal from './CreateCustomModelModal.vue'
 
 const { success } = useToast()
 
@@ -651,10 +1203,23 @@ const chatStore = useChatStore()
 const models = ref([])
 const isLoading = ref(false)
 
+// Custom Model Modal
+const showCreateCustomModel = ref(false)
+
 // Tabs
 const activeTab = ref('installed')
-const searchQuery = ref('')
+const installedSubTab = ref('custom')  // Sub-tab for installed models: custom, coder, vision, general
+const searchQuery = ref('')  // For available models
+const installedSearchQuery = ref('')  // For installed models
+const customSearchQuery = ref('')  // For custom models (in installed sub-tabs)
+const coderSearchQuery = ref('')  // For coder models
+const visionSearchQuery = ref('')  // For vision models
+const generalSearchQuery = ref('')  // For general models
 const selectedCategory = ref('Alle')
+
+// Custom Models
+const customModels = ref([])
+const isLoadingCustom = ref(false)
 
 // Categories
 const categories = ['Alle', 'Code', 'Chat', 'Vision', 'Embedding']
@@ -662,6 +1227,109 @@ const categories = ['Alle', 'Code', 'Chat', 'Vision', 'Embedding']
 // Real Ollama Library models (loaded from API)
 const availableModels = ref([])
 const isLoadingLibrary = ref(false)
+
+// Filtered installed models based on search
+const filteredInstalledModels = computed(() => {
+  if (!installedSearchQuery.value.trim()) {
+    return models.value
+  }
+  const query = installedSearchQuery.value.toLowerCase()
+  return models.value.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.description?.toLowerCase().includes(query)
+  )
+})
+
+// Filtered custom models based on search
+const filteredCustomModels = computed(() => {
+  if (!customSearchQuery.value.trim()) {
+    return customModels.value
+  }
+  const query = customSearchQuery.value.toLowerCase()
+  return customModels.value.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.description?.toLowerCase().includes(query) ||
+    m.baseModel?.toLowerCase().includes(query)
+  )
+})
+
+// Helper function: Determine model category
+function getModelCategory(modelName) {
+  const name = modelName.toLowerCase()
+
+  // Custom models (not in official list)
+  const knownOfficialModels = [
+    'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
+    'mistral', 'mixtral',
+    'phi', 'phi3',
+    'gemma', 'gemma2',
+    'codellama',
+    'qwen', 'qwen2', 'qwen2.5', 'qwen3',
+    'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
+    'deepseek-coder', 'deepseek-coder-v2',
+    'deepseek-r1',
+    'llava',
+    'moondream',
+    'bge-m3',
+    'nomic-embed-text',
+    'mxbai-embed-large',
+    'all-minilm'
+  ]
+
+  const baseName = name.split(':')[0]
+  const isOfficial = knownOfficialModels.includes(baseName)
+
+  if (!isOfficial) {
+    return 'custom'  // Eigene Modelle
+  }
+
+  // Vision models
+  if (name.includes('llava') || name.includes('moondream') || name.includes('vision') || name.includes('-vl')) {
+    return 'vision'
+  }
+
+  // Coder models
+  if (name.includes('coder') || name.includes('codellama') || name.includes('code')) {
+    return 'coder'
+  }
+
+  // General chat models (everything else)
+  return 'general'
+}
+
+// Category-specific filtered models
+const coderModels = computed(() => {
+  const filtered = models.value.filter(m => getModelCategory(m.name) === 'coder')
+  if (!coderSearchQuery.value.trim()) return filtered
+
+  const query = coderSearchQuery.value.toLowerCase()
+  return filtered.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.description?.toLowerCase().includes(query)
+  )
+})
+
+const visionModels = computed(() => {
+  const filtered = models.value.filter(m => getModelCategory(m.name) === 'vision')
+  if (!visionSearchQuery.value.trim()) return filtered
+
+  const query = visionSearchQuery.value.toLowerCase()
+  return filtered.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.description?.toLowerCase().includes(query)
+  )
+})
+
+const generalModels = computed(() => {
+  const filtered = models.value.filter(m => getModelCategory(m.name) === 'general')
+  if (!generalSearchQuery.value.trim()) return filtered
+
+  const query = generalSearchQuery.value.toLowerCase()
+  return filtered.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.description?.toLowerCase().includes(query)
+  )
+})
 
 // Filtered available models based on search only
 const filteredAvailableModels = computed(() => {
@@ -722,9 +1390,10 @@ const editingModel = ref({})
 const showDeleteDialog = ref(false)
 const modelToDelete = ref('')
 
-onMounted(() => {
-  loadModels()
-  loadLibraryModels()
+onMounted(async () => {
+  await loadModels()
+  await loadLibraryModels()  // Load library first to know which models are official
+  await loadCustomModels()   // Then detect custom models
 })
 
 async function loadModels() {
@@ -753,6 +1422,8 @@ async function loadLibraryModels() {
 
 async function refreshModels() {
   await loadModels()
+  await loadLibraryModels()
+  await loadCustomModels()
 }
 
 async function setAsDefault(modelName) {
@@ -770,6 +1441,30 @@ async function setAsDefault(modelName) {
     await chatStore.loadModels()
   } catch (error) {
     console.error('Failed to set default model:', error)
+  }
+}
+
+// Select model and automatically set as default
+async function selectAndSetDefault(modelName) {
+  try {
+    // Set as default in backend
+    await api.setDefaultModel(modelName)
+
+    // Activate in chatStore
+    chatStore.setSelectedModel(modelName)
+
+    // Show success message
+    success(`Modell "${modelName}" ausgewählt und als Standard gesetzt`)
+
+    // Reload to get backend confirmation
+    await loadModels()
+    await chatStore.loadModels()
+
+    // Close dialog automatically after selection
+    emit('close')
+  } catch (error) {
+    console.error('Failed to select and set default model:', error)
+    errorToast(`Fehler: ${error.message}`)
   }
 }
 
@@ -939,6 +1634,164 @@ function formatDate(dateString) {
   } catch (e) {
     return dateString
   }
+}
+
+/**
+ * Load custom models from database AND detect custom models from Ollama
+ */
+async function loadCustomModels() {
+  try {
+    isLoadingCustom.value = true
+
+    // Load custom models from database
+    const response = await fetch('/api/custom-models')
+    if (!response.ok) throw new Error('Failed to load custom models')
+    const dbCustomModels = await response.json()
+
+    // Whitelist of known official Ollama models (including older versions)
+    // This prevents false positives for legacy models no longer in the library
+    const knownOfficialModels = [
+      'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
+      'mistral', 'mixtral',
+      'phi', 'phi3',
+      'gemma', 'gemma2',
+      'codellama',
+      'qwen', 'qwen2', 'qwen2.5', 'qwen3',  // All qwen versions
+      'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
+      'deepseek-coder', 'deepseek-coder-v2',
+      'deepseek-r1',
+      'llava',
+      'moondream',
+      'bge-m3',
+      'nomic-embed-text',
+      'mxbai-embed-large',
+      'all-minilm'
+    ]
+
+    // Detect custom models from installed Ollama models
+    // A model is considered "custom" if:
+    // 1. It's not in the official Ollama library (availableModels), AND
+    // 2. It's not in the known official models whitelist, AND
+    // 3. It has a custom name format (e.g., "nova:latest", "mymodel:v1")
+    const detectedCustomModels = []
+
+    // Get list of official model base names from Ollama library
+    const officialModelNames = availableModels.value.map(m => {
+      // Extract base name without tag (e.g., "llama2" from "llama2:latest")
+      return m.name.split(':')[0]
+    })
+
+    // Combine library models with known official models
+    const allOfficialNames = [...new Set([...officialModelNames, ...knownOfficialModels])]
+
+    for (const installedModel of models.value) {
+      const baseName = installedModel.name.split(':')[0]
+
+      // Check if this model is in the official list or whitelist
+      const isOfficial = allOfficialNames.includes(baseName)
+
+      // Check if already in database custom models
+      const isInDatabase = dbCustomModels.some(dm => dm.name === installedModel.name)
+
+      if (!isOfficial && !isInDatabase) {
+        // This is a custom model not in our database
+        detectedCustomModels.push({
+          id: `detected-${installedModel.name}`,
+          name: installedModel.name,
+          baseModel: 'Unknown',
+          description: installedModel.description || 'Custom Model',
+          size: installedModel.size,
+          modifiedAt: installedModel.modifiedAt,
+          isDetected: true  // Flag to indicate it was auto-detected
+        })
+      }
+    }
+
+    // Combine database custom models with detected ones
+    customModels.value = [...dbCustomModels, ...detectedCustomModels]
+
+    console.log(`Loaded ${dbCustomModels.length} custom models from database and detected ${detectedCustomModels.length} additional custom models`)
+  } catch (error) {
+    console.error('Failed to load custom models:', error)
+  } finally {
+    isLoadingCustom.value = false
+  }
+}
+
+/**
+ * View custom model details
+ */
+function viewCustomModelDetails(model) {
+  // TODO: Open details modal with full modelfile info
+  console.log('View details:', model)
+}
+
+/**
+ * Delete custom model
+ */
+async function deleteCustomModel(id, name) {
+  if (!confirm(`Möchten Sie das Custom Model "${name}" wirklich löschen?`)) return
+
+  try {
+    let dbDeleted = false
+    let ollamaDeleted = false
+
+    // Check if this is a detected model (not in database)
+    const isDetected = typeof id === 'string' && id.startsWith('detected-')
+
+    if (!isDetected) {
+      // Delete from database
+      try {
+        const response = await fetch(`/api/custom-models/${id}`, {
+          method: 'DELETE'
+        })
+        if (response.ok) {
+          dbDeleted = true
+        }
+      } catch (e) {
+        console.error('Failed to delete from database:', e)
+      }
+    }
+
+    // Try to delete from Ollama (ignore error if model doesn't exist)
+    try {
+      await api.deleteModel(name)
+      ollamaDeleted = true
+    } catch (e) {
+      console.error('Failed to delete from Ollama (model might not exist):', e)
+      // Don't throw error - model might not exist in Ollama anymore
+    }
+
+    // Show appropriate success message
+    if (dbDeleted && ollamaDeleted) {
+      success(`Custom Model "${name}" vollständig gelöscht`)
+    } else if (dbDeleted) {
+      success(`Custom Model "${name}" aus Datenbank gelöscht (war nicht in Ollama vorhanden)`)
+    } else if (ollamaDeleted) {
+      success(`Custom Model "${name}" aus Ollama gelöscht`)
+    } else {
+      success(`Custom Model "${name}" entfernt`)
+    }
+
+    // Reload lists
+    loadModels()
+    loadCustomModels()
+  } catch (error) {
+    console.error('Failed to delete custom model:', error)
+    alert(`Fehler beim Löschen: ${error.message}`)
+  }
+}
+
+/**
+ * Handle custom model created event
+ */
+async function handleCustomModelCreated() {
+  success('Eigenes Modell erfolgreich erstellt!')
+  await loadModels() // Reload models list
+  await loadLibraryModels() // Reload library to ensure detection works
+  await loadCustomModels() // Reload custom models list (will detect the new model)
+  activeTab.value = 'installed' // Switch to installed tab
+  installedSubTab.value = 'custom' // Switch to custom sub-tab to show the new model
 }
 
 /**

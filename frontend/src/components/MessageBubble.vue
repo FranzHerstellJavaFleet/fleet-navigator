@@ -38,6 +38,12 @@
               <CpuChipIcon class="w-3 h-3" />
               {{ message.tokens }} tokens
             </span>
+            <!-- Model Name (only for AI messages) -->
+            <span v-if="!isUser" class="flex items-center gap-1">
+              •
+              <CpuChipIcon class="w-3 h-3" />
+              {{ message.modelName || chatStore.selectedModel || 'Unbekannt' }}
+            </span>
           </div>
         </div>
 
@@ -85,6 +91,7 @@ import {
   CheckIcon
 } from '@heroicons/vue/24/outline'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useChatStore } from '../stores/chatStore'
 import { useToast } from '../composables/useToast'
 
 const { success } = useToast()
@@ -97,6 +104,7 @@ const props = defineProps({
 })
 
 const settingsStore = useSettingsStore()
+const chatStore = useChatStore()
 const isUser = computed(() => props.message.role === 'USER')
 const copied = ref(false)
 

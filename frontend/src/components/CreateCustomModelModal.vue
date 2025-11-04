@@ -118,9 +118,34 @@
 
             <!-- System Prompt -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                System Prompt (Charakter/Persönlichkeit)
-              </label>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  System Prompt (Charakter/Persönlichkeit)
+                </label>
+                <button
+                  @click="triggerPromptFileInput"
+                  type="button"
+                  class="
+                    flex items-center gap-2 px-3 py-1.5 text-sm
+                    text-indigo-600 dark:text-indigo-400
+                    hover:bg-indigo-50 dark:hover:bg-indigo-900/20
+                    rounded-lg transition-all duration-200
+                    border border-indigo-300 dark:border-indigo-600
+                  "
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span>Aus Datei laden</span>
+                </button>
+                <input
+                  ref="promptFileInput"
+                  type="file"
+                  @change="handlePromptFileSelect"
+                  accept=".txt,.md"
+                  class="hidden"
+                />
+              </div>
               <textarea
                 v-model="systemPrompt"
                 rows="5"
@@ -137,7 +162,7 @@
                 "
               ></textarea>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Definiert die Persönlichkeit und das Verhalten des Modells
+                Definiert die Persönlichkeit und das Verhalten des Modells. Du kannst auch eine .txt oder .md Datei hochladen.
               </p>
             </div>
 
@@ -293,7 +318,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { XMarkIcon, SparklesIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
 import api from '../services/api'
-import { useToast } from 'vue-toastification'
+import { useToast } from '../composables/useToast'
 
 const props = defineProps({
   show: Boolean
@@ -301,7 +326,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'created'])
 
-const toast = useToast()
+const { success, error: errorToast } = useToast()
 
 // Form fields
 const modelName = ref('')
@@ -319,6 +344,7 @@ const isCreating = ref(false)
 const creationProgress = ref('')
 const creationProgressPercent = ref(0)
 const availableModels = ref([])
+const promptFileInput = ref(null)
 
 const canCreate = computed(() => {
   return modelName.value.trim() !== '' && baseModel.value.trim() !== ''
@@ -333,12 +359,18 @@ async function loadAvailableModels() {
     availableModels.value = await api.getAvailableModels()
   } catch (error) {
     console.error('Failed to load available models:', error)
-    toast.error('Fehler beim Laden der Modelle')
+    errorToast('Fehler beim Laden der Modelle')
   }
 }
 
 async function createModel() {
   if (!canCreate.value) return
+
+  // Additional validation before sending
+  if (!baseModel.value || baseModel.value.trim() === '') {
+    errorToast('Bitte wähle ein Basis-Modell aus!')
+    return
+  }
 
   isCreating.value = true
   creationProgress.value = 'Erstelle Modell...'
@@ -347,7 +379,7 @@ async function createModel() {
   try {
     const request = {
       name: modelName.value.trim(),
-      baseModel: baseModel.value,
+      baseModel: baseModel.value.trim(),
       description: description.value.trim() || null,
       systemPrompt: systemPrompt.value.trim() || null,
       temperature: temperature.value,
@@ -358,18 +390,25 @@ async function createModel() {
 
     await api.createCustomModel(request, (progress) => {
       creationProgress.value = progress
+      console.log('Creation progress:', progress)
 
-      // Simple progress estimation
-      if (progress.includes('Datenbank')) {
-        creationProgressPercent.value = 20
-      } else if (progress.includes('Ollama')) {
+      // Improved progress estimation based on backend messages
+      if (progress.includes('Generiere Modelfile')) {
+        creationProgressPercent.value = 10
+      } else if (progress.includes('Erstelle Modell in Ollama')) {
+        creationProgressPercent.value = 30
+      } else if (progress.includes('pulling') || progress.includes('download')) {
         creationProgressPercent.value = 50
-      } else if (progress.includes('erfolgreich')) {
+      } else if (progress.includes('writing') || progress.includes('verifying')) {
+        creationProgressPercent.value = 70
+      } else if (progress.includes('Speichere in Datenbank')) {
+        creationProgressPercent.value = 90
+      } else if (progress.includes('erfolgreich erstellt')) {
         creationProgressPercent.value = 100
       }
     })
 
-    toast.success('Custom Model erfolgreich erstellt!')
+    success('Custom Model erfolgreich erstellt!')
     emit('created')
     emit('close')
 
@@ -377,7 +416,7 @@ async function createModel() {
     resetForm()
   } catch (error) {
     console.error('Failed to create custom model:', error)
-    toast.error('Fehler beim Erstellen des Modells: ' + error.message)
+    errorToast('Fehler beim Erstellen des Modells: ' + error.message)
   } finally {
     isCreating.value = false
     creationProgress.value = ''
@@ -395,6 +434,47 @@ function resetForm() {
   topK.value = 40
   repeatPenalty.value = 1.1
   showAdvanced.value = false
+}
+
+// File upload functions
+function triggerPromptFileInput() {
+  promptFileInput.value?.click()
+}
+
+async function handlePromptFileSelect(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Validate file type
+  const validTypes = ['text/plain', 'text/markdown', 'application/octet-stream']
+  const validExtensions = ['.txt', '.md']
+  const isValidType = validTypes.includes(file.type) ||
+                      validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+
+  if (!isValidType) {
+    errorToast('Bitte wähle eine .txt oder .md Datei')
+    event.target.value = ''
+    return
+  }
+
+  // Validate file size (max 1MB for prompts)
+  if (file.size > 1024 * 1024) {
+    errorToast('Datei zu groß (max. 1MB)')
+    event.target.value = ''
+    return
+  }
+
+  try {
+    const text = await file.text()
+    systemPrompt.value = text
+    success(`System Prompt aus "${file.name}" geladen (${text.length} Zeichen)`)
+  } catch (error) {
+    console.error('Error reading file:', error)
+    errorToast('Fehler beim Lesen der Datei')
+  } finally {
+    // Reset input so same file can be selected again
+    event.target.value = ''
+  }
 }
 </script>
 

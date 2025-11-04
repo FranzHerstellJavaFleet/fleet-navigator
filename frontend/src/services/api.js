@@ -35,6 +35,11 @@ export default {
     return response.data
   },
 
+  async updateChatModel(chatId, modelName) {
+    const response = await api.patch(`/chat/${chatId}/model`, { model: modelName })
+    return response.data
+  },
+
   async deleteChat(chatId) {
     await api.delete(`/chat/${chatId}`)
   },
@@ -326,6 +331,33 @@ export default {
   async getOSAgentStatus() {
     const response = await api.get('/agents/os/status')
     return response
+  },
+
+  // ============================================================================
+  // USER SETTINGS
+  // ============================================================================
+
+  async getSelectedModel() {
+    try {
+      const response = await api.get('/settings/selected-model')
+      return response.data
+    } catch (error) {
+      if (error.response && error.response.status === 204) {
+        return null // No model saved yet
+      }
+      throw error
+    }
+  },
+
+  async saveSelectedModel(modelName) {
+    await api.post('/settings/selected-model', modelName, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  },
+
+  // DANGER ZONE: Reset selected application data
+  async resetSelectedData(selection) {
+    await api.post('/settings/reset-selective', selection)
   },
 
   // ============================================================================

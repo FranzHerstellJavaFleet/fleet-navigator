@@ -14,5 +14,6 @@ public class MessageDTO {
     private MessageRole role;
     private String content;
     private Integer tokens;
+    private String modelName;
     private LocalDateTime createdAt;
 }

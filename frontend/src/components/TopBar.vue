@@ -36,13 +36,30 @@
         <div class="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
 
         <!-- Current Chat Title -->
-        <div class="flex-1">
+        <div class="flex-1 flex items-center gap-4">
           <h2 v-if="chatStore.currentChat" class="text-lg font-semibold text-gray-800 dark:text-gray-100">
             {{ chatStore.currentChat.title }}
           </h2>
           <h2 v-else class="text-lg font-semibold text-gray-400 dark:text-gray-500">
             Wähle oder erstelle einen neuen Chat
           </h2>
+
+          <!-- Chat Stats (Tokens & Streaming) -->
+          <div v-if="chatStore.currentChat" class="flex items-center gap-3 text-xs">
+            <!-- Token Counter -->
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CpuChipIcon class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+              <span class="text-gray-600 dark:text-gray-400">Tokens:</span>
+              <span class="text-fleet-orange-500 font-semibold">{{ chatStore.currentChatTokens }}</span>
+            </div>
+
+            <!-- Streaming Status -->
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <BoltIcon v-if="chatStore.streamingEnabled" class="w-3.5 h-3.5 text-green-500" />
+              <DocumentTextIcon v-else class="w-3.5 h-3.5 text-gray-500" />
+              <span class="text-gray-600 dark:text-gray-400">{{ chatStore.streamingEnabled ? 'Streaming' : 'Normal' }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -50,19 +67,30 @@
       <div class="flex items-center space-x-2">
         <!-- Current Model Display -->
         <div class="flex items-center space-x-3 mr-2">
-          <!-- System Prompt Title -->
-          <div v-if="chatStore.systemPromptTitle" class="
-            flex items-center space-x-2 px-3 py-2
-            bg-gradient-to-br from-purple-100 to-purple-50
-            dark:from-purple-900/30 dark:to-purple-800/20
-            rounded-lg border border-purple-200 dark:border-purple-700/50
-            shadow-sm
-          ">
+          <!-- System Prompt Title (Clickable) - ALWAYS show, even when "Kein System-Prompt" -->
+          <button
+            @click="showSystemPrompt = !showSystemPrompt"
+            class="
+              flex items-center space-x-2 px-3 py-2
+              bg-gradient-to-br from-purple-100 to-purple-50
+              dark:from-purple-900/30 dark:to-purple-800/20
+              rounded-lg border border-purple-200 dark:border-purple-700/50
+              shadow-sm
+              hover:from-purple-200 hover:to-purple-100
+              dark:hover:from-purple-800/40 dark:hover:to-purple-700/30
+              hover:border-purple-300 dark:hover:border-purple-600/50
+              hover:shadow-md
+              transition-all duration-200
+              cursor-pointer
+              transform hover:scale-105 active:scale-95
+            "
+            title="System Prompt ändern"
+          >
             <ChatBubbleLeftRightIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span class="text-sm font-medium text-purple-900 dark:text-purple-100">
-              {{ chatStore.systemPromptTitle }}
+              {{ chatStore.systemPromptTitle || 'Kein System-Prompt' }}
             </span>
-          </div>
+          </button>
 
           <!-- Model (Clickable - Opens Model Manager) -->
           <button
@@ -85,7 +113,7 @@
           >
             <CpuChipIcon class="w-4 h-4 text-gray-600 dark:text-gray-400" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ chatStore.selectedModel }}
+              {{ chatStore.selectedModel || 'Modell wird geladen...' }}
             </span>
             <span class="text-xs">⭐</span>
           </button>
@@ -99,16 +127,6 @@
         >
           <SunIcon v-if="darkMode" class="w-5 h-5" />
           <MoonIcon v-else class="w-5 h-5" />
-        </ActionButton>
-
-        <!-- System Prompt Button -->
-        <ActionButton
-          @click="showSystemPrompt = !showSystemPrompt"
-          :active="showSystemPrompt"
-          title="System Prompt bearbeiten"
-          color="orange"
-        >
-          <ChatBubbleLeftRightIcon class="w-5 h-5" />
         </ActionButton>
 
         <!-- DISTRIBUTED AGENTS -->
@@ -142,24 +160,6 @@
           <CommandLineIcon class="w-5 h-5" />
         </ActionButton>
 
-        <!-- Model Manager -->
-        <ActionButton
-          @click="$emit('toggle-model-manager')"
-          title="Modelle verwalten"
-          color="orange"
-        >
-          <WrenchScrewdriverIcon class="w-5 h-5" />
-        </ActionButton>
-
-        <!-- System Monitor -->
-        <ActionButton
-          @click="$emit('toggle-monitor')"
-          title="System Monitor anzeigen"
-          color="orange"
-        >
-          <ChartBarIcon class="w-5 h-5" />
-        </ActionButton>
-
         <!-- Settings -->
         <ActionButton
           @click="$emit('toggle-settings')"
@@ -168,6 +168,39 @@
         >
           <Cog6ToothIcon class="w-5 h-5" />
         </ActionButton>
+
+        <!-- System Stats (CPU & Temp) - Clickable - GANZ RECHTS -->
+        <button
+          @click="$emit('toggle-monitor')"
+          class="
+            flex items-center space-x-2 px-3 py-2
+            bg-gradient-to-br from-gray-100 to-gray-50
+            dark:from-gray-700/50 dark:to-gray-800/50
+            rounded-lg border border-gray-200 dark:border-gray-700
+            shadow-sm
+            hover:from-gray-200 hover:to-gray-100
+            dark:hover:from-gray-600/50 dark:hover:to-gray-700/50
+            hover:border-gray-300 dark:hover:border-gray-600
+            hover:shadow-md
+            transition-all duration-200
+            cursor-pointer
+            transform hover:scale-105 active:scale-95
+          "
+          title="System Monitor öffnen"
+        >
+          <BoltIcon class="w-4 h-4 text-amber-500 dark:text-amber-400" />
+          <span class="text-sm font-medium text-gray-900 dark:text-white">
+            CPU: {{ cpuUsage }}%
+          </span>
+          <div class="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+          <FireIcon
+            class="w-4 h-4"
+            :class="temperatureColor"
+          />
+          <span class="text-sm font-medium text-gray-900 dark:text-white">
+            {{ temperature }}°C
+          </span>
+        </button>
       </div>
     </div>
 
@@ -370,7 +403,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
   SunIcon,
   MoonIcon,
@@ -385,8 +418,11 @@ import {
   TrashIcon,
   BookmarkIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  BoltIcon,
+  FireIcon
 } from '@heroicons/vue/24/outline'
+import { BoltIcon as BoltIconSolid } from '@heroicons/vue/24/solid'
 import { useChatStore } from '../stores/chatStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import api from '../services/api'
@@ -406,9 +442,49 @@ const showSaveTemplateModal = ref(false)
 const newTemplateName = ref('')
 const promptTemplates = ref([])
 
+// System monitoring - direkt aus chatStore.systemStatus (gleiche Werte wie SystemMonitor!)
+const cpuUsage = computed(() => {
+  const status = chatStore.systemStatus
+  if (!status || !status.cpuUsage) return 0
+  return Math.round(status.cpuUsage)
+})
+
+const temperature = computed(() => {
+  const status = chatStore.systemStatus
+  if (!status) return 0
+
+  // GPU Temperatur bevorzugen
+  if (status.gpuTemperature && status.gpuTemperature > 0) {
+    return Math.round(status.gpuTemperature)
+  }
+
+  // Fallback: geschätzte Temperatur basierend auf CPU
+  return Math.round(35 + (cpuUsage.value * 0.5))
+})
+
+// Temperature color based on value
+const temperatureColor = computed(() => {
+  const temp = temperature.value
+  if (temp < 60) return 'text-green-500 dark:text-green-400'
+  if (temp < 75) return 'text-yellow-500 dark:text-yellow-400'
+  if (temp < 85) return 'text-orange-500 dark:text-orange-400'
+  return 'text-red-500 dark:text-red-400'
+})
+
 onMounted(async () => {
   await loadTemplates()
+
+  // Load Karla prompt if only title is set but no content
+  if (chatStore.systemPromptTitle === 'Karla' && !chatStore.systemPrompt) {
+    const karlaTemplate = promptTemplates.value.find(t => t.name === 'Karla')
+    if (karlaTemplate) {
+      chatStore.systemPrompt = karlaTemplate.content
+      console.log('✅ Auto-loaded Karla prompt')
+    }
+  }
 })
+
+// Keine separaten System Stats mehr - chatStore hält die Daten zentral!
 
 const loadTemplates = async () => {
   try {
@@ -422,6 +498,8 @@ const loadTemplates = async () => {
 const loadTemplate = async (template) => {
   chatStore.systemPrompt = template.content
   chatStore.systemPromptTitle = template.name
+  // Auto-close after selection
+  showSystemPrompt.value = false
 }
 
 const deleteTemplate = async (id) => {
@@ -453,7 +531,9 @@ const saveTemplate = async () => {
 
 const clearSystemPrompt = () => {
   chatStore.systemPrompt = ''
-  chatStore.systemPromptTitle = null
+  chatStore.systemPromptTitle = 'Kein System-Prompt'
+  // Auto-close after selection
+  showSystemPrompt.value = false
 }
 </script>
 

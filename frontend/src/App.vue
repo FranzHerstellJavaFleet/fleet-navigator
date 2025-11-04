@@ -123,11 +123,14 @@ const projectChats = computed(() => {
 // Dark Mode IMMER als Default (localStorage wird ignoriert beim ersten Mal)
 const darkMode = ref(true)
 
-onMounted(() => {
+onMounted(async () => {
   // Setze Dark Mode immer auf true beim ersten Laden
   // (überschreibt alte localStorage-Werte)
   darkMode.value = true
   localStorage.setItem('darkMode', 'true')
+
+  // Load models and saved model from database on app start
+  await chatStore.loadModels()
 })
 
 // Toggle function
