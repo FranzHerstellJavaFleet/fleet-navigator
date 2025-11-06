@@ -9,15 +9,15 @@
     z-40
     pt-16
   ">
-    <!-- Header with Glassmorphism -->
+    <!-- Header -->
     <div class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 p-4 mb-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="p-2 rounded-lg bg-gradient-to-br from-fleet-orange-500 to-orange-600 shadow-lg">
-            <ChartBarIcon class="w-5 h-5 text-white" />
+            <ServerIcon class="w-5 h-5 text-white" />
           </div>
           <h3 class="text-lg font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            System Monitor
+            Fleet Officers
           </h3>
         </div>
         <button
@@ -36,394 +36,257 @@
     </div>
 
     <div class="px-4 pb-4 space-y-4">
-      <!-- Ollama Status -->
-      <Transition name="fade" mode="out-in">
+      <!-- No Officers Connected -->
+      <div v-if="officers.length === 0" class="
+        bg-gradient-to-br from-gray-800/30 to-gray-900/30
+        backdrop-blur-sm
+        p-6 rounded-xl
+        border border-gray-700/30 border-dashed
+        text-center
+      ">
+        <ServerIcon class="w-12 h-12 text-gray-600 mx-auto mb-3" />
+        <div class="text-sm font-medium text-gray-400 mb-1">Keine Fleet Officers verbunden</div>
+        <div class="text-xs text-gray-500">
+          Starten Sie einen Fleet Officer um Hardware-Daten zu empfangen
+        </div>
+      </div>
+
+      <!-- Officer Cards -->
+      <div v-for="officer in officers" :key="officer.officerId" class="space-y-4">
+        <!-- Officer Header -->
         <div class="
-          bg-gradient-to-br from-gray-800/50 to-gray-900/50
+          bg-gradient-to-br from-fleet-orange-500/20 to-orange-600/20
           backdrop-blur-sm
           p-4 rounded-xl
-          border border-gray-700/50
+          border border-fleet-orange-500/30
           shadow-lg
-          hover:shadow-xl
-          transition-all duration-200
         ">
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <ServerIcon class="w-5 h-5 text-fleet-orange-400" />
-              <span class="text-sm font-medium text-gray-300">Ollama Status</span>
+              <span class="text-sm font-bold text-white">{{ officer.name }}</span>
             </div>
-            <Transition name="badge" mode="out-in">
-              <span
-                :key="status.ollamaAvailable"
-                class="
-                  px-3 py-1 rounded-full text-xs font-semibold
-                  shadow-lg
-                  transition-all duration-300
-                  flex items-center gap-1.5
-                "
-                :class="status.ollamaAvailable
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                  : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'"
-              >
-                <component
-                  :is="status.ollamaAvailable ? CheckCircleIcon : XCircleIcon"
-                  class="w-3 h-3"
-                />
-                {{ status.ollamaAvailable ? 'Online' : 'Offline' }}
+            <span class="
+              px-2.5 py-1 rounded-full text-xs font-semibold
+              flex items-center gap-1.5
+            " :class="officer.status === 'ONLINE'
+              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+              : 'bg-red-500/20 text-red-400 border border-red-500/30'">
+              <component :is="officer.status === 'ONLINE' ? CheckCircleIcon : XCircleIcon" class="w-3 h-3" />
+              {{ officer.status }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-400">{{ officer.description }}</p>
+          <p class="text-xs text-gray-500 mt-1">ID: {{ officer.officerId }}</p>
+        </div>
+
+        <!-- Hardware Stats -->
+        <div v-if="officerStats[officer.officerId]" class="space-y-3">
+          <!-- System Info -->
+          <div class="
+            bg-gradient-to-br from-gray-800/50 to-gray-900/50
+            backdrop-blur-sm
+            p-4 rounded-xl
+            border border-gray-700/50
+            shadow-lg
+          ">
+            <div class="flex items-center gap-2 mb-3">
+              <ComputerDesktopIcon class="w-5 h-5 text-fleet-orange-400" />
+              <span class="text-sm font-medium text-gray-300">System</span>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Hostname</span>
+                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].system?.hostname || 'N/A' }}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">OS</span>
+                <span class="text-gray-200 font-medium">
+                  {{ officerStats[officer.officerId].system?.platform || 'N/A' }}
+                  {{ officerStats[officer.officerId].system?.platform_version || '' }}
+                </span>
+              </div>
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Kernel</span>
+                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].system?.kernel_version || 'N/A' }}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Uptime</span>
+                <span class="text-gray-200 font-medium">{{ formatUptime(officerStats[officer.officerId].system?.uptime) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CPU Overview -->
+          <div class="
+            bg-gradient-to-br from-gray-800/50 to-gray-900/50
+            backdrop-blur-sm
+            p-4 rounded-xl
+            border border-gray-700/50
+            shadow-lg
+          ">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <CpuChipIcon class="w-5 h-5 text-fleet-orange-400" />
+                <span class="text-sm font-medium text-gray-300">CPU</span>
+              </div>
+              <span class="text-sm font-bold text-fleet-orange-500 bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
+                {{ officerStats[officer.officerId].cpu?.usage_percent?.toFixed(1) || '0.0' }}%
               </span>
-            </Transition>
-          </div>
-          <Transition name="fade">
-            <div v-if="status.ollamaVersion" class="flex items-center gap-2 text-xs text-gray-400">
-              <InformationCircleIcon class="w-4 h-4" />
-              <span>Version: {{ status.ollamaVersion }}</span>
             </div>
-          </Transition>
-        </div>
-      </Transition>
-
-      <!-- Memory Usage -->
-      <div class="
-        bg-gradient-to-br from-gray-800/50 to-gray-900/50
-        backdrop-blur-sm
-        p-4 rounded-xl
-        border border-gray-700/50
-        shadow-lg
-        hover:shadow-xl
-        transition-all duration-200
-      ">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <CircleStackIcon class="w-5 h-5 text-fleet-orange-400" />
-            <span class="text-sm font-medium text-gray-300">Memory Usage</span>
-          </div>
-          <span class="text-sm font-bold text-fleet-orange-500 bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-            {{ chatStore.memoryUsagePercent }}%
-          </span>
-        </div>
-        <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden">
-          <div
-            class="
-              bg-gradient-to-r from-fleet-orange-500 to-orange-600
-              h-2.5 rounded-full
-              transition-all duration-500 ease-out
-              relative
-            "
-            :style="{ width: chatStore.memoryUsagePercent + '%' }"
-          >
-            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-          </div>
-        </div>
-        <div class="mt-2 flex items-center gap-1.5 text-xs text-gray-400">
-          <InformationCircleIcon class="w-3.5 h-3.5" />
-          <span>{{ formatBytes(status.usedMemory) }} / {{ formatBytes(status.totalMemory) }}</span>
-        </div>
-      </div>
-
-      <!-- Hardware Info -->
-      <div class="
-        bg-gradient-to-br from-gray-800/50 to-gray-900/50
-        backdrop-blur-sm
-        p-4 rounded-xl
-        border border-gray-700/50
-        shadow-lg
-        hover:shadow-xl
-        transition-all duration-200
-      ">
-        <div class="flex items-center gap-2 mb-3">
-          <CpuChipIcon class="w-5 h-5 text-fleet-orange-400" />
-          <span class="text-sm font-medium text-gray-300">Hardware</span>
-        </div>
-        <div class="space-y-2.5 text-xs">
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400">CPU</span>
-            <span class="text-gray-200 font-medium">{{ status.cpuModel || 'Unknown' }}</span>
-          </div>
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400">Frequenz</span>
-            <span class="text-gray-200 font-medium">{{ status.cpuFrequency || 'Unknown' }}</span>
-          </div>
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400">Kerne</span>
-            <span class="text-gray-200 font-medium">{{ status.cpuCores || 'Unknown' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- CPU Usage -->
-      <div class="
-        bg-gradient-to-br from-gray-800/50 to-gray-900/50
-        backdrop-blur-sm
-        p-4 rounded-xl
-        border border-gray-700/50
-        shadow-lg
-        hover:shadow-xl
-        transition-all duration-200
-      ">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <BoltIcon class="w-5 h-5 text-fleet-orange-400" />
-            <span class="text-sm font-medium text-gray-300">CPU Load (System)</span>
-          </div>
-          <span class="text-sm font-bold text-fleet-orange-500 bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-            {{ status.cpuUsage ? status.cpuUsage.toFixed(1) : '0.0' }}%
-          </span>
-        </div>
-        <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden">
-          <div
-            class="
-              bg-gradient-to-r from-fleet-orange-500 to-orange-600
-              h-2.5 rounded-full
-              transition-all duration-500 ease-out
-              relative
-            "
-            :style="{ width: Math.min(status.cpuUsage, 100) + '%' }"
-          >
-            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-          </div>
-        </div>
-
-        <!-- Process CPU -->
-        <div class="mt-4 pt-3 border-t border-gray-700/50">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-400 flex items-center gap-1.5">
-              <RocketLaunchIcon class="w-3.5 h-3.5" />
-              Fleet Navigator Prozess
-            </span>
-            <span class="text-xs font-bold text-fleet-orange-400 bg-fleet-orange-400/10 px-2 py-0.5 rounded">
-              {{ status.processCpuUsage ? status.processCpuUsage.toFixed(1) : '0.0' }}%
-            </span>
-          </div>
-          <div class="w-full bg-gray-700/50 rounded-full h-2 shadow-inner overflow-hidden">
-            <div
-              class="
-                bg-gradient-to-r from-fleet-orange-400 to-orange-500
-                h-2 rounded-full
-                transition-all duration-500 ease-out
-              "
-              :style="{ width: Math.min(status.processCpuUsage, 100) + '%' }"
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- System Memory (Physical RAM) -->
-      <Transition name="fade">
-        <div v-if="status.systemTotalMemory" class="
-          bg-gradient-to-br from-gray-800/50 to-gray-900/50
-          backdrop-blur-sm
-          p-4 rounded-xl
-          border border-gray-700/50
-          shadow-lg
-          hover:shadow-xl
-          transition-all duration-200
-        ">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <CircleStackIcon class="w-5 h-5 text-blue-400" />
-              <span class="text-sm font-medium text-gray-300">System RAM</span>
-            </div>
-            <span class="text-sm font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-lg">
-              {{ systemMemoryUsagePercent }}%
-            </span>
-          </div>
-          <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden">
-            <div
-              class="
-                bg-gradient-to-r from-blue-500 to-cyan-500
-                h-2.5 rounded-full
-                transition-all duration-500 ease-out
-              "
-              :style="{ width: systemMemoryUsagePercent + '%' }"
-            ></div>
-          </div>
-          <div class="mt-2 flex items-center gap-1.5 text-xs text-gray-400">
-            <InformationCircleIcon class="w-3.5 h-3.5" />
-            <span>{{ formatBytes(status.systemTotalMemory - status.systemFreeMemory) }} / {{ formatBytes(status.systemTotalMemory) }}</span>
-          </div>
-        </div>
-      </Transition>
-
-      <!-- GPU Info -->
-      <Transition name="fade" mode="out-in">
-        <div v-if="status.gpuName && status.gpuName !== 'No GPU detected' && status.gpuName !== 'Unknown'" class="
-          bg-gradient-to-br from-purple-900/20 to-pink-900/20
-          backdrop-blur-sm
-          p-4 rounded-xl
-          border border-purple-700/30
-          shadow-lg
-          hover:shadow-xl hover:shadow-purple-500/10
-          transition-all duration-200
-        ">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-              <CpuChipIcon class="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <div class="text-sm font-medium text-gray-200">GPU</div>
-              <div class="text-xs text-gray-400 truncate max-w-[220px]">
-                {{ status.gpuName }}
+            <div class="space-y-2 text-xs mb-3">
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Modell</span>
+                <span class="text-gray-200 font-medium text-right">{{ getCpuModel(officerStats[officer.officerId].cpu?.model) }}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Kerne</span>
+                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].cpu?.cores || 0 }}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
+                <span class="text-gray-400">Takt</span>
+                <span class="text-gray-200 font-medium">{{ (officerStats[officer.officerId].cpu?.mhz || 0).toFixed(0) }} MHz</span>
               </div>
             </div>
-          </div>
 
-          <!-- GPU Utilization -->
-          <div class="space-y-3">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-400 flex items-center gap-1.5">
-                  <BoltIcon class="w-3.5 h-3.5" />
-                  GPU Auslastung
-                </span>
-                <span class="text-xs font-bold text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
-                  {{ status.gpuUtilization ? status.gpuUtilization.toFixed(1) : '0.0' }}%
-                </span>
+            <!-- CPU Cores -->
+            <div class="mt-3 pt-3 border-t border-gray-700/50">
+              <div class="text-xs font-medium text-gray-400 mb-2 flex items-center gap-1.5">
+                <BoltIcon class="w-3.5 h-3.5" />
+                Kern-Auslastung
               </div>
-              <div class="w-full bg-gray-700/50 rounded-full h-2 shadow-inner overflow-hidden">
+              <div class="space-y-1.5">
                 <div
-                  class="
-                    bg-gradient-to-r from-purple-500 to-pink-500
-                    h-2 rounded-full
-                    transition-all duration-500 ease-out
-                  "
-                  :style="{ width: Math.min(status.gpuUtilization || 0, 100) + '%' }"
-                ></div>
+                  v-for="(usage, index) in officerStats[officer.officerId].cpu?.per_core || []"
+                  :key="index"
+                  class="flex items-center gap-2"
+                >
+                  <span class="text-xs text-gray-400 w-12">Core {{ index }}</span>
+                  <div class="flex-1 bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                    <div
+                      class="h-2 rounded-full transition-all duration-300"
+                      :class="getCpuBarColor(usage)"
+                      :style="{ width: Math.min(usage, 100) + '%' }"
+                    ></div>
+                  </div>
+                  <span class="text-xs font-medium w-12 text-right" :class="getCpuTextColor(usage)">
+                    {{ usage.toFixed(1) }}%
+                  </span>
+                  <span class="text-xs w-10 text-right" :class="getTempTextColor(getCoreTemp(officer.officerId, index))">
+                    {{ getCoreTemp(officer.officerId, index) }}°C
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
 
-            <!-- VRAM -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-400 flex items-center gap-1.5">
-                  <CircleStackIcon class="w-3.5 h-3.5" />
-                  VRAM
-                </span>
-                <span class="text-xs font-bold text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
-                  {{ gpuMemoryUsagePercent }}%
-                </span>
+          <!-- Memory -->
+          <div class="
+            bg-gradient-to-br from-gray-800/50 to-gray-900/50
+            backdrop-blur-sm
+            p-4 rounded-xl
+            border border-gray-700/50
+            shadow-lg
+          ">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <CircleStackIcon class="w-5 h-5 text-blue-400" />
+                <span class="text-sm font-medium text-gray-300">RAM</span>
               </div>
-              <div class="w-full bg-gray-700/50 rounded-full h-2 shadow-inner overflow-hidden">
-                <div
-                  class="
-                    bg-gradient-to-r from-purple-500 to-pink-500
-                    h-2 rounded-full
-                    transition-all duration-500 ease-out
-                  "
-                  :style="{ width: gpuMemoryUsagePercent + '%' }"
-                ></div>
+              <span class="text-sm font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-lg">
+                {{ officerStats[officer.officerId].memory?.used_percent?.toFixed(1) || '0.0' }}%
+              </span>
+            </div>
+            <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden mb-2">
+              <div
+                class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2.5 rounded-full transition-all duration-500"
+                :style="{ width: Math.min(officerStats[officer.officerId].memory?.used_percent || 0, 100) + '%' }"
+              ></div>
+            </div>
+            <div class="text-xs text-gray-400">
+              {{ formatBytes(officerStats[officer.officerId].memory?.used) }} /
+              {{ formatBytes(officerStats[officer.officerId].memory?.total) }}
+            </div>
+          </div>
+
+          <!-- Disk -->
+          <div
+            v-for="disk in officerStats[officer.officerId].disk || []"
+            :key="disk.mount_point"
+            class="
+              bg-gradient-to-br from-gray-800/50 to-gray-900/50
+              backdrop-blur-sm
+              p-4 rounded-xl
+              border border-gray-700/50
+              shadow-lg
+            "
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <CircleStackIcon class="w-5 h-5 text-purple-400" />
+                <span class="text-sm font-medium text-gray-300">Disk {{ disk.mount_point }}</span>
               </div>
-              <div class="mt-1 flex items-center gap-1.5 text-xs text-gray-400">
-                <InformationCircleIcon class="w-3.5 h-3.5" />
-                <span>{{ formatBytes(status.gpuMemoryUsed) }} / {{ formatBytes(status.gpuMemoryTotal) }}</span>
+              <span class="text-sm font-bold text-purple-500 bg-purple-500/10 px-2.5 py-1 rounded-lg">
+                {{ disk.used_percent?.toFixed(1) || '0.0' }}%
+              </span>
+            </div>
+            <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden mb-2">
+              <div
+                class="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                :style="{ width: Math.min(disk.used_percent || 0, 100) + '%' }"
+              ></div>
+            </div>
+            <div class="space-y-1 text-xs text-gray-400">
+              <div>{{ formatBytes(disk.used) }} / {{ formatBytes(disk.total) }}</div>
+              <div class="flex justify-between">
+                <span>{{ disk.device }}</span>
+                <span>{{ disk.fs_type }}</span>
               </div>
             </div>
+          </div>
 
-            <!-- GPU Temperature -->
-            <Transition name="fade">
-              <div v-if="status.gpuTemperature && status.gpuTemperature > 0" class="
-                flex items-center justify-between p-2 rounded-lg
-                bg-gray-900/30 border border-gray-700/30
-              ">
-                <span class="text-xs text-gray-400 flex items-center gap-1.5">
-                  <FireIcon class="w-3.5 h-3.5" />
-                  Temperatur
-                </span>
-                <span class="text-xs font-bold px-2 py-0.5 rounded" :class="[
-                  getTemperatureColor(status.gpuTemperature),
-                  'bg-opacity-10'
-                ]">
-                  {{ status.gpuTemperature.toFixed(0) }}°C
-                </span>
+          <!-- Temperature -->
+          <div
+            v-if="getCpuPackageTemp(officer.officerId)"
+            class="
+              bg-gradient-to-br from-gray-800/50 to-gray-900/50
+              backdrop-blur-sm
+              p-4 rounded-xl
+              border border-gray-700/50
+              shadow-lg
+            "
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <FireIcon class="w-5 h-5 text-orange-400" />
+                <span class="text-sm font-medium text-gray-300">CPU Package Temp</span>
               </div>
-            </Transition>
+              <span
+                class="text-sm font-bold px-2.5 py-1 rounded-lg"
+                :class="getTempBadgeColor(getCpuPackageTemp(officer.officerId))"
+              >
+                {{ getCpuPackageTemp(officer.officerId) }}°C
+              </span>
+            </div>
           </div>
         </div>
 
-        <!-- No GPU detected -->
+        <!-- Loading Stats -->
         <div v-else class="
-          bg-gradient-to-br from-gray-800/30 to-gray-900/30
-          backdrop-blur-sm
-          p-4 rounded-xl
-          border border-gray-700/30 border-dashed
-          text-center
-        ">
-          <CpuChipIcon class="w-8 h-8 text-gray-600 mx-auto mb-2" />
-          <div class="text-sm font-medium text-gray-400 mb-1">GPU / VRAM</div>
-          <div class="text-xs text-gray-500 italic">
-            Keine GPU erkannt
-          </div>
-        </div>
-      </Transition>
-
-      <!-- OS Info -->
-      <Transition name="fade">
-        <div v-if="status.osName" class="
           bg-gradient-to-br from-gray-800/50 to-gray-900/50
           backdrop-blur-sm
           p-4 rounded-xl
           border border-gray-700/50
-          shadow-lg
-          hover:shadow-xl
-          transition-all duration-200
+          text-center text-gray-400 text-sm
         ">
-          <div class="flex items-center gap-2 mb-2">
-            <ComputerDesktopIcon class="w-5 h-5 text-fleet-orange-400" />
-            <span class="text-sm font-medium text-gray-300">Betriebssystem</span>
-          </div>
-          <div class="text-xs text-gray-200 font-medium p-2 rounded-lg bg-gray-900/30">
-            {{ status.osName }} {{ status.osVersion }}
-          </div>
-        </div>
-      </Transition>
-
-      <!-- Stats -->
-      <div class="
-        bg-gradient-to-br from-gray-800/50 to-gray-900/50
-        backdrop-blur-sm
-        p-4 rounded-xl
-        border border-gray-700/50
-        shadow-lg
-        hover:shadow-xl
-        transition-all duration-200
-      ">
-        <div class="flex items-center gap-2 mb-4">
-          <ChartBarSquareIcon class="w-5 h-5 text-fleet-orange-400" />
-          <h4 class="text-sm font-semibold text-gray-200">Session Stats</h4>
-        </div>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400 flex items-center gap-2">
-              <CpuChipIcon class="w-4 h-4" />
-              Total Tokens
-            </span>
-            <span class="text-fleet-orange-500 font-bold bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-              {{ formatNumber(chatStore.globalStats.totalTokens) }}
-            </span>
-          </div>
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400 flex items-center gap-2">
-              <ChatBubbleLeftRightIcon class="w-4 h-4" />
-              Messages
-            </span>
-            <span class="text-fleet-orange-500 font-bold bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-              {{ chatStore.globalStats.totalMessages }}
-            </span>
-          </div>
-          <div class="flex justify-between items-center p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors">
-            <span class="text-gray-400 flex items-center gap-2">
-              <FolderIcon class="w-4 h-4" />
-              Chats
-            </span>
-            <span class="text-fleet-orange-500 font-bold bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-              {{ chatStore.globalStats.chatCount }}
-            </span>
-          </div>
+          <ArrowPathIcon class="w-6 h-6 mx-auto mb-2 animate-spin" />
+          Lade Hardware-Daten...
         </div>
       </div>
 
       <!-- Refresh Button -->
       <button
-        @click="refreshStatus"
+        @click="refreshAllData"
         :disabled="isRefreshing"
         class="
           w-full px-4 py-3 rounded-xl
@@ -437,10 +300,7 @@
           flex items-center justify-center gap-2
         "
       >
-        <ArrowPathIcon
-          class="w-5 h-5"
-          :class="{ 'animate-spin': isRefreshing }"
-        />
+        <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isRefreshing }" />
         <span>{{ isRefreshing ? 'Aktualisiere...' : 'Aktualisieren' }}</span>
       </button>
     </div>
@@ -448,75 +308,69 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import {
   XMarkIcon,
-  ChartBarIcon,
   ServerIcon,
-  CircleStackIcon,
-  CpuChipIcon,
-  BoltIcon,
-  InformationCircleIcon,
   CheckCircleIcon,
   XCircleIcon,
-  RocketLaunchIcon,
+  ArrowPathIcon,
+  CpuChipIcon,
+  CircleStackIcon,
+  BoltIcon,
   FireIcon,
-  ComputerDesktopIcon,
-  ChartBarSquareIcon,
-  ChatBubbleLeftRightIcon,
-  FolderIcon,
-  ArrowPathIcon
+  ComputerDesktopIcon
 } from '@heroicons/vue/24/outline'
-import { useChatStore } from '../stores/chatStore'
+import axios from 'axios'
 
 defineEmits(['close'])
 
-const chatStore = useChatStore()
-const status = ref(chatStore.systemStatus)
+const officers = ref([])
+const officerStats = ref({})
 const isRefreshing = ref(false)
-
 let intervalId = null
 
-// Calculate system memory usage percentage
-const systemMemoryUsagePercent = computed(() => {
-  if (!status.value.systemTotalMemory || !status.value.systemFreeMemory) {
-    return 0
-  }
-  const used = status.value.systemTotalMemory - status.value.systemFreeMemory
-  return Math.round((used / status.value.systemTotalMemory) * 100)
-})
-
-// Calculate GPU memory usage percentage
-const gpuMemoryUsagePercent = computed(() => {
-  if (!status.value.gpuMemoryTotal || !status.value.gpuMemoryUsed) {
-    return 0
-  }
-  return Math.round((status.value.gpuMemoryUsed / status.value.gpuMemoryTotal) * 100)
-})
-
-// Get temperature color based on value
-function getTemperatureColor(temp) {
-  if (temp < 60) return 'text-green-400 bg-green-500/10'
-  if (temp < 75) return 'text-yellow-400 bg-yellow-500/10'
-  if (temp < 85) return 'text-orange-400 bg-orange-500/10'
-  return 'text-red-400 bg-red-500/10'
-}
-
 onMounted(async () => {
-  await refreshStatus()
-  // Auto-refresh every 10 seconds
-  intervalId = setInterval(refreshStatus, 10000)
+  await loadOfficers()
+  await loadAllStats()
+  // Auto-refresh every 5 seconds
+  intervalId = setInterval(async () => {
+    await loadOfficers()
+    await loadAllStats()
+  }, 5000)
 })
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
 })
 
-async function refreshStatus() {
+async function loadOfficers() {
+  try {
+    const response = await axios.get('/api/fleet-officer/officers')
+    officers.value = response.data
+  } catch (error) {
+    console.error('Failed to load officers:', error)
+  }
+}
+
+async function loadAllStats() {
+  for (const officer of officers.value) {
+    if (officer.status === 'ONLINE') {
+      try {
+        const response = await axios.get(`/api/fleet-officer/officers/${officer.officerId}/stats`)
+        officerStats.value[officer.officerId] = response.data
+      } catch (error) {
+        console.error(`Failed to load stats for ${officer.officerId}:`, error)
+      }
+    }
+  }
+}
+
+async function refreshAllData() {
   isRefreshing.value = true
   try {
-    await chatStore.loadSystemStatus()
-    status.value = chatStore.systemStatus
+    await loadOfficers()
+    await loadAllStats()
   } finally {
     setTimeout(() => {
       isRefreshing.value = false
@@ -532,15 +386,62 @@ function formatBytes(bytes) {
   return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB'
 }
 
-function formatNumber(num) {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-  return num.toString()
+function formatUptime(seconds) {
+  if (!seconds) return 'N/A'
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  if (days > 0) return `${days}d ${hours}h`
+  return `${hours}h ${Math.floor((seconds % 3600) / 60)}m`
+}
+
+function getCpuModel(model) {
+  if (!model) return 'N/A'
+  // Kürze lange Intel/AMD Namen
+  return model.replace(/\(R\)|\(TM\)|CPU|Processor/g, '').trim()
+}
+
+function getCpuBarColor(usage) {
+  if (usage < 50) return 'bg-gradient-to-r from-green-500 to-emerald-500'
+  if (usage < 75) return 'bg-gradient-to-r from-yellow-500 to-orange-500'
+  return 'bg-gradient-to-r from-red-500 to-rose-500'
+}
+
+function getCpuTextColor(usage) {
+  if (usage < 50) return 'text-green-400'
+  if (usage < 75) return 'text-yellow-400'
+  return 'text-red-400'
+}
+
+function getTempTextColor(temp) {
+  if (!temp || temp === 'N/A') return 'text-gray-500'
+  const tempNum = parseInt(temp)
+  if (tempNum < 60) return 'text-green-400'
+  if (tempNum < 80) return 'text-yellow-400'
+  return 'text-red-400'
+}
+
+function getTempBadgeColor(temp) {
+  if (!temp || temp === 'N/A') return 'bg-gray-500/20 text-gray-400'
+  const tempNum = parseInt(temp)
+  if (tempNum < 60) return 'bg-green-500/20 text-green-400'
+  if (tempNum < 80) return 'bg-yellow-500/20 text-yellow-400'
+  return 'bg-red-500/20 text-red-400'
+}
+
+function getCoreTemp(officerId, coreIndex) {
+  const sensors = officerStats.value[officerId]?.temperature?.sensors || []
+  const coreSensor = sensors.find(s => s.name === `coretemp_core_${coreIndex}`)
+  return coreSensor ? coreSensor.temperature.toFixed(0) : 'N/A'
+}
+
+function getCpuPackageTemp(officerId) {
+  const sensors = officerStats.value[officerId]?.temperature?.sensors || []
+  const packageSensor = sensors.find(s => s.name && s.name.includes('coretemp_package'))
+  return packageSensor ? packageSensor.temperature.toFixed(0) : null
 }
 </script>
 
 <style scoped>
-/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
@@ -557,33 +458,5 @@ function formatNumber(num) {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, rgb(251, 146, 60), rgb(249, 115, 22));
-}
-
-/* Fade Transition */
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-/* Badge Transition */
-.badge-enter-active,
-.badge-leave-active {
-  transition: all 0.2s ease;
-}
-
-.badge-enter-from {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.badge-leave-to {
-  opacity: 0;
-  transform: scale(1.2);
 }
 </style>

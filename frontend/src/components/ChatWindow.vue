@@ -181,7 +181,7 @@
         <TransitionGroup name="message">
           <div
             v-for="(message, index) in chatStore.messages"
-            :key="message.id || index"
+            :key="(message.id || index) + '-' + (message.isStreaming ? 'stream' : 'done')"
             class="message-item"
           >
             <MessageBubble :message="message" />

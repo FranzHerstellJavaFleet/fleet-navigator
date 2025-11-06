@@ -5,8 +5,30 @@ import { useSettingsStore } from './settingsStore'
 
 const PROMPT_STORAGE_KEY = 'fleet-navigator-last-prompt'
 const MODEL_STORAGE_KEY = 'fleet-navigator-selected-model'
+const CHAT_CACHE_KEY = 'fleet-navigator-chat-cache'
 
 export const useChatStore = defineStore('chat', () => {
+  // Helper functions for chat cache in localStorage
+  const saveChatToCache = (chatId, messages) => {
+    try {
+      const cache = JSON.parse(localStorage.getItem(CHAT_CACHE_KEY) || '{}')
+      cache[chatId] = messages
+      localStorage.setItem(CHAT_CACHE_KEY, JSON.stringify(cache))
+    } catch (e) {
+      console.error('Failed to save chat to cache:', e)
+    }
+  }
+
+  const getChatFromCache = (chatId) => {
+    try {
+      const cache = JSON.parse(localStorage.getItem(CHAT_CACHE_KEY) || '{}')
+      return cache[chatId] || null
+    } catch (e) {
+      console.error('Failed to get chat from cache:', e)
+      return null
+    }
+  }
+
   // Load last used system prompt from localStorage
   const loadLastPrompt = () => {
     try {
@@ -189,6 +211,11 @@ export const useChatStore = defineStore('chat', () => {
       chats.value.unshift(chat)
       currentChat.value = chat
       messages.value = []
+
+      // Initialize empty cache for new chat
+      saveChatToCache(chat.id, [])
+      console.log('[Cache-Sync] Initialized cache for new chat')
+
       return chat
     } catch (err) {
       error.value = 'Failed to create chat'
@@ -408,7 +435,7 @@ export const useChatStore = defineStore('chat', () => {
           tokens: 0,
           createdAt: new Date().toISOString(),
           isStreaming: true,
-          modelName: selectedModel.value  // Fix: Speichere aktuelles Model beim Senden
+          modelName: selectedModel.value
         })
         messages.value.push(streamingMessage)
 
@@ -451,10 +478,36 @@ export const useChatStore = defineStore('chat', () => {
                   }
                   currentRequestId.value = parsed.requestId
                 } else if (parsed.tokens !== undefined) {
-                  // Done event
-                  console.log('[SSE] Done event - tokens:', parsed.tokens)
-                  streamingMessage.tokens = parsed.tokens
-                  streamingMessage.isStreaming = false
+                  // Done event - replace reactive object with plain object to trigger re-render
+                  const finalMessage = {
+                    role: streamingMessage.role,
+                    content: streamingMessage.content,
+                    tokens: parsed.tokens,
+                    createdAt: streamingMessage.createdAt,
+                    modelName: streamingMessage.modelName,
+                    isStreaming: false
+                  }
+
+                  // Find and replace the streaming message in the array
+                  const index = messages.value.findIndex(m => m === streamingMessage)
+                  if (index !== -1) {
+                    messages.value[index] = finalMessage
+
+                    // Temporarily save to localStorage cache for immediate UI update
+                    if (currentChat.value?.id) {
+                      saveChatToCache(currentChat.value.id, messages.value)
+                    }
+
+                    // Sync with H2 database after a short delay to ensure backend saved the message
+                    // DB is the source of truth - this ensures cache stays synchronized
+                    setTimeout(() => {
+                      if (currentChat.value?.id) {
+                        console.log('[Cache-Sync] Syncing with H2 database...')
+                        loadChatHistory(currentChat.value.id)
+                      }
+                    }, 500) // 500ms delay to let backend finish saving
+                  }
+
                   currentRequestId.value = null
                 } else if (parsed.error) {
                   // Error event
@@ -497,9 +550,14 @@ export const useChatStore = defineStore('chat', () => {
   async function loadChatHistory(chatId) {
     try {
       isLoading.value = true
+      // H2 Database is the source of truth
       const chat = await api.getChatHistory(chatId)
       currentChat.value = chat
       messages.value = chat.messages || []
+
+      // Sync localStorage cache with database (DB wins in case of conflicts)
+      saveChatToCache(chatId, messages.value)
+      console.log('[Cache-Sync] Chat history loaded from H2 DB and synchronized with localStorage')
     } catch (err) {
       error.value = 'Failed to load chat history'
       console.error(err)
@@ -535,6 +593,16 @@ export const useChatStore = defineStore('chat', () => {
       if (currentChat.value?.id === chatId) {
         currentChat.value = null
         messages.value = []
+      }
+
+      // Remove from localStorage cache to keep it synchronized with H2 DB
+      try {
+        const cache = JSON.parse(localStorage.getItem(CHAT_CACHE_KEY) || '{}')
+        delete cache[chatId]
+        localStorage.setItem(CHAT_CACHE_KEY, JSON.stringify(cache))
+        console.log('[Cache-Sync] Removed deleted chat from localStorage cache')
+      } catch (e) {
+        console.error('Failed to remove chat from cache:', e)
       }
     } catch (err) {
       error.value = 'Failed to delete chat'

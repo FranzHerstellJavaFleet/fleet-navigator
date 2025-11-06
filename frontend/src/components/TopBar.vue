@@ -132,8 +132,8 @@
         <!-- DISTRIBUTED AGENTS -->
         <!-- Email Agent -->
         <ActionButton
-          @click="$emit('toggle-email-agent')"
-          title="Email Agent (Coming Soon)"
+          @click="openInNewTab('/agents/email')"
+          title="Email Agent"
           color="blue"
           :has-badge="true"
         >
@@ -142,7 +142,7 @@
 
         <!-- Document Agent -->
         <ActionButton
-          @click="$emit('toggle-document-agent')"
+          @click="openInNewTab('/agents/documents')"
           title="Briefe Agent"
           color="green"
           :has-badge="true"
@@ -152,12 +152,21 @@
 
         <!-- OS Agent -->
         <ActionButton
-          @click="$emit('toggle-os-agent')"
-          title="OS Agent (Coming Soon)"
+          @click="openInNewTab('/agents/os')"
+          title="OS Agent"
           color="purple"
           :has-badge="true"
         >
           <CommandLineIcon class="w-5 h-5" />
+        </ActionButton>
+
+        <!-- Fleet Officers -->
+        <ActionButton
+          @click="openInNewTab('/agents/fleet-officers')"
+          title="Fleet Officers Dashboard"
+          color="orange"
+        >
+          <ServerIcon class="w-5 h-5" />
         </ActionButton>
 
         <!-- Settings -->
@@ -420,12 +429,14 @@ import {
   Bars3Icon,
   XMarkIcon,
   BoltIcon,
-  FireIcon
+  FireIcon,
+  ServerIcon
 } from '@heroicons/vue/24/outline'
 import { BoltIcon as BoltIconSolid } from '@heroicons/vue/24/solid'
 import { useChatStore } from '../stores/chatStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import api from '../services/api'
+import axios from 'axios'
 
 // Components
 import ActionButton from './ActionButton.vue'
@@ -442,24 +453,52 @@ const showSaveTemplateModal = ref(false)
 const newTemplateName = ref('')
 const promptTemplates = ref([])
 
-// System monitoring - direkt aus chatStore.systemStatus (gleiche Werte wie SystemMonitor!)
+// System monitoring - Fleet Officer Stats laden
+const officers = ref([])
+const officerStats = ref({})
+
+// Lade Fleet Officer Daten regelmäßig
+const loadOfficerData = async () => {
+  try {
+    // Lade Officers Liste
+    const response = await axios.get('/api/fleet-officer/officers')
+    officers.value = response.data || []
+
+    // Lade Stats für ersten aktiven Officer
+    const firstOnline = officers.value.find(o => o.status === 'ONLINE')
+    if (firstOnline) {
+      const statsResponse = await axios.get(`/api/fleet-officer/officers/${firstOnline.officerId}/stats`)
+      officerStats.value = statsResponse.data || {}
+    }
+  } catch (error) {
+    console.error('Failed to load officer data:', error)
+  }
+}
+
+// CPU Usage vom ersten Fleet Officer
 const cpuUsage = computed(() => {
-  const status = chatStore.systemStatus
-  if (!status || !status.cpuUsage) return 0
-  return Math.round(status.cpuUsage)
+  if (!officerStats.value.cpu || !officerStats.value.cpu.usage_percent) return 0
+  return Math.round(officerStats.value.cpu.usage_percent)
 })
 
+// Temperatur vom ersten Fleet Officer (Package Temp bevorzugt)
 const temperature = computed(() => {
-  const status = chatStore.systemStatus
-  if (!status) return 0
+  if (!officerStats.value.temperature || !officerStats.value.temperature.sensors) return 0
 
-  // GPU Temperatur bevorzugen
-  if (status.gpuTemperature && status.gpuTemperature > 0) {
-    return Math.round(status.gpuTemperature)
+  const sensors = officerStats.value.temperature.sensors
+  // Suche CPU Package Temperature
+  const packageSensor = sensors.find(s => s.name && s.name.includes('coretemp_package'))
+  if (packageSensor && packageSensor.temperature) {
+    return Math.round(packageSensor.temperature)
   }
 
-  // Fallback: geschätzte Temperatur basierend auf CPU
-  return Math.round(35 + (cpuUsage.value * 0.5))
+  // Fallback: erster Sensor mit Temperatur
+  const firstSensor = sensors.find(s => s.temperature && s.temperature > 0)
+  if (firstSensor) {
+    return Math.round(firstSensor.temperature)
+  }
+
+  return 0
 })
 
 // Temperature color based on value
@@ -470,6 +509,8 @@ const temperatureColor = computed(() => {
   if (temp < 85) return 'text-orange-500 dark:text-orange-400'
   return 'text-red-500 dark:text-red-400'
 })
+
+let officerDataInterval = null
 
 onMounted(async () => {
   await loadTemplates()
@@ -482,9 +523,17 @@ onMounted(async () => {
       console.log('✅ Auto-loaded Karla prompt')
     }
   }
+
+  // Lade Fleet Officer Daten initial und dann alle 5 Sekunden
+  await loadOfficerData()
+  officerDataInterval = setInterval(loadOfficerData, 5000)
 })
 
-// Keine separaten System Stats mehr - chatStore hält die Daten zentral!
+onUnmounted(() => {
+  if (officerDataInterval) {
+    clearInterval(officerDataInterval)
+  }
+})
 
 const loadTemplates = async () => {
   try {
@@ -534,6 +583,10 @@ const clearSystemPrompt = () => {
   chatStore.systemPromptTitle = 'Kein System-Prompt'
   // Auto-close after selection
   showSystemPrompt.value = false
+}
+
+const openInNewTab = (url) => {
+  window.open(url, '_blank')
 }
 </script>
 

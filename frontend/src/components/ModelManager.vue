@@ -1195,9 +1195,9 @@ import { useToast } from '../composables/useToast'
 import { canModelHandleContext, getIncompatibilityReason, getSafeContextLimit } from '../utils/modelContextWindows'
 import CreateCustomModelModal from './CreateCustomModelModal.vue'
 
-const { success } = useToast()
+const { success, error: errorToast } = useToast()
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const chatStore = useChatStore()
 const models = ref([])

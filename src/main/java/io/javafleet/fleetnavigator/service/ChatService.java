@@ -77,8 +77,24 @@ public class ChatService {
             chat = chatRepository.save(chat);
         }
 
-        // Build complete message (with project context and document context if provided)
+        // Load previous messages from database to maintain conversation context
+        List<Message> previousMessages = messageRepository.findByChatIdOrderByCreatedAtAsc(chat.getId());
+
+        // Build complete message (with chat history, project context and document context if provided)
         StringBuilder completeMessageBuilder = new StringBuilder();
+
+        // Add chat history if this is an existing conversation
+        if (!previousMessages.isEmpty()) {
+            completeMessageBuilder.append("Previous conversation:\n\n");
+            for (Message msg : previousMessages) {
+                String roleName = msg.getRole() == MessageRole.USER ? "User" : "Assistant";
+                completeMessageBuilder.append(roleName).append(": ");
+                completeMessageBuilder.append(msg.getContent());
+                completeMessageBuilder.append("\n\n");
+            }
+            completeMessageBuilder.append("---\n\n");
+            log.info("Added {} previous messages to conversation context", previousMessages.size());
+        }
 
         // Add project context if chat is assigned to a project
         if (chat.getProject() != null && !chat.getProject().getContextFiles().isEmpty()) {
@@ -95,7 +111,7 @@ public class ChatService {
             completeMessageBuilder.append("\n\n---\n\n");
         }
 
-        // Add user message
+        // Add current user message
         completeMessageBuilder.append("User question: ");
         completeMessageBuilder.append(request.getMessage());
 
@@ -150,14 +166,12 @@ public class ChatService {
             );
         }
 
-        // Convert response to HTML for better formatting in frontend
-        String htmlResponse = convertToHtml(response);
-
-        // Save assistant message
+        // Don't convert to HTML - frontend will handle markdown rendering
+        // Save assistant message with raw markdown
         Message assistantMessage = new Message();
         assistantMessage.setChat(chat);
         assistantMessage.setRole(MessageRole.ASSISTANT);
-        assistantMessage.setContent(htmlResponse);
+        assistantMessage.setContent(response);  // Store raw markdown
         assistantMessage.setTokens(ollamaService.estimateTokens(response));
         assistantMessage.setModelName(request.getModel());  // Store which model was used
         assistantMessage = messageRepository.save(assistantMessage);
@@ -170,7 +184,7 @@ public class ChatService {
 
         return new ChatResponse(
                 chat.getId(),
-                htmlResponse,  // Return HTML-formatted response
+                response,  // Return raw markdown for frontend to render
                 assistantMessage.getTokens(),
                 chat.getModel(),
                 requestId  // Include request ID for tracking
@@ -282,8 +296,24 @@ public class ChatService {
         executorService.execute(() -> {
             try {
 
-                // Build complete message (with project context and document context if provided)
+                // Load previous messages from database to maintain conversation context
+                List<Message> previousMessages = messageRepository.findByChatIdOrderByCreatedAtAsc(finalChat.getId());
+
+                // Build complete message (with chat history, project context and document context if provided)
                 StringBuilder completeMessageBuilder = new StringBuilder();
+
+                // Add chat history if this is an existing conversation
+                if (!previousMessages.isEmpty()) {
+                    completeMessageBuilder.append("Previous conversation:\n\n");
+                    for (Message msg : previousMessages) {
+                        String roleName = msg.getRole() == MessageRole.USER ? "User" : "Assistant";
+                        completeMessageBuilder.append(roleName).append(": ");
+                        completeMessageBuilder.append(msg.getContent());
+                        completeMessageBuilder.append("\n\n");
+                    }
+                    completeMessageBuilder.append("---\n\n");
+                    log.info("Added {} previous messages to conversation context", previousMessages.size());
+                }
 
                 // Add project context if available (loaded before async execution)
                 if (finalProjectContext != null) {
@@ -300,7 +330,7 @@ public class ChatService {
                     completeMessageBuilder.append("\n\n---\n\n");
                 }
 
-                // Add user message
+                // Add current user message
                 completeMessageBuilder.append("User question: ");
                 completeMessageBuilder.append(request.getMessage());
 
@@ -721,8 +751,7 @@ public class ChatService {
     }
 
     /**
-     * Convert plain text response to HTML with proper code block formatting
-     * Similar to DocumentAgent approach, but enhanced for code
+     * Convert Markdown to HTML with full formatting support
      */
     private String convertToHtml(String plainText) {
         if (plainText == null || plainText.trim().isEmpty()) {
@@ -742,57 +771,162 @@ public class ChatService {
         codeBlockMatcher.appendTail(protectedBuffer);
         String protectedText = protectedBuffer.toString();
 
-        // Step 2: Escape HTML special characters (except in code blocks)
+        // Step 2: Extract and protect inline code
+        java.util.List<String> inlineCodes = new java.util.ArrayList<>();
+        java.util.regex.Pattern inlineCodePattern = java.util.regex.Pattern.compile("`([^`]+)`");
+        java.util.regex.Matcher inlineCodeMatcher = inlineCodePattern.matcher(protectedText);
+        StringBuffer protectedBuffer2 = new StringBuffer();
+
+        while (inlineCodeMatcher.find()) {
+            inlineCodes.add(inlineCodeMatcher.group(1));
+            inlineCodeMatcher.appendReplacement(protectedBuffer2, "###INLINECODE" + (inlineCodes.size() - 1) + "###");
+        }
+        inlineCodeMatcher.appendTail(protectedBuffer2);
+        protectedText = protectedBuffer2.toString();
+
+        // Step 3: Escape HTML special characters
         String escaped = protectedText
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
 
-        // Step 3: Convert double newlines to paragraph breaks
-        escaped = escaped.replace("\n\n", "</p><p>");
+        // Step 4: Convert Markdown to HTML (line by line to handle headings, lists, etc.)
+        String[] lines = escaped.split("\n");
+        StringBuilder htmlBuilder = new StringBuilder();
+        boolean inList = false;
+        boolean inOrderedList = false;
 
-        // Step 4: Convert single newlines to <br>
-        escaped = escaped.replace("\n", "<br>\n");
+        for (String line : lines) {
+            String trimmed = line.trim();
 
-        // Step 5: Wrap in paragraph tags
-        String html = "<p>" + escaped + "</p>";
+            // Handle headings (# ## ###)
+            if (trimmed.startsWith("### ")) {
+                htmlBuilder.append("<h3>").append(trimmed.substring(4)).append("</h3>\n");
+            } else if (trimmed.startsWith("## ")) {
+                htmlBuilder.append("<h2>").append(trimmed.substring(3)).append("</h2>\n");
+            } else if (trimmed.startsWith("# ")) {
+                htmlBuilder.append("<h1>").append(trimmed.substring(2)).append("</h1>\n");
+            }
+            // Handle unordered lists (- or *)
+            else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+                if (!inList) {
+                    htmlBuilder.append("<ul>\n");
+                    inList = true;
+                }
+                htmlBuilder.append("<li>").append(trimmed.substring(2)).append("</li>\n");
+            }
+            // Handle ordered lists (1. 2. 3.)
+            else if (trimmed.matches("^\\d+\\.\\s+.*")) {
+                if (!inOrderedList) {
+                    htmlBuilder.append("<ol>\n");
+                    inOrderedList = true;
+                }
+                String content = trimmed.replaceFirst("^\\d+\\.\\s+", "");
+                htmlBuilder.append("<li>").append(content).append("</li>\n");
+            }
+            // Handle blockquotes (> )
+            else if (trimmed.startsWith("> ")) {
+                htmlBuilder.append("<blockquote>").append(trimmed.substring(2)).append("</blockquote>\n");
+            }
+            // Handle horizontal rules (---)
+            else if (trimmed.equals("---") || trimmed.equals("***")) {
+                htmlBuilder.append("<hr>\n");
+            }
+            // Normal text
+            else {
+                // Close lists if needed
+                if (inList && !trimmed.startsWith("- ") && !trimmed.startsWith("* ")) {
+                    htmlBuilder.append("</ul>\n");
+                    inList = false;
+                }
+                if (inOrderedList && !trimmed.matches("^\\d+\\.\\s+.*")) {
+                    htmlBuilder.append("</ol>\n");
+                    inOrderedList = false;
+                }
 
-        // Step 6: Restore code blocks with proper formatting
+                if (!trimmed.isEmpty()) {
+                    htmlBuilder.append("<p>").append(line).append("</p>\n");
+                } else {
+                    htmlBuilder.append("<br>\n");
+                }
+            }
+        }
+
+        // Close any open lists
+        if (inList) {
+            htmlBuilder.append("</ul>\n");
+        }
+        if (inOrderedList) {
+            htmlBuilder.append("</ol>\n");
+        }
+
+        String html = htmlBuilder.toString();
+
+        // Step 5: Convert inline Markdown formatting
+        // Bold: **text** or __text__
+        html = html.replaceAll("\\*\\*(.+?)\\*\\*", "<strong>$1</strong>");
+        html = html.replaceAll("__(.+?)__", "<strong>$1</strong>");
+
+        // Italic: *text* or _text_ (but not in already matched bold)
+        html = html.replaceAll("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)", "<em>$1</em>");
+        html = html.replaceAll("(?<!_)_(?!_)(.+?)(?<!_)_(?!_)", "<em>$1</em>");
+
+        // Strikethrough: ~~text~~
+        html = html.replaceAll("~~(.+?)~~", "<del>$1</del>");
+
+        // Links: [text](url)
+        html = html.replaceAll("\\[([^\\]]+)\\]\\(([^\\)]+)\\)", "<a href=\"$2\" target=\"_blank\">$1</a>");
+
+        // Step 6: Restore inline code
+        for (int i = 0; i < inlineCodes.size(); i++) {
+            String code = inlineCodes.get(i)
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;");
+            html = html.replace("###INLINECODE" + i + "###",
+                    "<code style=\"background: #f3f4f6; dark:background: #374151; padding: 0.2rem 0.4rem; " +
+                    "border-radius: 0.25rem; font-family: monospace; font-size: 0.875em;\">" + code + "</code>");
+        }
+
+        // Step 7: Restore code blocks with proper language class for Highlight.js
         for (int i = 0; i < codeBlocks.size(); i++) {
             String codeBlock = codeBlocks.get(i);
 
-            // Extract language and code
-            String langPattern = "```(\\w+)?\\n([\\s\\S]*?)```";
+            // Extract language and code - flexible pattern for newlines
+            String langPattern = "```(\\w+)?\\s*([\\s\\S]*?)```";
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(langPattern);
             java.util.regex.Matcher matcher = pattern.matcher(codeBlock);
 
             String formattedCode;
             if (matcher.find()) {
                 String lang = matcher.group(1) != null ? matcher.group(1) : "";
-                String code = matcher.group(2);
+                String code = matcher.group(2).trim(); // Trim whitespace
 
-                // Normalize line breaks in code - replace literal \n with actual newlines
-                code = code.replace("\\n", "\n");
-
-                // Escape HTML in code
+                // Escape HTML in code - but keep newlines intact for Highlight.js
                 code = code.replace("&", "&amp;")
                           .replace("<", "&lt;")
-                          .replace(">", "&gt;")
-                          .replace("\n", "<br>\n");  // Convert newlines to <br> for HTML
+                          .replace(">", "&gt;");
 
-                // Format as HTML code block with proper spacing
-                formattedCode = "</p><pre style=\"background: #1e1e1e; color: #d4d4d4; padding: 1rem; " +
-                              "border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; white-space: pre-wrap;\">" +
-                              "<code>" + code + "</code></pre><p>";
+                // Build language class for Highlight.js
+                String langClass = !lang.isEmpty() ? " class=\"language-" + lang + "\"" : "";
+
+                // Format as HTML code block (no <br> tags, Highlight.js handles formatting)
+                formattedCode = "<pre><code" + langClass + ">" + code + "</code></pre>";
             } else {
-                formattedCode = codeBlock;
+                // Fallback: treat entire block as code without language
+                String code = codeBlock.replace("```", "").trim();
+                code = code.replace("&", "&amp;")
+                          .replace("<", "&lt;")
+                          .replace(">", "&gt;");
+
+                formattedCode = "<pre><code>" + code + "</code></pre>";
             }
 
             html = html.replace("###CODEBLOCK" + i + "###", formattedCode);
         }
 
-        // Step 7: Clean up empty paragraphs
+        // Step 8: Clean up empty paragraphs
         html = html.replace("<p></p>", "");
         html = html.replace("<p><br>\n</p>", "");
         html = html.replaceAll("<p>\\s*</p>", "");

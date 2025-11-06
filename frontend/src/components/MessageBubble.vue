@@ -66,7 +66,11 @@
       </div>
 
       <!-- Message Content -->
-      <div class="prose dark:prose-invert max-w-none message-content" v-html="renderedContent"></div>
+      <div
+        ref="contentRef"
+        class="prose dark:prose-invert max-w-none message-content"
+        v-html="displayContent"
+      ></div>
 
       <!-- Streaming Indicator -->
       <div v-if="message.isStreaming" class="mt-3 flex items-center gap-2">
@@ -82,7 +86,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUpdated, nextTick } from 'vue'
 import {
   UserCircleIcon,
   CpuChipIcon,
@@ -93,6 +97,8 @@ import {
 import { useSettingsStore } from '../stores/settingsStore'
 import { useChatStore } from '../stores/chatStore'
 import { useToast } from '../composables/useToast'
+import { marked } from 'marked'
+import hljs from 'highlight.js'
 
 const { success } = useToast()
 
@@ -107,6 +113,108 @@ const settingsStore = useSettingsStore()
 const chatStore = useChatStore()
 const isUser = computed(() => props.message.role === 'USER')
 const copied = ref(false)
+const contentRef = ref(null)
+
+const displayContent = computed(() => {
+  const content = props.message.content
+  const streaming = props.message.isStreaming
+
+  // For user messages, escape HTML
+  if (isUser.value) {
+    return escapeHtml(content)
+  }
+
+  // During streaming: show raw text with line breaks
+  if (streaming) {
+    return '<div class="whitespace-pre-wrap">' + escapeHtml(content) + '</div>'
+  }
+
+  // After streaming: parse markdown with syntax highlighting
+  try {
+    const parsed = marked.parse(content, { async: false })
+    return parsed
+  } catch (error) {
+    console.error('Markdown parsing error:', error)
+    return content.replace(/\n/g, '<br>')
+  }
+})
+
+// Apply syntax highlighting and add copy buttons
+const applyHighlighting = () => {
+  nextTick(() => {
+    if (contentRef.value && !props.message.isStreaming) {
+      const codeBlocks = contentRef.value.querySelectorAll('pre code')
+
+      if (codeBlocks.length > 0) {
+        codeBlocks.forEach((block) => {
+          // Apply syntax highlighting
+          hljs.highlightElement(block)
+
+          // Add copy button if not already present
+          const pre = block.parentElement
+          if (pre && !pre.querySelector('.code-copy-btn')) {
+            const copyBtn = document.createElement('button')
+            copyBtn.className = 'code-copy-btn'
+            copyBtn.innerHTML = `
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            `
+            copyBtn.title = 'Code kopieren'
+
+            copyBtn.addEventListener('click', async () => {
+              try {
+                await navigator.clipboard.writeText(block.textContent)
+                copyBtn.innerHTML = `
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                `
+                success('Code kopiert')
+                setTimeout(() => {
+                  copyBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  `
+                }, 2000)
+              } catch (err) {
+                console.error('Failed to copy code:', err)
+              }
+            })
+
+            pre.style.position = 'relative'
+            pre.appendChild(copyBtn)
+          }
+        })
+      }
+    }
+  })
+}
+
+onMounted(() => {
+  applyHighlighting()
+})
+
+onUpdated(() => {
+  applyHighlighting()
+})
+
+// Configure marked to use highlight.js
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value
+      } catch (err) {
+        console.error('Highlight error:', err)
+      }
+    }
+    return hljs.highlightAuto(code).value
+  },
+  breaks: true,
+  gfm: true
+})
 
 const messageClasses = computed(() => {
   if (isUser.value) {
@@ -129,19 +237,6 @@ const messageClasses = computed(() => {
   }
 })
 
-// Render content - backend now sends HTML-formatted content
-const renderedContent = computed(() => {
-  const content = props.message.content
-
-  // For user messages, escape HTML
-  if (isUser.value) {
-    return escapeHtml(content)
-  }
-
-  // For AI messages, the backend sends HTML-formatted content
-  // Just return it directly (v-html will render it)
-  return content
-})
 
 function escapeHtml(text) {
   const div = document.createElement('div')
@@ -203,6 +298,25 @@ async function copyToClipboard() {
   @apply bg-gray-900 dark:bg-black;
 }
 
+/* Highlight.js Code Blocks */
+:deep(.message-content pre) {
+  @apply rounded-lg my-4 overflow-x-auto;
+}
+
+:deep(.message-content pre code) {
+  @apply block p-4;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Override Highlight.js theme for dark mode consistency */
+:deep(.message-content pre code.hljs) {
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  padding: 1rem !important;
+}
+
 :deep(.prose a) {
   @apply text-blue-600 dark:text-blue-400;
 }
@@ -218,5 +332,91 @@ async function copyToClipboard() {
 
 :deep(.message-content br) {
   @apply block my-1;
+}
+
+/* Headings */
+:deep(.message-content h1) {
+  @apply text-2xl font-bold mt-4 mb-3 text-gray-900 dark:text-gray-100;
+}
+
+:deep(.message-content h2) {
+  @apply text-xl font-bold mt-3 mb-2 text-gray-900 dark:text-gray-100;
+}
+
+:deep(.message-content h3) {
+  @apply text-lg font-bold mt-3 mb-2 text-gray-900 dark:text-gray-100;
+}
+
+/* Lists */
+:deep(.message-content ul) {
+  @apply list-disc list-inside mb-3 ml-4 space-y-1;
+}
+
+:deep(.message-content ol) {
+  @apply list-decimal list-inside mb-3 ml-4 space-y-1;
+}
+
+:deep(.message-content li) {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+/* Blockquotes */
+:deep(.message-content blockquote) {
+  @apply border-l-4 border-blue-500 pl-4 py-2 my-3 bg-blue-50 dark:bg-blue-900/20 italic text-gray-700 dark:text-gray-300;
+}
+
+/* Horizontal Rule */
+:deep(.message-content hr) {
+  @apply my-4 border-gray-300 dark:border-gray-600;
+}
+
+/* Links */
+:deep(.message-content a) {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+/* Inline formatting */
+:deep(.message-content strong) {
+  @apply font-bold text-gray-900 dark:text-gray-100;
+}
+
+:deep(.message-content em) {
+  @apply italic;
+}
+
+:deep(.message-content del) {
+  @apply line-through text-gray-500 dark:text-gray-400;
+}
+
+/* Copy Button for Code Blocks */
+:deep(.code-copy-btn) {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  color: #d4d4d4;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(pre:hover .code-copy-btn) {
+  opacity: 1;
+}
+
+:deep(.code-copy-btn:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+:deep(.code-copy-btn:active) {
+  transform: scale(0.95);
 }
 </style>
