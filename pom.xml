@@ -324,6 +324,10 @@
                                 <buildArg>--enable-all-security-services</buildArg>
                                 <buildArg>-H:+JNI</buildArg>
 
+                                <!-- Runtime initialization for Apache Commons Logging -->
+                                <buildArg>--initialize-at-run-time=org.apache.commons.logging.LogFactory</buildArg>
+                                <buildArg>--initialize-at-run-time=org.apache.commons.logging.LogFactoryService</buildArg>
+
                                 <!-- Resource handling -->
                                 <buildArg>-H:+AddAllCharsets</buildArg>
                                 <buildArg>-H:IncludeResourceBundles=org.hibernate.validator.ValidationMessages</buildArg>
