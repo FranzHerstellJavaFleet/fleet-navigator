@@ -137,6 +137,13 @@
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-all</artifactId>
             <version>0.64.8</version>
+            <exclusions>
+                <!-- Exclude commons-logging (comes from PDF dependencies) to avoid GraalVM Native Image conflicts -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- iText7 for PDF generation (better than PDFBox for creation) -->
