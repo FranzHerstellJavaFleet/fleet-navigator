@@ -1,0 +1,50 @@
+server:
+  port: 2025
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: Fleet Navigator
+
+  datasource:
+    url: jdbc:h2:file:/opt/fleet-navigator/data/fleetnavdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false  # Disable in production
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  web:
+    resources:
+      # Static resources are embedded in native image
+      static-locations: classpath:/static/
+      cache:
+        period: 31536000  # 1 year
+
+  mvc:
+    static-path-pattern: /**
+
+logging:
+  level:
+    root: INFO
+    io.javafleet: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Ollama configuration
+ollama:
+  base-url: http://localhost:11434
+  timeout: 300000
+  model: llama3.2

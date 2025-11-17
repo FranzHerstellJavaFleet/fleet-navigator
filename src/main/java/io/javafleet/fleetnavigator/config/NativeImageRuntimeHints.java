@@ -4,6 +4,7 @@ import io.javafleet.fleetnavigator.dto.MateCommand;
 import io.javafleet.fleetnavigator.dto.MateMessage;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
@@ -33,22 +34,72 @@ public class NativeImageRuntimeHints {
             hints.reflection()
                     .registerType(MateMessage.class, hint -> hint
                             .withMembers(
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS,
-                                    org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS,
-                                    org.springframework.aot.hint.MemberCategory.PUBLIC_FIELDS
+                                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                    MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                    MemberCategory.INVOKE_DECLARED_METHODS,
+                                    MemberCategory.INVOKE_PUBLIC_METHODS,
+                                    MemberCategory.DECLARED_FIELDS,
+                                    MemberCategory.PUBLIC_FIELDS
                             ))
                     .registerType(MateCommand.class, hint -> hint
                             .withMembers(
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS,
-                                    org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS,
-                                    org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS,
-                                    org.springframework.aot.hint.MemberCategory.PUBLIC_FIELDS
+                                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                    MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                    MemberCategory.INVOKE_DECLARED_METHODS,
+                                    MemberCategory.INVOKE_PUBLIC_METHODS,
+                                    MemberCategory.DECLARED_FIELDS,
+                                    MemberCategory.PUBLIC_FIELDS
                             ));
+
+            // Register java-llama.cpp classes for reflection (needed by LlamaModel)
+            // Without these hints, Native Image fails with: NoClassDefFoundError: Could not initialize class de.kherud.llama.LlamaModel
+            try {
+                Class<?> llamaModelClass = classLoader.loadClass("de.kherud.llama.LlamaModel");
+                Class<?> modelParametersClass = classLoader.loadClass("de.kherud.llama.ModelParameters");
+                Class<?> inferParametersClass = classLoader.loadClass("de.kherud.llama.InferenceParameters");
+                Class<?> logFormatClass = classLoader.loadClass("de.kherud.llama.LogFormat");
+
+                hints.reflection()
+                        .registerType(llamaModelClass, hint -> hint
+                                .withMembers(
+                                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_DECLARED_METHODS,
+                                        MemberCategory.INVOKE_PUBLIC_METHODS,
+                                        MemberCategory.DECLARED_FIELDS,
+                                        MemberCategory.PUBLIC_FIELDS
+                                ))
+                        .registerType(modelParametersClass, hint -> hint
+                                .withMembers(
+                                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_DECLARED_METHODS,
+                                        MemberCategory.INVOKE_PUBLIC_METHODS,
+                                        MemberCategory.DECLARED_FIELDS,
+                                        MemberCategory.PUBLIC_FIELDS
+                                ))
+                        .registerType(inferParametersClass, hint -> hint
+                                .withMembers(
+                                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_DECLARED_METHODS,
+                                        MemberCategory.INVOKE_PUBLIC_METHODS,
+                                        MemberCategory.DECLARED_FIELDS,
+                                        MemberCategory.PUBLIC_FIELDS
+                                ))
+                        .registerType(logFormatClass, hint -> hint
+                                .withMembers(
+                                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                        MemberCategory.INVOKE_DECLARED_METHODS,
+                                        MemberCategory.INVOKE_PUBLIC_METHODS,
+                                        MemberCategory.DECLARED_FIELDS,
+                                        MemberCategory.PUBLIC_FIELDS
+                                ));
+            } catch (ClassNotFoundException e) {
+                // java-llama.cpp not on classpath - that's OK, maybe using different provider
+                System.out.println("⚠️  java-llama.cpp not found on classpath - skipping runtime hints");
+            }
         }
     }
 }
