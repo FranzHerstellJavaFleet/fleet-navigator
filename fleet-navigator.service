@@ -43,6 +43,7 @@ ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/opt/fleet-navigator/data
 ReadWritePaths=/opt/fleet-navigator/models
+ReadWritePaths=/opt/fleet-navigator/logs
 
 [Install]
 WantedBy=multi-user.target

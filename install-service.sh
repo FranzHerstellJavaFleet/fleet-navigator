@@ -36,8 +36,11 @@ cp target/fleet-navigator /opt/fleet-navigator/
 chmod +x /opt/fleet-navigator/fleet-navigator
 
 echo "📝 3. Kopiere Konfiguration und Binaries..."
-# Optional: Kopiere application.yml wenn vorhanden
-if [ -f "src/main/resources/application.yml" ]; then
+# Kopiere Production-Konfiguration
+if [ -f "src/main/resources/application-production.yml" ]; then
+    echo "   Kopiere application-production.yml..."
+    cp src/main/resources/application-production.yml /opt/fleet-navigator/application.yml
+elif [ -f "src/main/resources/application.yml" ]; then
     cp src/main/resources/application.yml /opt/fleet-navigator/
 fi
 
@@ -50,8 +53,18 @@ fi
 
 # Kopiere existierende Modelle (falls vorhanden)
 if [ -d "models" ]; then
-    echo "   Kopiere Modelle (kann dauern)..."
-    cp -r models/* /opt/fleet-navigator/models/ 2>/dev/null || true
+    echo "   📦 Kopiere vorhandene Modelle (kann dauern)..."
+    echo "   Quelle: $(pwd)/models/"
+
+    # Zähle und zeige Modellgröße
+    MODEL_COUNT=$(find models -name "*.gguf" -type f | wc -l)
+    MODEL_SIZE=$(du -sh models | cut -f1)
+    echo "   Gefunden: $MODEL_COUNT GGUF-Modelle ($MODEL_SIZE)"
+
+    # Kopiere mit Struktur (library/ und custom/)
+    cp -rv models/* /opt/fleet-navigator/models/ 2>/dev/null || true
+
+    echo "   ✅ Modelle kopiert nach /opt/fleet-navigator/models/"
 fi
 
 echo "👤 4. Setze Berechtigungen..."

@@ -43,6 +43,64 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 
 ---
 
+## 💻 Systemanforderungen
+
+Fleet Navigator läuft auf fast jedem modernen PC - hier sind die Empfehlungen für optimale Leistung:
+
+### Minimum (Für kleine Modelle wie Llama-3.2-1B)
+- **Prozessor**: Intel Core i3 / AMD Ryzen 3 (ab 2015)
+- **RAM**: 4 GB
+- **Speicher**: 5 GB frei
+- **Grafikkarte**: Nicht erforderlich (läuft auf CPU)
+- **Betriebssystem**: Windows 10+, macOS 12+, Linux (glibc 2.31+)
+
+### Empfohlen (Für mittlere Modelle wie Qwen2.5-3B)
+- **Prozessor**: Intel Core i5 / AMD Ryzen 5 (ab 2018) oder neuer
+- **RAM**: 8 GB
+- **Speicher**: 10 GB frei
+- **Grafikkarte**: Optional - NVIDIA GTX 1050+ mit 4GB VRAM (für GPU-Beschleunigung)
+- **Betriebssystem**: Windows 10+, macOS 12+, Linux
+
+### Optimal (Für große Modelle wie Qwen2.5-7B)
+- **Prozessor**: Intel Core i7 / AMD Ryzen 7 oder besser
+- **RAM**: 16 GB oder mehr
+- **Speicher**: 20 GB frei
+- **Grafikkarte**: NVIDIA RTX 3060+ mit 8GB+ VRAM (stark empfohlen!)
+- **Betriebssystem**: Windows 11, macOS 13+, Linux
+
+### 🎮 GPU-Beschleunigung (Optional aber empfohlen!)
+
+**NVIDIA GPUs (CUDA):**
+- ✅ **GeForce RTX Serie**: RTX 4090, 4080, 4070, 3090, 3080, 3070, 3060
+- ✅ **GeForce GTX Serie**: GTX 1660, 1650, 1080 Ti, 1070
+- ✅ **Quadro/Tesla**: Für Workstations und Server
+- 📊 **Geschwindigkeit**: Bis zu 10x schneller als CPU!
+
+**AMD GPUs (ROCm - Linux):**
+- ✅ Radeon RX 7000 Serie
+- ✅ Radeon RX 6000 Serie
+- ⚠️ Eingeschränkter Support, Linux erforderlich
+
+**Apple Silicon (M1/M2/M3):**
+- ✅ Metal Acceleration automatisch aktiviert
+- 🚀 Sehr schnell dank unified memory
+
+**Intel GPUs:**
+- ⚠️ Experimenteller Support via oneAPI
+
+### 📊 Modellgröße vs. RAM/VRAM
+
+| Modell | RAM (CPU) | VRAM (GPU) | Tokens/Sek (CPU) | Tokens/Sek (GPU) |
+|--------|-----------|------------|------------------|------------------|
+| **Llama-3.2-1B** | 4 GB | 2 GB | 15-25 | 60-100 |
+| **Qwen2.5-3B** | 8 GB | 4 GB | 8-15 | 40-80 |
+| **Qwen2.5-7B** | 16 GB | 8 GB | 3-8 | 25-50 |
+| **Llama-3.1-70B** | 64 GB | 48 GB | <1 | 5-15 |
+
+**Tipp:** Mit GPU ist die Antwortgeschwindigkeit deutlich höher - für die beste Erfahrung nutze eine NVIDIA GPU mit mindestens 4GB VRAM!
+
+---
+
 ## 🚀 Installation (Schritt für Schritt)
 
 ### Windows
@@ -375,7 +433,7 @@ Für schnelleren Start und weniger RAM-Verbrauch:
 mvn -Pnative clean package
 ```
 
-Mehr Infos: [NATIVE-IMAGE.md](NATIVE-IMAGE.md)
+Mehr Infos: [NATIVE-IMAGE.md](docs/NATIVE-IMAGE.md)
 
 ---
 
