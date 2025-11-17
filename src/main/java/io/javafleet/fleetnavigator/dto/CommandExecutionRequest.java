@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Request DTO for remote command execution on Fleet Officers
+ * Request DTO for remote command execution on Fleet Mates
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommandExecutionRequest {
-    private String officerId;
+    private String mateId;
     private String command;          // Base command (e.g., "ls", "ps", "systemctl status")
     private List<String> args;       // Command arguments (e.g., ["-la", "/var/log"])
     private String workingDirectory; // Optional working directory (default: /tmp)

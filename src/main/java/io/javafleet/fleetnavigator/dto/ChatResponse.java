@@ -16,4 +16,15 @@ public class ChatResponse {
     private Integer tokens;
     private String model;
     private String requestId;  // For request tracking/cancellation
+    private String downloadUrl;  // Optional: URL for downloadable generated code
+
+    // Constructor for backward compatibility (without downloadUrl)
+    public ChatResponse(Long chatId, String response, Integer tokens, String model, String requestId) {
+        this.chatId = chatId;
+        this.response = response;
+        this.tokens = tokens;
+        this.model = model;
+        this.requestId = requestId;
+        this.downloadUrl = null;
+    }
 }

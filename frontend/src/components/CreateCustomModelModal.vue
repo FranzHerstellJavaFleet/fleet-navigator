@@ -395,7 +395,7 @@ async function createModel() {
       // Improved progress estimation based on backend messages
       if (progress.includes('Generiere Modelfile')) {
         creationProgressPercent.value = 10
-      } else if (progress.includes('Erstelle Modell in Ollama')) {
+      } else if (progress.includes('Erstelle Modell')) {
         creationProgressPercent.value = 30
       } else if (progress.includes('pulling') || progress.includes('download')) {
         creationProgressPercent.value = 50

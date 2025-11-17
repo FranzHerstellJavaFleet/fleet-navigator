@@ -6,6 +6,7 @@ import { useSettingsStore } from './settingsStore'
 const PROMPT_STORAGE_KEY = 'fleet-navigator-last-prompt'
 const MODEL_STORAGE_KEY = 'fleet-navigator-selected-model'
 const CHAT_CACHE_KEY = 'fleet-navigator-chat-cache'
+const SAMPLING_PARAMS_KEY = 'defaultSamplingParams'
 
 export const useChatStore = defineStore('chat', () => {
   // Helper functions for chat cache in localStorage
@@ -43,6 +44,19 @@ export const useChatStore = defineStore('chat', () => {
     }
     // Default: null (will load from API)
     return { content: null, title: null }
+  }
+
+  // Load sampling parameters from localStorage
+  const loadSamplingParams = () => {
+    try {
+      const stored = localStorage.getItem(SAMPLING_PARAMS_KEY)
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch (e) {
+      console.error('Failed to load sampling params', e)
+    }
+    return null
   }
 
   // Load last selected model from database (async loaded in mounted)
@@ -105,9 +119,7 @@ export const useChatStore = defineStore('chat', () => {
     cpuUsage: 0,
     totalMemory: 0,
     freeMemory: 0,
-    usedMemory: 0,
-    ollamaAvailable: false,
-    ollamaVersion: 'Unknown'
+    usedMemory: 0
   })
 
   // Helper function: Check if model is a custom model
@@ -288,18 +300,27 @@ export const useChatStore = defineStore('chat', () => {
         // Build request
         const settingsStore = useSettingsStore()
 
+        // Load sampling parameters (from localStorage or defaults)
+        const samplingParams = loadSamplingParams()
+
         const request = {
           chatId: currentChat.value?.id,
           message: messageText,
           model: selectedModel.value,
-          systemPrompt: isCustomModel(selectedModel.value) ? '' : systemPrompt.value,
-          stream: false,
-          // Add generation parameters from settings
-          maxTokens: settingsStore.settings.maxTokens,
-          temperature: settingsStore.settings.temperature,
-          topP: settingsStore.settings.topP,
-          topK: settingsStore.settings.topK,
-          repeatPenalty: settingsStore.settings.repeatPenalty
+          systemPrompt: systemPrompt.value,
+          stream: false
+        }
+
+        // Add sampling parameters if available
+        if (samplingParams && Object.keys(samplingParams).length > 0) {
+          request.samplingParameters = samplingParams
+        } else {
+          // Fallback to deprecated parameters from settings
+          request.maxTokens = settingsStore.settings.maxTokens
+          request.temperature = settingsStore.settings.temperature
+          request.topP = settingsStore.settings.topP
+          request.topK = settingsStore.settings.topK
+          request.repeatPenalty = settingsStore.settings.repeatPenalty
         }
 
         // Add images if present
@@ -329,7 +350,8 @@ export const useChatStore = defineStore('chat', () => {
           role: 'ASSISTANT',
           content: response.response,
           tokens: response.tokens,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          downloadUrl: response.downloadUrl  // Add download URL if present
         }
         messages.value.push(assistantMessage)
 
@@ -365,23 +387,31 @@ export const useChatStore = defineStore('chat', () => {
 
       const settingsStore = useSettingsStore()
 
+      // Load sampling parameters (from localStorage or defaults)
+      const samplingParams = loadSamplingParams()
+
       // DEBUG: Log settings before sending
-      console.log('🔍 Settings Store:', settingsStore.settings)
-      console.log('🔍 maxTokens:', settingsStore.settings.maxTokens)
+      console.log('🔍 Sampling Params:', samplingParams)
 
       // Create EventSource with POST body (using fetch to send body, then EventSource for reading)
       const requestBody = {
         chatId: currentChat.value?.id,
         message: messageText,
         model: selectedModel.value,
-        systemPrompt: isCustomModel(selectedModel.value) ? '' : systemPrompt.value,
-        stream: true,
-        // Add generation parameters from settings
-        maxTokens: settingsStore.settings.maxTokens,
-        temperature: settingsStore.settings.temperature,
-        topP: settingsStore.settings.topP,
-        topK: settingsStore.settings.topK,
-        repeatPenalty: settingsStore.settings.repeatPenalty
+        systemPrompt: systemPrompt.value,
+        stream: true
+      }
+
+      // Add sampling parameters if available
+      if (samplingParams && Object.keys(samplingParams).length > 0) {
+        requestBody.samplingParameters = samplingParams
+      } else {
+        // Fallback to deprecated parameters from settings
+        requestBody.maxTokens = settingsStore.settings.maxTokens
+        requestBody.temperature = settingsStore.settings.temperature
+        requestBody.topP = settingsStore.settings.topP
+        requestBody.topK = settingsStore.settings.topK
+        requestBody.repeatPenalty = settingsStore.settings.repeatPenalty
       }
 
       // DEBUG: Log request body

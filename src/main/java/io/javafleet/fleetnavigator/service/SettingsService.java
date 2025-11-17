@@ -50,7 +50,7 @@ public class SettingsService {
         settings.setDefaultModel(getStringSetting(
             AppSettings.KEY_DEFAULT_MODEL, "qwen2.5-coder:7b"));
         settings.setVisionChainingEnabled(getBooleanSetting(
-            AppSettings.KEY_VISION_CHAINING_ENABLED, true));
+            AppSettings.KEY_VISION_CHAINING_ENABLED, false));
         settings.setVisionChainingSmartSelection(getBooleanSetting(
             AppSettings.KEY_VISION_CHAINING_SMART_SELECTION, true));
 
@@ -131,6 +131,82 @@ public class SettingsService {
     public void saveSelectedModel(String modelName) {
         log.info("Saving selected model to database: {}", modelName);
         saveSetting(AppSettings.KEY_SELECTED_MODEL, modelName, "User's last selected model");
+    }
+
+    /**
+     * Get the email classification model.
+     */
+    @Transactional(readOnly = true)
+    public String getEmailModel() {
+        String model = getStringSetting(AppSettings.KEY_EMAIL_MODEL, null);
+        log.debug("Retrieved email model from database: {}", model);
+        return model;
+    }
+
+    /**
+     * Save the email classification model.
+     */
+    @Transactional
+    public void saveEmailModel(String modelName) {
+        log.info("Saving email model to database: {}", modelName);
+        saveSetting(AppSettings.KEY_EMAIL_MODEL, modelName, "Email classification and reply model");
+    }
+
+    /**
+     * Get the log analysis model.
+     */
+    @Transactional(readOnly = true)
+    public String getLogAnalysisModel() {
+        String model = getStringSetting(AppSettings.KEY_LOG_ANALYSIS_MODEL, null);
+        log.debug("Retrieved log analysis model from database: {}", model);
+        return model;
+    }
+
+    /**
+     * Save the log analysis model.
+     */
+    @Transactional
+    public void saveLogAnalysisModel(String modelName) {
+        log.info("Saving log analysis model to database: {}", modelName);
+        saveSetting(AppSettings.KEY_LOG_ANALYSIS_MODEL, modelName, "Log analysis and debugging model");
+    }
+
+    /**
+     * Get the document generation model.
+     */
+    @Transactional(readOnly = true)
+    public String getDocumentModel() {
+        String model = getStringSetting(AppSettings.KEY_DOCUMENT_MODEL, null);
+        log.debug("Retrieved document model from database: {}", model);
+        return model;
+    }
+
+    /**
+     * Save the document generation model.
+     */
+    @Transactional
+    public void saveDocumentModel(String modelName) {
+        log.info("Saving document model to database: {}", modelName);
+        saveSetting(AppSettings.KEY_DOCUMENT_MODEL, modelName, "Document and letter generation model");
+    }
+
+    /**
+     * Get the active LLM provider.
+     */
+    @Transactional(readOnly = true)
+    public String getActiveProvider() {
+        String provider = getStringSetting(AppSettings.KEY_ACTIVE_PROVIDER, null);
+        log.debug("Retrieved active provider from database: {}", provider);
+        return provider;
+    }
+
+    /**
+     * Save the active LLM provider.
+     */
+    @Transactional
+    public void saveActiveProvider(String providerName) {
+        log.info("Saving active provider to database: {}", providerName);
+        saveSetting(AppSettings.KEY_ACTIVE_PROVIDER, providerName, "Active LLM Provider (ollama, llamacpp, openai)");
     }
 
     /**

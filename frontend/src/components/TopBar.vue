@@ -130,40 +130,10 @@
         </ActionButton>
 
         <!-- DISTRIBUTED AGENTS -->
-        <!-- Email Agent -->
+        <!-- Fleet Mates (Linux/OS Mates) -->
         <ActionButton
-          @click="openInNewTab('/agents/email')"
-          title="Email Agent"
-          color="blue"
-          :has-badge="true"
-        >
-          <EnvelopeIcon class="w-5 h-5" />
-        </ActionButton>
-
-        <!-- Document Agent -->
-        <ActionButton
-          @click="openInNewTab('/agents/documents')"
-          title="Briefe Agent"
-          color="green"
-          :has-badge="true"
-        >
-          <DocumentTextIcon class="w-5 h-5" />
-        </ActionButton>
-
-        <!-- OS Agent -->
-        <ActionButton
-          @click="openInNewTab('/agents/os')"
-          title="OS Agent"
-          color="purple"
-          :has-badge="true"
-        >
-          <CommandLineIcon class="w-5 h-5" />
-        </ActionButton>
-
-        <!-- Fleet Officers -->
-        <ActionButton
-          @click="openInNewTab('/agents/fleet-officers')"
-          title="Fleet Officers Dashboard"
+          @click="openInNewTab('/agents/fleet-mates')"
+          title="Fleet Mates Dashboard"
           color="orange"
         >
           <ServerIcon class="w-5 h-5" />
@@ -417,11 +387,6 @@ import {
   SunIcon,
   MoonIcon,
   ChatBubbleLeftRightIcon,
-  EnvelopeIcon,
-  DocumentTextIcon,
-  CommandLineIcon,
-  WrenchScrewdriverIcon,
-  ChartBarIcon,
   Cog6ToothIcon,
   CpuChipIcon,
   TrashIcon,
@@ -453,39 +418,39 @@ const showSaveTemplateModal = ref(false)
 const newTemplateName = ref('')
 const promptTemplates = ref([])
 
-// System monitoring - Fleet Officer Stats laden
-const officers = ref([])
-const officerStats = ref({})
+// System monitoring - Fleet Mate Stats laden
+const mates = ref([])
+const mateStats = ref({})
 
-// Lade Fleet Officer Daten regelmäßig
-const loadOfficerData = async () => {
+// Lade Fleet Mate Daten regelmäßig
+const loadMateData = async () => {
   try {
-    // Lade Officers Liste
-    const response = await axios.get('/api/fleet-officer/officers')
-    officers.value = response.data || []
+    // Lade Mates Liste
+    const response = await axios.get('/api/fleet-mate/mates')
+    mates.value = response.data || []
 
-    // Lade Stats für ersten aktiven Officer
-    const firstOnline = officers.value.find(o => o.status === 'ONLINE')
+    // Lade Stats für ersten aktiven Mate
+    const firstOnline = mates.value.find(o => o.status === 'ONLINE')
     if (firstOnline) {
-      const statsResponse = await axios.get(`/api/fleet-officer/officers/${firstOnline.officerId}/stats`)
-      officerStats.value = statsResponse.data || {}
+      const statsResponse = await axios.get(`/api/fleet-mate/mates/${firstOnline.mateId}/stats`)
+      mateStats.value = statsResponse.data || {}
     }
   } catch (error) {
-    console.error('Failed to load officer data:', error)
+    console.error('Failed to load mate data:', error)
   }
 }
 
-// CPU Usage vom ersten Fleet Officer
+// CPU Usage vom ersten Fleet Mate
 const cpuUsage = computed(() => {
-  if (!officerStats.value.cpu || !officerStats.value.cpu.usage_percent) return 0
-  return Math.round(officerStats.value.cpu.usage_percent)
+  if (!mateStats.value.cpu || !mateStats.value.cpu.usage_percent) return 0
+  return Math.round(mateStats.value.cpu.usage_percent)
 })
 
-// Temperatur vom ersten Fleet Officer (Package Temp bevorzugt)
+// Temperatur vom ersten Fleet Mate (Package Temp bevorzugt)
 const temperature = computed(() => {
-  if (!officerStats.value.temperature || !officerStats.value.temperature.sensors) return 0
+  if (!mateStats.value.temperature || !mateStats.value.temperature.sensors) return 0
 
-  const sensors = officerStats.value.temperature.sensors
+  const sensors = mateStats.value.temperature.sensors
   // Suche CPU Package Temperature
   const packageSensor = sensors.find(s => s.name && s.name.includes('coretemp_package'))
   if (packageSensor && packageSensor.temperature) {
@@ -510,7 +475,7 @@ const temperatureColor = computed(() => {
   return 'text-red-500 dark:text-red-400'
 })
 
-let officerDataInterval = null
+let mateDataInterval = null
 
 onMounted(async () => {
   await loadTemplates()
@@ -524,14 +489,14 @@ onMounted(async () => {
     }
   }
 
-  // Lade Fleet Officer Daten initial und dann alle 5 Sekunden
-  await loadOfficerData()
-  officerDataInterval = setInterval(loadOfficerData, 5000)
+  // Lade Fleet Mate Daten initial und dann alle 5 Sekunden
+  await loadMateData()
+  mateDataInterval = setInterval(loadMateData, 5000)
 })
 
 onUnmounted(() => {
-  if (officerDataInterval) {
-    clearInterval(officerDataInterval)
+  if (mateDataInterval) {
+    clearInterval(mateDataInterval)
   }
 })
 

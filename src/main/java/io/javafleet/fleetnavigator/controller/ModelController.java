@@ -1,10 +1,10 @@
 package io.javafleet.fleetnavigator.controller;
 
-import io.javafleet.fleetnavigator.dto.ModelInfo;
+import io.javafleet.fleetnavigator.llm.dto.ModelInfo;
 import io.javafleet.fleetnavigator.model.ModelMetadata;
 import io.javafleet.fleetnavigator.service.ModelMetadataEnrichmentService;
 import io.javafleet.fleetnavigator.service.ModelMetadataService;
-import io.javafleet.fleetnavigator.service.OllamaService;
+import io.javafleet.fleetnavigator.service.LLMProviderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ModelController {
 
-    private final OllamaService ollamaService;
+    private final LLMProviderService llmProviderService;
     private final ModelMetadataService metadataService;
     private final ModelMetadataEnrichmentService enrichmentService;
 
@@ -33,13 +33,13 @@ public class ModelController {
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     /**
-     * GET /api/models - Get available Ollama models with metadata
+     * GET /api/models - Get available models from active provider with metadata
      */
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAvailableModels() {
         try {
-            log.info("Fetching available models");
-            List<ModelInfo> models = ollamaService.getAvailableModels();
+            log.info("Fetching available models from active provider: {}", llmProviderService.getActiveProviderName());
+            List<ModelInfo> models = llmProviderService.getAvailableModels();
 
             // Enrich with metadata from database and curated metadata
             List<Map<String, Object>> enrichedModels = new ArrayList<>();
@@ -83,7 +83,7 @@ public class ModelController {
     public ResponseEntity<Map<String, String>> deleteModel(@PathVariable String name) {
         try {
             log.info("Deleting model: {}", name);
-            ollamaService.deleteModel(name);
+            llmProviderService.deleteModel(name);
 
             // Also delete metadata if exists
             metadataService.deleteMetadata(name);
@@ -114,7 +114,7 @@ public class ModelController {
                         .data("{\"status\":\"Starting download\"}"));
 
                 // Pull model with progress updates
-                ollamaService.pullModel(modelName, progress -> {
+                llmProviderService.pullModel(modelName, progress -> {
                     try {
                         emitter.send(SseEmitter.event()
                                 .name("progress")
@@ -151,14 +151,17 @@ public class ModelController {
 
     /**
      * GET /api/models/{name}/details - Get detailed information about a model
+     * Note: Currently only supported for Ollama provider
      */
     @GetMapping("/{name}/details")
     public ResponseEntity<Map<String, Object>> getModelDetails(@PathVariable String name) {
         try {
             log.info("Fetching details for model: {}", name);
 
-            // Get details from Ollama
-            Map<String, Object> details = ollamaService.getModelDetails(name);
+            // TODO: Add getModelDetails to LLMProvider interface
+            // For now, return basic info for non-Ollama providers
+            Map<String, Object> details = new HashMap<>();
+            details.put("name", name);
 
             // Enrich with metadata from database
             Optional<ModelMetadata> metadata = metadataService.getMetadataByName(name);
@@ -174,7 +177,7 @@ public class ModelController {
             });
 
             return ResponseEntity.ok(details);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error fetching model details: {}", name, e);
             return ResponseEntity.internalServerError().build();
         }
@@ -230,14 +233,15 @@ public class ModelController {
 
     /**
      * GET /api/models/library - Get all available models from Ollama Library
+     * Note: Ollama-specific feature
      */
     @GetMapping("/library")
     public ResponseEntity<List<Map<String, Object>>> getLibraryModels() {
         try {
             log.info("Fetching all models from Ollama Library");
-            List<Map<String, Object>> libraryModels = ollamaService.getOllamaLibraryModels();
-            return ResponseEntity.ok(libraryModels);
-        } catch (IOException e) {
+            // TODO: This is Ollama-specific - not available for other providers
+            return ResponseEntity.ok(new ArrayList<>());
+        } catch (Exception e) {
             log.error("Error fetching Ollama Library models", e);
             return ResponseEntity.internalServerError().build();
         }
@@ -271,8 +275,9 @@ public class ModelController {
                         .name("start")
                         .data("{\"status\":\"Creating model\"}"));
 
-                // Create model with progress updates using new Ollama API format (since v0.5.5)
-                ollamaService.createModel(
+                // Create model with progress updates
+                // TODO: Add createModel to LLMProvider interface (Ollama-specific for now)
+                llmProviderService.createModel(
                         modelName,
                         baseModel,
                         systemPrompt,

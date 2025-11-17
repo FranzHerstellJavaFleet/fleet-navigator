@@ -18,7 +18,7 @@
       />
 
       <!-- Main Content (Router View) -->
-      <div class="flex-1 flex flex-col">
+      <div class="flex-1 flex flex-col overflow-hidden">
         <router-view
           v-slot="{ Component }"
           :selected-project="selectedProject"

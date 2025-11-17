@@ -6,14 +6,14 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * Hardware statistics from Fleet Officer
+ * Hardware statistics from Fleet Mate
  */
 @Data
 public class HardwareStats {
     private OffsetDateTime timestamp;
 
-    @JsonProperty("officer_id")
-    private String officerId;
+    @JsonProperty("mate_id")
+    private String mateId;
 
     private CPUStats cpu;
     private MemoryStats memory;

@@ -53,3 +53,14 @@ uploads/
 
 # GraalVM Native Image
 *.build_artifacts.txt
+models/
+*.gguf
+
+# Large Binary Files (CUDA libraries exceed GitHub 100MB limit)
+# Exclude all bin/ contents first
+bin/
+# Then whitelist specific shell scripts we want to keep
+!bin/llama-server
+!bin/llama-server-wrapper.sh
+!bin/llama-server.old
+BOOT-INF/

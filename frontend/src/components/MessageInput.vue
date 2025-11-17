@@ -272,6 +272,11 @@ async function uploadFile(file) {
 
       uploadedFiles.value.push(uploadedFile)
       success(`${file.name} hochgeladen`)
+
+      // Auto-switch to vision model when image is uploaded
+      if (uploadedFile.type === 'image' && !isVisionModel.value) {
+        await autoSwitchToVisionModel()
+      }
     } else {
       errorMessage.value = response.error || 'Upload fehlgeschlagen'
       errorToast('Upload fehlgeschlagen')
@@ -288,6 +293,25 @@ async function uploadFile(file) {
 
 function removeFile(index) {
   uploadedFiles.value.splice(index, 1)
+}
+
+// Auto-switch to vision model when image is uploaded
+async function autoSwitchToVisionModel() {
+  try {
+    // Get vision model from settings
+    const visionModel = await api.default.getModelSelectionSettings()
+      .then(settings => settings.visionModel)
+
+    if (visionModel && visionModel !== chatStore.selectedModel) {
+      // Switch to vision model
+      chatStore.selectedModel = visionModel
+      success(`🖼️ Automatisch zu Vision-Modell gewechselt: ${visionModel}`)
+      console.log(`Auto-switched to vision model: ${visionModel}`)
+    }
+  } catch (error) {
+    console.error('Failed to auto-switch to vision model:', error)
+    // Don't show error to user, just log it
+  }
 }
 
 // Send Message Functions

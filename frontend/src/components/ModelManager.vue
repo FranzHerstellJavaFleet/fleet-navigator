@@ -1,6 +1,26 @@
 <template>
-  <Transition name="modal">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <!-- GGUF Model Config Modal -->
+  <GgufModelConfigModal
+    :show="showGgufConfigModal"
+    :config="currentGgufConfig"
+    :availableGgufModels="ggufModels"
+    @close="closeGgufConfigModal"
+    @saved="handleGgufConfigSaved"
+  />
+
+  <!-- Model Download Modal for llama.cpp -->
+  <ModelDownloadModal
+    :isVisible="showLlamaCppDownloadModal"
+    :currentModel="currentDownloadModel"
+    :progress="currentDownloadProgress"
+    :downloadedSize="currentDownloadedSize"
+    :totalSize="currentTotalSize"
+    :speed="currentSpeed"
+    :statusMessages="downloadStatusMessages"
+    @cancel="cancelLlamaCppDownload"
+  />
+
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div class="
         bg-white/90 dark:bg-gray-800/90
         backdrop-blur-xl backdrop-saturate-150
@@ -142,55 +162,80 @@
               <div v-if="installedSubTab === 'custom'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500"></div>
             </button>
             <button
-              @click="installedSubTab = 'coder'"
+              @click="installedSubTab = 'downloaded'"
               class="
                 px-4 py-2 font-medium text-sm transition-all duration-200
                 flex items-center gap-2
                 relative
               "
-              :class="installedSubTab === 'coder'
+              :class="installedSubTab === 'downloaded'
                 ? 'text-blue-600 dark:text-blue-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
-              <CpuChipIcon class="w-4 h-4" />
-              <span>Coder Modelle</span>
-              <div v-if="installedSubTab === 'coder'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
+              <ServerIcon class="w-4 h-4" />
+              <span>Heruntergeladene Modelle</span>
+              <div v-if="installedSubTab === 'downloaded'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
             </button>
-            <button
-              @click="installedSubTab = 'vision'"
-              class="
-                px-4 py-2 font-medium text-sm transition-all duration-200
-                flex items-center gap-2
-                relative
-              "
-              :class="installedSubTab === 'vision'
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <span>Vision Modelle</span>
-              <div v-if="installedSubTab === 'vision'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></div>
-            </button>
-            <button
-              @click="installedSubTab = 'general'"
-              class="
-                px-4 py-2 font-medium text-sm transition-all duration-200
-                flex items-center gap-2
-                relative
-              "
-              :class="installedSubTab === 'general'
-                ? 'text-orange-600 dark:text-orange-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              <span>Allgemeine Modelle</span>
-              <div v-if="installedSubTab === 'general'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500"></div>
-            </button>
+          </div>
+        </div>
+
+        <!-- Model Type Filter (only for Downloaded Models Sub-Tab) -->
+        <div v-if="activeTab === 'installed' && installedSubTab === 'downloaded'" class="border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 px-4 py-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">🏷️ Filter:</span>
+            <div class="flex gap-2">
+              <button
+                @click="downloadedFilter = 'all'"
+                :class="[
+                  'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                  downloadedFilter === 'all'
+                    ? 'bg-gray-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                Alle
+              </button>
+              <button
+                @click="downloadedFilter = 'coder'"
+                :class="[
+                  'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                  downloadedFilter === 'coder'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                ]"
+              >
+                <CpuChipIcon class="w-4 h-4 inline mr-1" />
+                Coder
+              </button>
+              <button
+                @click="downloadedFilter = 'vision'"
+                :class="[
+                  'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                  downloadedFilter === 'vision'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
+                ]"
+              >
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Vision
+              </button>
+              <button
+                @click="downloadedFilter = 'general'"
+                :class="[
+                  'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                  downloadedFilter === 'general'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/50'
+                ]"
+              >
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01" />
+                </svg>
+                Allgemein
+              </button>
+            </div>
           </div>
         </div>
 
@@ -259,14 +304,14 @@
               </button>
             </div>
 
-            <!-- Coder Models Sub-Tab -->
-            <div v-else-if="installedSubTab === 'coder'" class="flex gap-3">
+            <!-- Downloaded Models Sub-Tab -->
+            <div v-else-if="installedSubTab === 'downloaded'" class="flex gap-3">
               <div class="flex-1 relative">
                 <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  v-model="coderSearchQuery"
+                  v-model="downloadedSearchQuery"
                   type="text"
-                  placeholder="Coder Modelle durchsuchen..."
+                  placeholder="Heruntergeladene Modelle durchsuchen..."
                   class="
                     w-full pl-10 pr-4 py-2.5 rounded-xl
                     border border-gray-300 dark:border-gray-600
@@ -274,90 +319,6 @@
                     text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-gray-500
                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    transition-all duration-200
-                  "
-                />
-              </div>
-              <button
-                @click="refreshModels"
-                :disabled="isLoading"
-                class="
-                  px-4 py-2 rounded-xl
-                  bg-gradient-to-r from-gray-200 to-gray-300
-                  dark:from-gray-700 dark:to-gray-600
-                  hover:from-gray-300 hover:to-gray-400
-                  dark:hover:from-gray-600 dark:hover:to-gray-500
-                  text-gray-800 dark:text-white
-                  font-medium
-                  shadow-sm hover:shadow-md
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-all duration-200
-                  transform hover:scale-105 active:scale-95
-                  flex items-center gap-2
-                "
-              >
-                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
-                <span>Aktualisieren</span>
-              </button>
-            </div>
-
-            <!-- Vision Models Sub-Tab -->
-            <div v-else-if="installedSubTab === 'vision'" class="flex gap-3">
-              <div class="flex-1 relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  v-model="visionSearchQuery"
-                  type="text"
-                  placeholder="Vision Modelle durchsuchen..."
-                  class="
-                    w-full pl-10 pr-4 py-2.5 rounded-xl
-                    border border-gray-300 dark:border-gray-600
-                    bg-white dark:bg-gray-700
-                    text-gray-900 dark:text-white
-                    placeholder-gray-400 dark:placeholder-gray-500
-                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                    transition-all duration-200
-                  "
-                />
-              </div>
-              <button
-                @click="refreshModels"
-                :disabled="isLoading"
-                class="
-                  px-4 py-2 rounded-xl
-                  bg-gradient-to-r from-gray-200 to-gray-300
-                  dark:from-gray-700 dark:to-gray-600
-                  hover:from-gray-300 hover:to-gray-400
-                  dark:hover:from-gray-600 dark:hover:to-gray-500
-                  text-gray-800 dark:text-white
-                  font-medium
-                  shadow-sm hover:shadow-md
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-all duration-200
-                  transform hover:scale-105 active:scale-95
-                  flex items-center gap-2
-                "
-              >
-                <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading }" />
-                <span>Aktualisieren</span>
-              </button>
-            </div>
-
-            <!-- General Models Sub-Tab -->
-            <div v-else-if="installedSubTab === 'general'" class="flex gap-3">
-              <div class="flex-1 relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  v-model="generalSearchQuery"
-                  type="text"
-                  placeholder="Allgemeine Modelle durchsuchen..."
-                  class="
-                    w-full pl-10 pr-4 py-2.5 rounded-xl
-                    border border-gray-300 dark:border-gray-600
-                    bg-white dark:bg-gray-700
-                    text-gray-900 dark:text-white
-                    placeholder-gray-400 dark:placeholder-gray-500
-                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
                     transition-all duration-200
                   "
                 />
@@ -478,6 +439,26 @@
                 </div>
 
                 <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <!-- Konfigurieren Button for GGUF models -->
+                  <button
+                    v-if="model.baseModel?.endsWith('.gguf')"
+                    @click="openGgufConfigModal(model.name)"
+                    class="
+                      w-full px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-indigo-500 to-purple-500
+                      hover:from-indigo-600 hover:to-purple-600
+                      text-white text-sm font-medium
+                      shadow-sm hover:shadow-md
+                      transition-all duration-200
+                      transform hover:scale-105 active:scale-95
+                      flex items-center justify-center gap-2
+                    "
+                    title="GGUF Model konfigurieren"
+                  >
+                    <Cog6ToothIcon class="w-4 h-4" />
+                    <span>Konfigurieren</span>
+                  </button>
+
                   <button
                     @click="selectAndSetDefault(model.name)"
                     class="
@@ -519,105 +500,21 @@
           </div>
         </div>
 
-        <!-- Coder Models Sub-Tab -->
-        <div v-else-if="installedSubTab === 'coder'">
-          <div v-if="coderModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <CpuChipIcon class="w-16 h-16 mx-auto text-blue-400 dark:text-blue-600 mb-4" />
-            <p v-if="coderSearchQuery">Keine Coder Modelle gefunden für: "{{ coderSearchQuery }}"</p>
-            <p v-else>Keine Coder Modelle installiert</p>
-          </div>
-
-          <div v-else class="space-y-3">
-            <div
-              v-for="model in coderModels"
-              :key="model.name"
-              class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      {{ model.name }}
-                      <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
-                        ⚠️ Context zu groß
-                      </span>
-                    </h3>
-                    <span v-if="model.isDefault" class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full">
-                      ⭐ Standard
-                    </span>
-                    <span v-if="hasUpdate(model.name)" class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse">
-                      🔄 Update verfügbar
-                    </span>
-                  </div>
-
-                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div><strong>Größe:</strong> {{ model.size }}</div>
-                    <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
-                    <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
-                  </div>
-                </div>
-
-                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
-                  <button
-                    @click="selectAndSetDefault(model.name)"
-                    :disabled="!canUseModel(model.name)"
-                    class="
-                      w-full px-4 py-2 rounded-lg
-                      bg-gradient-to-r from-purple-500 to-indigo-500
-                      hover:from-purple-600 hover:to-indigo-600
-                      disabled:from-gray-400 disabled:to-gray-500
-                      text-white text-sm font-medium
-                      shadow-sm hover:shadow-md
-                      transition-all duration-200
-                      transform hover:scale-105 active:scale-95
-                      disabled:cursor-not-allowed disabled:transform-none
-                      flex items-center justify-center gap-2
-                    "
-                    title="Model auswählen"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Auswählen</span>
-                  </button>
-                  <button
-                    @click="confirmDelete(model.name)"
-                    class="
-                      w-full px-4 py-2 rounded-lg
-                      bg-red-500 hover:bg-red-600
-                      text-white text-sm font-medium
-                      shadow-sm hover:shadow-md
-                      transition-all duration-200
-                      transform hover:scale-105 active:scale-95
-                      flex items-center justify-center gap-2
-                    "
-                    title="Löschen"
-                  >
-                    <TrashIcon class="w-4 h-4" />
-                    <span>Löschen</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vision Models Sub-Tab -->
-        <div v-else-if="installedSubTab === 'vision'">
-          <div v-if="visionModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <svg class="w-16 h-16 mx-auto text-green-400 dark:text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        <!-- Downloaded Models Sub-Tab -->
+        <div v-else-if="installedSubTab === 'downloaded'">
+          <div v-if="downloadedModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <svg class="w-16 h-16 mx-auto text-purple-400 dark:text-purple-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
             </svg>
-            <p v-if="visionSearchQuery">Keine Vision Modelle gefunden für: "{{ visionSearchQuery }}"</p>
-            <p v-else>Keine Vision Modelle installiert</p>
+            <p v-if="downloadedFilter">Keine heruntergeladenen Modelle gefunden für: "{{ downloadedFilter }}"</p>
+            <p v-else>Keine heruntergeladenen Modelle installiert</p>
           </div>
 
           <div v-else class="space-y-3">
             <div
-              v-for="model in visionModels"
+              v-for="model in downloadedModels"
               :key="model.name"
-              class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200/50 dark:border-green-700/50 transition-colors hover:bg-green-100 dark:hover:bg-green-900/30"
+              class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200/50 dark:border-purple-700/50 transition-colors hover:bg-purple-100 dark:hover:bg-purple-900/30"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
@@ -637,98 +534,39 @@
                   </div>
 
                   <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div><strong>Größe:</strong> {{ model.size }}</div>
+                    <div><strong>Größe:</strong> {{ formatSize(model.size) }}</div>
                     <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
                     <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
+                    <div v-if="model.publisher"><strong>Herausgeber:</strong> {{ model.publisher }}</div>
+                    <div v-if="model.releaseDate">
+                      <strong>Veröffentlicht:</strong> {{ formatDate(model.releaseDate) }}
+                    </div>
+                    <div v-if="model.trainedUntil"><strong>Trainiert bis:</strong> {{ model.trainedUntil }}</div>
+                    <div v-if="model.license"><strong>Lizenz:</strong> {{ model.license }}</div>
                   </div>
                 </div>
 
                 <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
+                  <!-- Konfigurieren Button for GGUF models -->
                   <button
-                    @click="selectAndSetDefault(model.name)"
-                    :disabled="!canUseModel(model.name)"
+                    v-if="model.name.endsWith('.gguf')"
+                    @click="openGgufConfigModal(model.name)"
                     class="
                       w-full px-4 py-2 rounded-lg
-                      bg-gradient-to-r from-purple-500 to-indigo-500
-                      hover:from-purple-600 hover:to-indigo-600
-                      disabled:from-gray-400 disabled:to-gray-500
-                      text-white text-sm font-medium
-                      shadow-sm hover:shadow-md
-                      transition-all duration-200
-                      transform hover:scale-105 active:scale-95
-                      disabled:cursor-not-allowed disabled:transform-none
-                      flex items-center justify-center gap-2
-                    "
-                    title="Model auswählen"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Auswählen</span>
-                  </button>
-                  <button
-                    @click="confirmDelete(model.name)"
-                    class="
-                      w-full px-4 py-2 rounded-lg
-                      bg-red-500 hover:bg-red-600
+                      bg-gradient-to-r from-indigo-500 to-purple-500
+                      hover:from-indigo-600 hover:to-purple-600
                       text-white text-sm font-medium
                       shadow-sm hover:shadow-md
                       transition-all duration-200
                       transform hover:scale-105 active:scale-95
                       flex items-center justify-center gap-2
                     "
-                    title="Löschen"
+                    title="GGUF Model konfigurieren"
                   >
-                    <TrashIcon class="w-4 h-4" />
-                    <span>Löschen</span>
+                    <Cog6ToothIcon class="w-4 h-4" />
+                    <span>Konfigurieren</span>
                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- General Models Sub-Tab -->
-        <div v-else-if="installedSubTab === 'general'">
-          <div v-if="generalModels.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <svg class="w-16 h-16 mx-auto text-orange-400 dark:text-orange-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <p v-if="generalSearchQuery">Keine allgemeinen Modelle gefunden für: "{{ generalSearchQuery }}"</p>
-            <p v-else>Keine allgemeinen Modelle installiert</p>
-          </div>
-
-          <div v-else class="space-y-3">
-            <div
-              v-for="model in generalModels"
-              :key="model.name"
-              class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200/50 dark:border-orange-700/50 transition-colors hover:bg-orange-100 dark:hover:bg-orange-900/30"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      {{ model.name }}
-                      <span v-if="!canUseModel(model.name)" class="text-xs font-normal px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded" :title="getIncompatibilityMessage(model.name)">
-                        ⚠️ Context zu groß
-                      </span>
-                    </h3>
-                    <span v-if="model.isDefault" class="px-2 py-1 bg-fleet-orange-500 text-white text-xs rounded-full">
-                      ⭐ Standard
-                    </span>
-                    <span v-if="hasUpdate(model.name)" class="px-2 py-1 bg-green-500 text-white text-xs rounded-full animate-pulse">
-                      🔄 Update verfügbar
-                    </span>
-                  </div>
-
-                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div><strong>Größe:</strong> {{ model.size }}</div>
-                    <div v-if="model.description"><strong>Beschreibung:</strong> {{ model.description }}</div>
-                    <div v-if="model.specialties"><strong>Spezialitäten:</strong> {{ model.specialties }}</div>
-                  </div>
-                </div>
-
-                <div class="flex flex-col gap-2 ml-4 min-w-[200px]">
                   <button
                     @click="selectAndSetDefault(model.name)"
                     :disabled="!canUseModel(model.name)"
@@ -778,14 +616,213 @@
       <div v-else-if="activeTab === 'available'" class="flex-1 overflow-y-auto p-6">
         <div v-if="isLoadingLibrary" class="flex justify-center items-center py-8">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fleet-orange-500"></div>
-          <span class="ml-3 text-gray-600 dark:text-gray-400">Lade alle Ollama-Modelle...</span>
+          <span class="ml-3 text-gray-600 dark:text-gray-400">
+            Lade Model Store...
+          </span>
         </div>
 
         <div v-else class="space-y-4">
+          <!-- Model Store Info Banner -->
           <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3 mb-4">
             <p class="text-sm text-blue-800 dark:text-blue-200">
-              📚 <strong>{{ availableModels.length }} Modelle</strong> aus der Ollama Library verfügbar
+              🏪 <strong>{{ availableModels.length }} GGUF-Modelle</strong> im Model Store verfügbar
             </p>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              🏷️ Kategorien
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="category in categories"
+                :key="category"
+                @click="activeCategory = category"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors',
+                  activeCategory === category
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                {{ category }}
+                <span v-if="activeCategory === category" class="ml-1">✓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- HuggingFace Search -->
+          <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              🔍 HuggingFace Modell-Suche
+            </h3>
+
+            <div class="flex gap-3 mb-3">
+              <input
+                v-model="hfSearchQuery"
+                @keyup.enter="searchHuggingFace"
+                type="text"
+                placeholder="Suche nach Modellen (z.B. 'qwen', 'llama', 'german')..."
+                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-fleet-orange-500"
+              />
+              <button
+                @click="searchHuggingFace"
+                :disabled="isSearchingHF || !hfSearchQuery.trim()"
+                class="px-6 py-2 bg-fleet-orange-500 hover:bg-fleet-orange-600 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium"
+              >
+                {{ isSearchingHF ? '🔄 Suche...' : '🔍 Suchen' }}
+              </button>
+            </div>
+
+            <div class="space-y-2">
+              <!-- Row 1: Sprache & Beliebtheit -->
+              <div class="flex gap-2 flex-wrap">
+                <button
+                  @click="loadPopularHF"
+                  :disabled="isSearchingHF"
+                  class="px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 text-sm rounded transition-colors"
+                >
+                  ⭐ Beliebte Modelle
+                </button>
+                <button
+                  @click="loadGermanHF"
+                  :disabled="isSearchingHF"
+                  class="px-3 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 text-green-800 dark:text-green-200 text-sm rounded transition-colors"
+                >
+                  🇩🇪 Deutsche Modelle
+                </button>
+              </div>
+
+              <!-- Row 2: Kategorien -->
+              <div class="flex gap-2 flex-wrap">
+                <button
+                  @click="loadInstructHF"
+                  :disabled="isSearchingHF"
+                  class="px-3 py-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-800 dark:text-purple-200 text-sm rounded transition-colors"
+                >
+                  💬 Instruct/Chat
+                </button>
+                <button
+                  @click="loadCodeHF"
+                  :disabled="isSearchingHF"
+                  class="px-3 py-1 bg-teal-100 hover:bg-teal-200 dark:bg-teal-900 dark:hover:bg-teal-800 text-teal-800 dark:text-teal-200 text-sm rounded transition-colors"
+                >
+                  💻 Code
+                </button>
+                <button
+                  @click="loadVisionHF"
+                  :disabled="isSearchingHF"
+                  class="px-3 py-1 bg-orange-100 hover:bg-orange-200 dark:bg-orange-900 dark:hover:bg-orange-800 text-orange-800 dark:text-orange-200 text-sm rounded transition-colors"
+                >
+                  👁️ Vision
+                </button>
+                <button
+                  @click="clearHFSearch"
+                  v-if="hfSearchResults.length > 0"
+                  class="px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm rounded transition-colors"
+                >
+                  ✕ Zurücksetzen
+                </button>
+              </div>
+            </div>
+
+            <!-- HF Search Results -->
+            <div v-if="hfSearchResults.length > 0" class="mt-4 border-t border-yellow-200 dark:border-yellow-700 pt-4">
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Gefunden: {{ hfSearchResults.length }} Modelle von HuggingFace
+              </h4>
+              <div class="max-h-96 overflow-y-auto space-y-3">
+                <div
+                  v-for="model in hfSearchResults"
+                  :key="model.id"
+                  class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-650 transition-colors"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                      <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ model.displayName || model.name }}
+                      </h5>
+                      <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <span>👤 {{ model.author }}</span>
+                        <span>•</span>
+                        <span>⬇️ {{ formatDownloads(model.downloads) }} Downloads</span>
+                        <span v-if="model.likes">•</span>
+                        <span v-if="model.likes">❤️ {{ model.likes }} Likes</span>
+                      </div>
+                    </div>
+                    <button
+                      class="ml-3 px-4 py-2 bg-fleet-orange-500 hover:bg-fleet-orange-600 text-white rounded-lg transition-colors whitespace-nowrap font-medium"
+                      @click.stop="downloadHFModel(model)"
+                    >
+                      ⬇ Download
+                    </button>
+                  </div>
+
+                  <!-- Description -->
+                  <p v-if="model.shortDescription || model.description" class="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+                    {{ model.shortDescription || model.description || 'Keine Beschreibung verfügbar' }}
+                  </p>
+
+                  <!-- Metadata Grid -->
+                  <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+                    <!-- Release Date -->
+                    <div v-if="model.createdAt">
+                      <span class="text-gray-600 dark:text-gray-400">📅 Veröffentlicht:</span>
+                      <span class="ml-2 text-gray-900 dark:text-white">{{ formatDate(model.createdAt) }}</span>
+                    </div>
+
+                    <!-- Last Modified -->
+                    <div v-if="model.lastModified">
+                      <span class="text-gray-600 dark:text-gray-400">🔄 Aktualisiert:</span>
+                      <span class="ml-2 text-gray-900 dark:text-white">{{ formatDate(model.lastModified) }}</span>
+                    </div>
+
+                    <!-- License -->
+                    <div v-if="model.license">
+                      <span class="text-gray-600 dark:text-gray-400">📜 Lizenz:</span>
+                      <span class="ml-2 text-gray-900 dark:text-white">{{ model.license }}</span>
+                    </div>
+
+                    <!-- Pipeline Tag -->
+                    <div v-if="model.pipeline_tag">
+                      <span class="text-gray-600 dark:text-gray-400">🏷️ Typ:</span>
+                      <span class="ml-2 text-gray-900 dark:text-white">{{ model.pipeline_tag }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Tags -->
+                  <div v-if="model.tags && model.tags.length > 0" class="flex flex-wrap gap-1 mb-2">
+                    <span
+                      v-for="tag in model.tags.slice(0, 8)"
+                      :key="tag"
+                      class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
+                    >
+                      {{ tag }}
+                    </span>
+                    <span v-if="model.tags.length > 8" class="px-2 py-0.5 text-gray-600 dark:text-gray-400 text-xs">
+                      +{{ model.tags.length - 8 }} mehr
+                    </span>
+                  </div>
+
+                  <!-- Languages -->
+                  <div v-if="model.languages && model.languages.length > 0" class="text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">🌐 Sprachen:</span>
+                    <span class="ml-2 text-gray-900 dark:text-white">{{ model.languages.join(', ') }}</span>
+                  </div>
+
+                  <!-- Privacy indicators -->
+                  <div v-if="model.gated || model.private_model" class="mt-2 flex gap-2">
+                    <span v-if="model.gated" class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded">
+                      🔒 Gated Model (Zugriff beschränkt)
+                    </span>
+                    <span v-if="model.private_model" class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded">
+                      🔐 Privates Model
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Filtered Models -->
@@ -800,27 +837,44 @@
                 <div class="flex-1">
                   <div class="flex items-center gap-3 mb-2">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                      {{ model.name }}
+                      {{ model.displayName }}
                     </h3>
                     <span
-                      v-if="isInstalled(model.name)"
+                      v-if="isInstalled(model.name || model.filename)"
                       class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full"
                     >
                       ✓ Installiert
                     </span>
                   </div>
 
-                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div><strong>Größe:</strong> {{ model.size }}</div>
-                    <div v-if="model.modifiedAt"><strong>Aktualisiert:</strong> {{ formatDate(model.modifiedAt) }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                    <div><strong>Größe:</strong> {{ model.sizeHuman }}</div>
+                    <div v-if="model.description" class="mt-1 text-gray-700 dark:text-gray-300">
+                      {{ model.description.substring(0, 200) }}{{ model.description.length > 200 ? '...' : '' }}
+                    </div>
+                    <div v-if="model.useCases && model.useCases.length > 0" class="flex flex-wrap gap-1 mt-2">
+                      <span
+                        v-for="useCase in model.useCases"
+                        :key="useCase"
+                        class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
+                      >
+                        {{ useCase }}
+                      </span>
+                    </div>
+                    <div v-if="model.languages && model.languages.length > 0" class="text-xs">
+                      <strong>Sprachen:</strong> {{ model.languages.join(', ') }}
+                    </div>
+                    <div v-if="model.rating" class="mt-1">
+                      ⭐ {{ model.rating }} / 5.0 | {{ model.downloads?.toLocaleString() }} Downloads
+                    </div>
                   </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex flex-col gap-2 ml-4">
                   <button
-                    v-if="!isInstalled(model.name)"
-                    @click="downloadFromLibrary(model.name)"
+                    v-if="!isInstalled(model.name || model.filename)"
+                    @click="downloadFromLibrary(model.id, model)"
                     class="px-3 py-1 bg-fleet-orange-500 hover:bg-fleet-orange-600 text-white text-sm rounded transition-colors whitespace-nowrap"
                   >
                     ⬇ Download
@@ -1158,8 +1212,81 @@
           </button>
         </div>
       </div>
+  </div>
+
+  <!-- File Selection Modal (for HuggingFace models with multiple GGUF files) -->
+  <div v-if="showFileSelectionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-500/20 dark:to-indigo-500/20">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">GGUF-Datei auswählen</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ fileSelectionModel?.displayName || fileSelectionModel?.name }}</p>
+          </div>
+        </div>
+        <button
+          @click="closeFileSelectionModal"
+          class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Dieses Modell bietet mehrere GGUF-Varianten an. Wähle die gewünschte Datei aus:
+        </p>
+
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <label
+            v-for="(file, index) in fileSelectionFiles"
+            :key="index"
+            class="flex items-center gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer"
+            :class="selectedFileIndex === index
+              ? 'border-fleet-orange-500 bg-fleet-orange-50 dark:bg-fleet-orange-900/20'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'"
+          >
+            <input
+              type="radio"
+              :value="index"
+              v-model="selectedFileIndex"
+              class="w-4 h-4 text-fleet-orange-500 focus:ring-fleet-orange-500"
+            />
+            <div class="flex-1 min-w-0">
+              <p class="font-mono text-sm font-medium text-gray-900 dark:text-white truncate">
+                {{ file }}
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <button
+          @click="closeFileSelectionModal"
+          class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+        >
+          Abbrechen
+        </button>
+        <button
+          @click="confirmFileSelection"
+          class="px-6 py-2 rounded-lg bg-gradient-to-r from-fleet-orange-500 to-orange-600 text-white font-medium hover:from-fleet-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
+        >
+          Download starten
+        </button>
+      </div>
     </div>
-  </Transition>
+  </div>
 
   <!-- Create Custom Model Modal -->
   <CreateCustomModelModal
@@ -1187,13 +1314,16 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
-  CloudArrowDownIcon
+  CloudArrowDownIcon,
+  Cog6ToothIcon
 } from '@heroicons/vue/24/outline'
 import api from '../services/api'
 import { useChatStore } from '../stores/chatStore'
 import { useToast } from '../composables/useToast'
 import { canModelHandleContext, getIncompatibilityReason, getSafeContextLimit } from '../utils/modelContextWindows'
 import CreateCustomModelModal from './CreateCustomModelModal.vue'
+import ModelDownloadModal from './ModelDownloadModal.vue'
+import GgufModelConfigModal from './GgufModelConfigModal.vue'
 
 const { success, error: errorToast } = useToast()
 
@@ -1203,18 +1333,33 @@ const chatStore = useChatStore()
 const models = ref([])
 const isLoading = ref(false)
 
+// LlamaCpp Provider (only provider now)
+const providerAvailable = ref(true)
+
 // Custom Model Modal
 const showCreateCustomModel = ref(false)
 
+// GGUF Model Config Modal
+const showGgufConfigModal = ref(false)
+const currentGgufConfig = ref(null)
+const ggufModels = computed(() => {
+  return generalModels.value.filter(m => m.name.endsWith('.gguf'))
+})
+
+// File Selection Modal (for HuggingFace models with multiple GGUF files)
+const showFileSelectionModal = ref(false)
+const fileSelectionModel = ref(null)
+const fileSelectionFiles = ref([])
+const selectedFileIndex = ref(0)
+
 // Tabs
 const activeTab = ref('installed')
-const installedSubTab = ref('custom')  // Sub-tab for installed models: custom, coder, vision, general
+const installedSubTab = ref('custom')  // Sub-tab for installed models: custom, downloaded
+const downloadedFilter = ref('all')  // Filter for downloaded models: all, coder, vision, general
 const searchQuery = ref('')  // For available models
 const installedSearchQuery = ref('')  // For installed models
-const customSearchQuery = ref('')  // For custom models (in installed sub-tabs)
-const coderSearchQuery = ref('')  // For coder models
-const visionSearchQuery = ref('')  // For vision models
-const generalSearchQuery = ref('')  // For general models
+const customSearchQuery = ref('')  // For custom models
+const downloadedSearchQuery = ref('')  // For downloaded models
 const selectedCategory = ref('Alle')
 
 // Custom Models
@@ -1222,11 +1367,17 @@ const customModels = ref([])
 const isLoadingCustom = ref(false)
 
 // Categories
-const categories = ['Alle', 'Code', 'Chat', 'Vision', 'Embedding']
+const categories = ['Alle', 'Chat', 'Code', 'Vision', 'Compact']
+const activeCategory = ref('Alle')
 
-// Real Ollama Library models (loaded from API)
+// GGUF Model Store models (loaded from API)
 const availableModels = ref([])
 const isLoadingLibrary = ref(false)
+
+// HuggingFace search
+const hfSearchQuery = ref('')
+const hfSearchResults = ref([])
+const isSearchingHF = ref(false)
 
 // Filtered installed models based on search
 const filteredInstalledModels = computed(() => {
@@ -1254,92 +1405,106 @@ const filteredCustomModels = computed(() => {
 })
 
 // Helper function: Determine model category
+// Helper function: Determine model category based on GGUF metadata
 function getModelCategory(modelName) {
-  const name = modelName.toLowerCase()
-
-  // Custom models (not in official list)
-  const knownOfficialModels = [
-    'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
-    'mistral', 'mixtral',
-    'phi', 'phi3',
-    'gemma', 'gemma2',
-    'codellama',
-    'qwen', 'qwen2', 'qwen2.5', 'qwen3',
-    'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
-    'deepseek-coder', 'deepseek-coder-v2',
-    'deepseek-r1',
-    'llava',
-    'moondream',
-    'bge-m3',
-    'nomic-embed-text',
-    'mxbai-embed-large',
-    'all-minilm'
-  ]
-
-  const baseName = name.split(':')[0]
-  const isOfficial = knownOfficialModels.includes(baseName)
-
-  if (!isOfficial) {
-    return 'custom'  // Eigene Modelle
+  // Handle undefined or null model names
+  if (!modelName) {
+    console.warn('getModelCategory called with invalid modelName:', modelName)
+    return 'unknown'
   }
 
-  // Vision models
-  if (name.includes('llava') || name.includes('moondream') || name.includes('vision') || name.includes('-vl')) {
+  // Find the model object to access its metadata
+  const model = models.value.find(m => m.name === modelName)
+
+  // If no model found, return unknown
+  if (!model) {
+    return 'unknown'
+  }
+
+  // Check if it's a custom model (GgufModelConfig from database)
+  if (model.isCustom || model.baseModel) {
+    return 'custom'
+  }
+
+  // Get metadata for categorization
+  const specialties = (model.specialties || '').toLowerCase()
+  const description = (model.description || '').toLowerCase()
+  const name = modelName.toLowerCase()
+
+  // Vision models: Check for vision-related keywords in GGUF metadata
+  const visionKeywords = ['vision', 'image', 'multimodal', 'visual', 'bild', 'foto', 'image to text', 'image-to-text']
+  if (visionKeywords.some(keyword =>
+    specialties.includes(keyword) ||
+    description.includes(keyword) ||
+    name.includes('llava') ||
+    name.includes('moondream') ||
+    name.includes('vision')
+  )) {
     return 'vision'
   }
 
-  // Coder models
-  if (name.includes('coder') || name.includes('codellama') || name.includes('code')) {
+  // Coder models: Check for code-related keywords in GGUF metadata
+  const coderKeywords = ['code', 'coding', 'programming', 'coder', 'python', 'javascript', 'java', 'programmier', 'software']
+  if (coderKeywords.some(keyword =>
+    specialties.includes(keyword) ||
+    description.includes(keyword) ||
+    name.includes('coder') ||
+    name.includes('codellama')
+  )) {
     return 'coder'
   }
 
-  // General chat models (everything else)
+  // General chat models (everything else: chat, instruct, etc.)
   return 'general'
 }
 
-// Category-specific filtered models
-const coderModels = computed(() => {
-  const filtered = models.value.filter(m => getModelCategory(m.name) === 'coder')
-  if (!coderSearchQuery.value.trim()) return filtered
+// Downloaded models (all non-custom GGUF models) with filter
+const downloadedModels = computed(() => {
+  // Get all models that are NOT custom (regular GGUF files from HuggingFace/llama.cpp)
+  let filtered = models.value.filter(m => getModelCategory(m.name) !== 'custom')
 
-  const query = coderSearchQuery.value.toLowerCase()
-  return filtered.filter(m =>
-    m.name.toLowerCase().includes(query) ||
-    m.description?.toLowerCase().includes(query)
-  )
+  // Apply type filter (coder, vision, general)
+  if (downloadedFilter.value !== 'all') {
+    filtered = filtered.filter(m => getModelCategory(m.name) === downloadedFilter.value)
+  }
+
+  // Apply search query
+  if (downloadedSearchQuery.value.trim()) {
+    const query = downloadedSearchQuery.value.toLowerCase()
+    filtered = filtered.filter(m =>
+      m.name.toLowerCase().includes(query) ||
+      m.description?.toLowerCase().includes(query)
+    )
+  }
+
+  return filtered
 })
 
-const visionModels = computed(() => {
-  const filtered = models.value.filter(m => getModelCategory(m.name) === 'vision')
-  if (!visionSearchQuery.value.trim()) return filtered
+// Keep these for backward compatibility (some code might still reference them)
+const coderModels = computed(() => models.value.filter(m => getModelCategory(m.name) === 'coder'))
+const visionModels = computed(() => models.value.filter(m => getModelCategory(m.name) === 'vision'))
+const generalModels = computed(() => models.value.filter(m => getModelCategory(m.name) === 'general'))
 
-  const query = visionSearchQuery.value.toLowerCase()
-  return filtered.filter(m =>
-    m.name.toLowerCase().includes(query) ||
-    m.description?.toLowerCase().includes(query)
-  )
-})
-
-const generalModels = computed(() => {
-  const filtered = models.value.filter(m => getModelCategory(m.name) === 'general')
-  if (!generalSearchQuery.value.trim()) return filtered
-
-  const query = generalSearchQuery.value.toLowerCase()
-  return filtered.filter(m =>
-    m.name.toLowerCase().includes(query) ||
-    m.description?.toLowerCase().includes(query)
-  )
-})
-
-// Filtered available models based on search only
+// Filtered available models based on category and search
 const filteredAvailableModels = computed(() => {
   let filtered = availableModels.value
+
+  // Filter by category
+  if (activeCategory.value !== 'Alle') {
+    const categoryLower = activeCategory.value.toLowerCase()
+    filtered = filtered.filter(m => {
+      // Model Store models have a 'category' property
+      return m.category && m.category.toLowerCase() === categoryLower
+    })
+  }
 
   // Filter by search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(m =>
       m.name.toLowerCase().includes(query) ||
+      m.displayName?.toLowerCase().includes(query) ||
+      m.description?.toLowerCase().includes(query) ||
       m.model?.toLowerCase().includes(query)
     )
   }
@@ -1390,9 +1555,20 @@ const editingModel = ref({})
 const showDeleteDialog = ref(false)
 const modelToDelete = ref('')
 
+// llama.cpp Download Modal
+const showLlamaCppDownloadModal = ref(false)
+const currentDownloadModel = ref('')
+const currentDownloadProgress = ref(0)
+const currentDownloadedSize = ref('0 MB')
+const currentTotalSize = ref('0 MB')
+const currentSpeed = ref('0.0')
+const downloadStatusMessages = ref([])
+const currentDownloadModelId = ref('')
+const activeDownloadEventSource = ref(null)
+
 onMounted(async () => {
   await loadModels()
-  await loadLibraryModels()  // Load library first to know which models are official
+  await loadLibraryModels()  // Load GGUF Model Store
   await loadCustomModels()   // Then detect custom models
 })
 
@@ -1410,11 +1586,12 @@ async function loadModels() {
 async function loadLibraryModels() {
   isLoadingLibrary.value = true
   try {
-    console.log('Loading Ollama Library models...')
-    availableModels.value = await api.getOllamaLibraryModels()
-    console.log(`Loaded ${availableModels.value.length} models from Ollama Library`)
+    console.log('Loading GGUF Model Store...')
+    availableModels.value = await api.getAllModelStoreModels()
+    console.log(`Loaded ${availableModels.value.length} models from Model Store`)
   } catch (error) {
-    console.error('Failed to load Ollama Library models:', error)
+    console.error('Failed to load library models:', error)
+    availableModels.value = []
   } finally {
     isLoadingLibrary.value = false
   }
@@ -1519,9 +1696,86 @@ async function deleteModel() {
   }
 }
 
-function downloadFromLibrary(modelName) {
-  downloadModelName.value = modelName
-  showDownloadDialog.value = true
+function downloadFromLibrary(modelName, model = null) {
+  // Use Model Store download with modal
+  // modelName is actually the model ID for LlamaCpp
+  startLlamaCppDownload(modelName)
+}
+
+async function startLlamaCppDownload(modelId) {
+  if (showLlamaCppDownloadModal.value) {
+    alert('⚠️ Es läuft bereits ein Download.')
+    return
+  }
+
+  // Find model info
+  const model = availableModels.value.find(m => m.id === modelId || m.name === modelId)
+  if (!model) {
+    alert('Modell nicht gefunden')
+    return
+  }
+
+  // Show modal
+  showLlamaCppDownloadModal.value = true
+  currentDownloadModelId.value = model.id || modelId
+  currentDownloadModel.value = model.displayName || model.name
+  currentDownloadProgress.value = 0
+  currentDownloadedSize.value = '0 MB'
+  currentTotalSize.value = model.sizeHuman || '0 MB'
+  currentSpeed.value = '0.0'
+  downloadStatusMessages.value = ['📥 Starte Download...']
+
+  // Create EventSource for SSE
+  const eventSource = new EventSource(`/api/model-store/download/${currentDownloadModelId.value}`)
+  activeDownloadEventSource.value = eventSource
+
+  eventSource.addEventListener('progress', (event) => {
+    const message = event.data
+    downloadStatusMessages.value.push(message)
+
+    // Parse progress
+    const percentMatch = message.match(/(\d+)%/)
+    const downloadedMatch = message.match(/([\d.]+\s+[GM]B)\s+\//)
+    const totalMatch = message.match(/\/\s+([\d.]+\s+[GM]B)/)
+    const speedMatch = message.match(/([\d.]+)\s+MB\/s/)
+
+    if (percentMatch) currentDownloadProgress.value = parseInt(percentMatch[1])
+    if (downloadedMatch) currentDownloadedSize.value = downloadedMatch[1]
+    if (totalMatch) currentTotalSize.value = totalMatch[1]
+    if (speedMatch) currentSpeed.value = parseFloat(speedMatch[1]).toFixed(1)
+  })
+
+  eventSource.addEventListener('complete', (event) => {
+    downloadStatusMessages.value.push('✅ ' + event.data)
+    eventSource.close()
+
+    // Reload models
+    loadModels()
+
+    setTimeout(() => {
+      showLlamaCppDownloadModal.value = false
+      currentDownloadModelId.value = ''
+    }, 2000)
+
+    success('Modell heruntergeladen!')
+  })
+
+  eventSource.addEventListener('error', (event) => {
+    downloadStatusMessages.value.push('❌ Download fehlgeschlagen')
+    eventSource.close()
+    showLlamaCppDownloadModal.value = false
+    currentDownloadModelId.value = ''
+    errorToast('Download fehlgeschlagen')
+  })
+}
+
+function cancelLlamaCppDownload() {
+  if (currentDownloadModelId.value && activeDownloadEventSource.value) {
+    api.post(`/model-store/download/${currentDownloadModelId.value}/cancel`)
+    activeDownloadEventSource.value.close()
+    showLlamaCppDownloadModal.value = false
+    currentDownloadModelId.value = ''
+  }
 }
 
 async function cancelDownload() {
@@ -1565,7 +1819,7 @@ async function startDownload() {
       downloadProgress.value = progress
 
       // Parse progress for percentage
-      // Ollama progress format: "pulling manifest", "downloading sha256:...", "verifying sha256:...", etc.
+      // Progress format: "pulling manifest", "downloading sha256:...", "verifying sha256:...", etc.
       if (progress.includes('pulling')) {
         downloadProgressPercent.value = 5
       } else if (progress.includes('downloading')) {
@@ -1637,82 +1891,57 @@ function formatDate(dateString) {
 }
 
 /**
- * Load custom models from database AND detect custom models from Ollama
+ * Format file size from bytes to human-readable format (KB, MB, GB)
+ */
+function formatSize(sizeString) {
+  if (!sizeString) return ''
+
+  // If already formatted (contains "GB" or "MB"), return as is
+  if (typeof sizeString === 'string' && (sizeString.includes('GB') || sizeString.includes('MB') || sizeString.includes('KB'))) {
+    return sizeString
+  }
+
+  // Parse bytes from string (e.g., "4803985408 bytes" or just "4803985408")
+  const bytes = typeof sizeString === 'number' ? sizeString : parseInt(sizeString.replace(/[^\d]/g, ''))
+
+  if (isNaN(bytes)) return sizeString
+
+  const gb = bytes / (1024 * 1024 * 1024)
+  const mb = bytes / (1024 * 1024)
+  const kb = bytes / 1024
+
+  if (gb >= 1) {
+    return `${gb.toFixed(2)} GB`
+  } else if (mb >= 1) {
+    return `${mb.toFixed(2)} MB`
+  } else if (kb >= 1) {
+    return `${kb.toFixed(2)} KB`
+  } else {
+    return `${bytes} Bytes`
+  }
+}
+
+/**
+ * Load custom models from database and detect custom models from installed models
  */
 async function loadCustomModels() {
   try {
     isLoadingCustom.value = true
 
-    // Load custom models from database
+    // Load ONLY custom models from database (GgufModelConfig)
+    // These are user-created model configurations with fixed parameters
     const response = await fetch('/api/custom-models')
     if (!response.ok) throw new Error('Failed to load custom models')
     const dbCustomModels = await response.json()
 
-    // Whitelist of known official Ollama models (including older versions)
-    // This prevents false positives for legacy models no longer in the library
-    const knownOfficialModels = [
-      'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
-      'mistral', 'mixtral',
-      'phi', 'phi3',
-      'gemma', 'gemma2',
-      'codellama',
-      'qwen', 'qwen2', 'qwen2.5', 'qwen3',  // All qwen versions
-      'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
-      'deepseek-coder', 'deepseek-coder-v2',
-      'deepseek-r1',
-      'llava',
-      'moondream',
-      'bge-m3',
-      'nomic-embed-text',
-      'mxbai-embed-large',
-      'all-minilm'
-    ]
+    // Only show database custom models
+    // Downloaded GGUF files are shown in "Heruntergeladene Modelle" tab
+    customModels.value = dbCustomModels
 
-    // Detect custom models from installed Ollama models
-    // A model is considered "custom" if:
-    // 1. It's not in the official Ollama library (availableModels), AND
-    // 2. It's not in the known official models whitelist, AND
-    // 3. It has a custom name format (e.g., "nova:latest", "mymodel:v1")
-    const detectedCustomModels = []
-
-    // Get list of official model base names from Ollama library
-    const officialModelNames = availableModels.value.map(m => {
-      // Extract base name without tag (e.g., "llama2" from "llama2:latest")
-      return m.name.split(':')[0]
-    })
-
-    // Combine library models with known official models
-    const allOfficialNames = [...new Set([...officialModelNames, ...knownOfficialModels])]
-
-    for (const installedModel of models.value) {
-      const baseName = installedModel.name.split(':')[0]
-
-      // Check if this model is in the official list or whitelist
-      const isOfficial = allOfficialNames.includes(baseName)
-
-      // Check if already in database custom models
-      const isInDatabase = dbCustomModels.some(dm => dm.name === installedModel.name)
-
-      if (!isOfficial && !isInDatabase) {
-        // This is a custom model not in our database
-        detectedCustomModels.push({
-          id: `detected-${installedModel.name}`,
-          name: installedModel.name,
-          baseModel: 'Unknown',
-          description: installedModel.description || 'Custom Model',
-          size: installedModel.size,
-          modifiedAt: installedModel.modifiedAt,
-          isDetected: true  // Flag to indicate it was auto-detected
-        })
-      }
-    }
-
-    // Combine database custom models with detected ones
-    customModels.value = [...dbCustomModels, ...detectedCustomModels]
-
-    console.log(`Loaded ${dbCustomModels.length} custom models from database and detected ${detectedCustomModels.length} additional custom models`)
+    console.log(`Loaded ${dbCustomModels.length} custom model configurations from database`)
   } catch (error) {
     console.error('Failed to load custom models:', error)
+    customModels.value = []
   } finally {
     isLoadingCustom.value = false
   }
@@ -1734,7 +1963,7 @@ async function deleteCustomModel(id, name) {
 
   try {
     let dbDeleted = false
-    let ollamaDeleted = false
+    let modelDeleted = false
 
     // Check if this is a detected model (not in database)
     const isDetected = typeof id === 'string' && id.startsWith('detected-')
@@ -1753,22 +1982,22 @@ async function deleteCustomModel(id, name) {
       }
     }
 
-    // Try to delete from Ollama (ignore error if model doesn't exist)
+    // Try to delete model (ignore error if model doesn't exist)
     try {
       await api.deleteModel(name)
-      ollamaDeleted = true
+      modelDeleted = true
     } catch (e) {
-      console.error('Failed to delete from Ollama (model might not exist):', e)
-      // Don't throw error - model might not exist in Ollama anymore
+      console.error('Failed to delete model (model might not exist):', e)
+      // Don't throw error - model might not exist anymore
     }
 
     // Show appropriate success message
-    if (dbDeleted && ollamaDeleted) {
+    if (dbDeleted && modelDeleted) {
       success(`Custom Model "${name}" vollständig gelöscht`)
     } else if (dbDeleted) {
-      success(`Custom Model "${name}" aus Datenbank gelöscht (war nicht in Ollama vorhanden)`)
-    } else if (ollamaDeleted) {
-      success(`Custom Model "${name}" aus Ollama gelöscht`)
+      success(`Custom Model "${name}" aus Datenbank gelöscht (war nicht vorhanden)`)
+    } else if (modelDeleted) {
+      success(`Custom Model "${name}" gelöscht`)
     } else {
       success(`Custom Model "${name}" entfernt`)
     }
@@ -1831,6 +2060,383 @@ function getIncompatibilityMessage(modelName) {
   }
 
   return getIncompatibilityReason(modelName, projectTokens)
+}
+
+// ============================================================================
+// HUGGINGFACE SEARCH & DISCOVERY
+// ============================================================================
+
+async function searchHuggingFace() {
+  if (!hfSearchQuery.value.trim()) return
+
+  isSearchingHF.value = true
+  try {
+    const results = await api.searchHuggingFaceModels(hfSearchQuery.value, 50)
+    hfSearchResults.value = results
+    console.log('HuggingFace search results:', results.length)
+  } catch (error) {
+    console.error('HuggingFace search failed:', error)
+    alert('❌ Suche fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+async function loadPopularHF() {
+  isSearchingHF.value = true
+  hfSearchQuery.value = ''
+  try {
+    const results = await api.getPopularHuggingFaceModels(30)
+    hfSearchResults.value = results
+    console.log('Popular HuggingFace models:', results.length)
+  } catch (error) {
+    console.error('Failed to load popular models:', error)
+    alert('❌ Laden fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+async function loadGermanHF() {
+  isSearchingHF.value = true
+  hfSearchQuery.value = ''
+  try {
+    const results = await api.getGermanHuggingFaceModels(30)
+    hfSearchResults.value = results
+    console.log('German HuggingFace models:', results.length)
+  } catch (error) {
+    console.error('Failed to load German models:', error)
+    alert('❌ Laden fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+async function loadInstructHF() {
+  isSearchingHF.value = true
+  hfSearchQuery.value = ''
+  try {
+    const results = await api.getInstructHuggingFaceModels(30)
+    hfSearchResults.value = results
+    console.log('Instruct HuggingFace models:', results.length)
+  } catch (error) {
+    console.error('Failed to load instruct models:', error)
+    alert('❌ Laden fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+async function loadCodeHF() {
+  isSearchingHF.value = true
+  hfSearchQuery.value = ''
+  try {
+    const results = await api.getCodeHuggingFaceModels(30)
+    hfSearchResults.value = results
+    console.log('Code HuggingFace models:', results.length)
+  } catch (error) {
+    console.error('Failed to load code models:', error)
+    alert('❌ Laden fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+async function loadVisionHF() {
+  isSearchingHF.value = true
+  hfSearchQuery.value = ''
+  try {
+    const results = await api.getVisionHuggingFaceModels(20)
+    hfSearchResults.value = results
+    console.log('Vision HuggingFace models:', results.length)
+  } catch (error) {
+    console.error('Failed to load vision models:', error)
+    alert('❌ Laden fehlgeschlagen: ' + error.message)
+  } finally {
+    isSearchingHF.value = false
+  }
+}
+
+function clearHFSearch() {
+  hfSearchQuery.value = ''
+  hfSearchResults.value = []
+}
+
+async function showHFModelDetails(model) {
+  // TODO: Show detailed modal with full README, files, etc.
+  console.log('Show details for:', model)
+  alert(`📄 Details für: ${model.displayName || model.name}\n\nDownloads: ${formatDownloads(model.downloads)}\nLikes: ${model.likes}\nLizenz: ${model.license || 'N/A'}\n\nErstellungsdatum: ${model.createdAt ? new Date(model.createdAt).toLocaleDateString('de-DE') : 'N/A'}\nLetztes Update: ${model.lastModified ? new Date(model.lastModified).toLocaleDateString('de-DE') : 'N/A'}`)
+}
+
+async function downloadHFModel(model) {
+  // Check if this is a Model Store model (curated models from ModelRegistry)
+  // Model Store models have an 'id' property and come from our curated list
+  if (model.id && model.filename && !model.siblings) {
+    console.log('Detected Model Store model:', model.id)
+    await downloadModelStoreModel(model)
+    return
+  }
+
+  // If siblings are missing (from search/german/popular endpoints), load details first
+  if (!model.siblings || model.siblings.length === 0) {
+    console.log('Loading model details for:', model.modelId || model.id)
+    try {
+      const detailsResponse = await api.getHuggingFaceModelDetails(model.modelId || model.id)
+      if (detailsResponse && detailsResponse.siblings) {
+        model.siblings = detailsResponse.siblings
+        console.log(`Loaded ${model.siblings.length} files for model`)
+      } else {
+        alert('❌ Keine Dateien gefunden für dieses Modell')
+        return
+      }
+    } catch (error) {
+      console.error('Failed to load model details:', error)
+      alert('❌ Fehler beim Laden der Modelldetails: ' + error.message)
+      return
+    }
+  }
+
+  // For HuggingFace models, we need to select which file to download
+  if (model.siblings && model.siblings.length > 0) {
+    const ggufFiles = model.siblings.filter(f => f.toLowerCase().endsWith('.gguf'))
+    if (ggufFiles.length === 0) {
+      alert('❌ Keine GGUF-Dateien gefunden für dieses Modell')
+      return
+    }
+
+    if (ggufFiles.length === 1) {
+      // Only one file - download directly
+      confirmAndDownloadHFFile(model, ggufFiles[0])
+    } else {
+      // Multiple files - show modal to let user choose
+      fileSelectionModel.value = model
+      fileSelectionFiles.value = ggufFiles
+      selectedFileIndex.value = 0
+      showFileSelectionModal.value = true
+    }
+  } else {
+    alert('❌ Keine Dateien gefunden für dieses Modell')
+  }
+}
+
+async function downloadModelStoreModel(model) {
+  // Prevent multiple downloads
+  if (showLlamaCppDownloadModal.value) {
+    alert('⚠️ Es läuft bereits ein Download. Bitte warte, bis dieser abgeschlossen ist.')
+    return
+  }
+
+  console.log('Starting Model Store download for:', model.id)
+
+  // Show download modal
+  showLlamaCppDownloadModal.value = true
+  currentDownloadModel.value = model.displayName
+  downloadProgress.value = 0
+  downloadedSize.value = '0 MB'
+  totalSize.value = model.sizeHuman || 'N/A'
+  downloadSpeed.value = '0.0'
+  downloadStatusMessages.value = ['📥 Starte Download...']
+
+  // Create EventSource for SSE
+  const eventSource = new EventSource(`/api/model-store/download/${model.id}`)
+
+  eventSource.addEventListener('progress', (event) => {
+    const message = event.data
+    console.log('Progress:', message)
+
+    // Add to status messages
+    downloadStatusMessages.value.push(message)
+    if (downloadStatusMessages.value.length > 10) {
+      downloadStatusMessages.value.shift() // Keep last 10 messages
+    }
+
+    // Parse progress from message like "⬇️ 45% - 1.2 GB / 2.0 GB - 5.3 MB/s"
+    const percentMatch = message.match(/(\d+)%/)
+    const downloadedMatch = message.match(/([\d.]+\s+[GM]B)\s+\//)
+    const totalMatch = message.match(/\/\s+([\d.]+\s+[GM]B)/)
+    const speedMatch = message.match(/([\d.]+)\s+MB\/s/)
+
+    if (percentMatch) {
+      downloadProgress.value = parseInt(percentMatch[1])
+    }
+    if (downloadedMatch) {
+      downloadedSize.value = downloadedMatch[1]
+    }
+    if (totalMatch) {
+      totalSize.value = totalMatch[1]
+    }
+    if (speedMatch) {
+      downloadSpeed.value = parseFloat(speedMatch[1]).toFixed(1)
+    }
+  })
+
+  eventSource.addEventListener('complete', (event) => {
+    console.log('Download complete:', event.data)
+    downloadStatusMessages.value.push('✅ ' + event.data)
+
+    eventSource.close()
+
+    setTimeout(() => {
+      showLlamaCppDownloadModal.value = false
+      downloadProgress.value = 0
+      downloadStatusMessages.value = []
+
+      // Refresh installed models
+      loadInstalledModels()
+
+      alert('✅ Download erfolgreich!\n\nModell: ' + model.displayName + '\n\nDas Modell ist jetzt verfügbar.')
+    }, 2000)
+  })
+
+  eventSource.addEventListener('error', (event) => {
+    console.error('Download error:', event)
+
+    let errorMessage = 'Unbekannter Fehler'
+    if (event.data) {
+      try {
+        errorMessage = event.data
+      } catch (e) {
+        errorMessage = 'Download fehlgeschlagen'
+      }
+    }
+
+    downloadStatusMessages.value.push('❌ ' + errorMessage)
+    eventSource.close()
+
+    setTimeout(() => {
+      showLlamaCppDownloadModal.value = false
+      alert('❌ Download fehlgeschlagen!\n\n' + errorMessage)
+    }, 2000)
+  })
+
+  eventSource.onerror = (error) => {
+    console.error('EventSource error:', error)
+    eventSource.close()
+
+    setTimeout(() => {
+      showLlamaCppDownloadModal.value = false
+      alert('❌ Download-Verbindung unterbrochen!')
+    }, 1000)
+  }
+}
+
+async function confirmAndDownloadHFFile(model, filename) {
+  // Prevent multiple downloads
+  if (showLlamaCppDownloadModal.value) {
+    alert('⚠️ Es läuft bereits ein Download. Bitte warte, bis dieser abgeschlossen ist.')
+    return
+  }
+
+  const confirmed = confirm(`Möchtest du "${filename}" herunterladen?\n\nModell: ${model.displayName || model.name}\nAutor: ${model.author}\n\nDieser Download kann lange dauern!`)
+  if (!confirmed) {
+    return
+  }
+
+  console.log('Starting HuggingFace download:', model.modelId, filename)
+
+  // Show download modal
+  showLlamaCppDownloadModal.value = true
+  currentDownloadModel.value = filename
+  downloadStatusMessages.value = []
+  downloadStatusMessages.value.push('🚀 Starte HuggingFace Download...')
+
+  // Create EventSource for Server-Sent Events (same as Registry download)
+  const eventSource = new EventSource(
+    `/api/model-store/huggingface/download?modelId=${encodeURIComponent(model.modelId)}&filename=${encodeURIComponent(filename)}`
+  )
+  activeDownloadEventSource.value = eventSource
+
+  eventSource.addEventListener('progress', (event) => {
+    const message = event.data
+    downloadStatusMessages.value.push(message)
+
+    // Parse progress (same format as registry download)
+    const percentMatch = message.match(/(\d+)%/)
+    const downloadedMatch = message.match(/([\d.]+\s+[GM]B)\s+\//)
+    const totalMatch = message.match(/\/\s+([\d.]+\s+[GM]B)/)
+    const speedMatch = message.match(/([\d.]+)\s+MB\/s/)
+
+    if (percentMatch) currentDownloadProgress.value = parseInt(percentMatch[1])
+    if (downloadedMatch) currentDownloadedSize.value = downloadedMatch[1]
+    if (totalMatch) currentTotalSize.value = totalMatch[1]
+    if (speedMatch) currentSpeed.value = parseFloat(speedMatch[1]).toFixed(1)
+  })
+
+  eventSource.addEventListener('complete', (event) => {
+    downloadStatusMessages.value.push('✅ ' + event.data)
+    eventSource.close()
+
+    // Reload models
+    loadModels()
+
+    setTimeout(() => {
+      showLlamaCppDownloadModal.value = false
+      currentDownloadModelId.value = ''
+    }, 2000)
+
+    success('Modell heruntergeladen!')
+  })
+
+  eventSource.addEventListener('error', (event) => {
+    downloadStatusMessages.value.push('❌ Download fehlgeschlagen')
+    eventSource.close()
+    showLlamaCppDownloadModal.value = false
+    currentDownloadModelId.value = ''
+    errorToast('Download fehlgeschlagen')
+  })
+}
+
+// File Selection Modal Handlers
+function confirmFileSelection() {
+  if (fileSelectionModel.value && fileSelectionFiles.value.length > 0) {
+    const selectedFile = fileSelectionFiles.value[selectedFileIndex.value]
+    confirmAndDownloadHFFile(fileSelectionModel.value, selectedFile)
+    closeFileSelectionModal()
+  }
+}
+
+function closeFileSelectionModal() {
+  showFileSelectionModal.value = false
+  fileSelectionModel.value = null
+  fileSelectionFiles.value = []
+  selectedFileIndex.value = 0
+}
+
+function formatDownloads(downloads) {
+  if (!downloads) return '0'
+  if (downloads >= 1000000) return `${(downloads / 1000000).toFixed(1)}M`
+  if (downloads >= 1000) return `${(downloads / 1000).toFixed(1)}K`
+  return downloads.toString()
+}
+
+// GGUF Model Config Modal Functions
+async function openGgufConfigModal(modelName) {
+  try {
+    // Try to load existing config for this model
+    try {
+      const config = await api.getGgufModelConfigByName(modelName)
+      currentGgufConfig.value = config
+    } catch (e) {
+      // No existing config - create new one with this base model pre-selected
+      currentGgufConfig.value = null
+    }
+    showGgufConfigModal.value = true
+  } catch (error) {
+    console.error('Failed to load GGUF model config:', error)
+    errorToast('Fehler beim Laden der Konfiguration')
+  }
+}
+
+function closeGgufConfigModal() {
+  showGgufConfigModal.value = false
+  currentGgufConfig.value = null
+}
+
+async function handleGgufConfigSaved() {
+  success('GGUF Model-Konfiguration gespeichert')
+  closeGgufConfigModal()
+  // Refresh models to show updated configs
+  await refreshModels()
 }
 </script>
 

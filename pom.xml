@@ -86,6 +86,13 @@
             <version>4.12.0</version>
         </dependency>
 
+        <!-- java-llama.cpp (Native JNI Binding für llama.cpp) -->
+        <dependency>
+            <groupId>de.kherud</groupId>
+            <artifactId>llama</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
         <!-- OSHI (Hardware Information - CPU, GPU, RAM) -->
         <dependency>
             <groupId>com.github.oshi</groupId>
@@ -125,6 +132,26 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- Markdown to HTML (for PDF reports) -->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>0.64.8</version>
+        </dependency>
+
+        <!-- iText7 for PDF generation (better than PDFBox for creation) -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.2.5</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -135,6 +162,32 @@
 
     <build>
         <plugins>
+
+            <!-- Maven Clean Plugin - Clean frontend build artifacts -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <filesets>
+                        <!-- Clean Vue.js build output -->
+                        <fileset>
+                            <directory>frontend/dist</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <!-- Clean Vite cache -->
+                        <fileset>
+                            <directory>frontend/node_modules/.vite</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <!-- Clean any cached frontend files in target -->
+                        <fileset>
+                            <directory>target/classes/static</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
             <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>

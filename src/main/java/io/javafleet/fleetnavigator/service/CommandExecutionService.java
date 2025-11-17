@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Service for managing remote command execution on Fleet Officers
+ * Service for managing remote command execution on Fleet Mates
  */
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class CommandExecutionService {
     private final Map<String, StringBuilder> outputBuffers = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> sessionStartTimes = new ConcurrentHashMap<>();
 
-    // Command history (last 100 commands per officer)
+    // Command history (last 100 commands per mate)
     private final Map<String, List<CommandHistoryEntry>> commandHistory = new ConcurrentHashMap<>();
 
     // Whitelisted commands (base commands only)
@@ -59,7 +59,7 @@ public class CommandExecutionService {
      * Create a new command execution session
      */
     public String createSession(CommandExecutionRequest request) {
-        String sessionId = generateSessionId(request.getOfficerId());
+        String sessionId = generateSessionId(request.getMateId());
 
         // Validate command
         validateCommand(request.getCommand());
@@ -69,8 +69,8 @@ public class CommandExecutionService {
         outputBuffers.put(sessionId, new StringBuilder());
         sessionStartTimes.put(sessionId, LocalDateTime.now());
 
-        log.info("Created command execution session: {} for officer: {}, command: {}",
-                sessionId, request.getOfficerId(), request.getCommand());
+        log.info("Created command execution session: {} for mate: {}, command: {}",
+                sessionId, request.getMateId(), request.getCommand());
 
         return sessionId;
     }
@@ -146,7 +146,7 @@ public class CommandExecutionService {
         // Create history entry
         CommandHistoryEntry historyEntry = CommandHistoryEntry.builder()
             .sessionId(sessionId)
-            .officerId(request.getOfficerId())
+            .mateId(request.getMateId())
             .command(request.getCommand())
             .fullCommand(buildFullCommand(request))
             .exitCode(exitCode)
@@ -157,7 +157,7 @@ public class CommandExecutionService {
             .build();
 
         // Add to history
-        addToHistory(request.getOfficerId(), historyEntry);
+        addToHistory(request.getMateId(), historyEntry);
 
         // Send completion event
         sendEvent(sessionId, "done", Map.of(
@@ -174,10 +174,10 @@ public class CommandExecutionService {
     }
 
     /**
-     * Get command history for an officer
+     * Get command history for a mate
      */
-    public List<CommandHistoryEntry> getHistory(String officerId) {
-        return commandHistory.getOrDefault(officerId, Collections.emptyList());
+    public List<CommandHistoryEntry> getHistory(String mateId) {
+        return commandHistory.getOrDefault(mateId, Collections.emptyList());
     }
 
     /**
@@ -189,8 +189,8 @@ public class CommandExecutionService {
 
     // === Private Helper Methods ===
 
-    private String generateSessionId(String officerId) {
-        return String.format("%s-cmd-%d", officerId, System.currentTimeMillis());
+    private String generateSessionId(String mateId) {
+        return String.format("%s-cmd-%d", mateId, System.currentTimeMillis());
     }
 
     private void validateCommand(String command) {
@@ -227,12 +227,12 @@ public class CommandExecutionService {
         }
     }
 
-    private void addToHistory(String officerId, CommandHistoryEntry entry) {
-        commandHistory.computeIfAbsent(officerId, k -> new CopyOnWriteArrayList<>())
+    private void addToHistory(String mateId, CommandHistoryEntry entry) {
+        commandHistory.computeIfAbsent(mateId, k -> new CopyOnWriteArrayList<>())
             .add(0, entry); // Add to beginning
 
         // Keep only last 100 entries
-        List<CommandHistoryEntry> history = commandHistory.get(officerId);
+        List<CommandHistoryEntry> history = commandHistory.get(mateId);
         if (history.size() > 100) {
             history.subList(100, history.size()).clear();
         }

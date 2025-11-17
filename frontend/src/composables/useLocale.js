@@ -79,12 +79,7 @@ const translations = {
       notOperational: 'System nicht vollständig einsatzbereit',
       warnings: 'Systemwarnungen',
       checkAgain: '🔄 Erneut prüfen',
-      ollamaInstall: '📦 Ollama Installation:',
-      modelInstall: '🤖 Modell Installation:',
-      afterInstall: 'Nach der Installation:',
-      recommendedForLetters: 'Empfohlen für Briefe:',
-      largeAndPowerful: 'Groß und leistungsstark:',
-      fastAndSmall: 'Schnell und klein:'
+      modelInstall: '🤖 Modell Installation:'
     },
     sidebar: {
       newChat: 'Neuer Chat',
@@ -92,6 +87,14 @@ const translations = {
       settings: 'Einstellungen',
       letters: 'Briefe',
       agents: 'Agenten'
+    },
+    download: {
+      title: 'Projekt bereit zum Download',
+      description: 'Dein generiertes Projekt als ZIP-Datei',
+      button: 'Herunterladen',
+      downloading: 'Lädt herunter...',
+      success: 'Download erfolgreich!',
+      error: 'Download fehlgeschlagen. Bitte versuche es erneut.'
     }
   },
   en: {
@@ -143,12 +146,7 @@ const translations = {
       notOperational: 'System not fully operational',
       warnings: 'System Warnings',
       checkAgain: '🔄 Check again',
-      ollamaInstall: '📦 Ollama Installation:',
-      modelInstall: '🤖 Model Installation:',
-      afterInstall: 'After installation:',
-      recommendedForLetters: 'Recommended for letters:',
-      largeAndPowerful: 'Large and powerful:',
-      fastAndSmall: 'Fast and small:'
+      modelInstall: '🤖 Model Installation:'
     },
     sidebar: {
       newChat: 'New Chat',
@@ -156,6 +154,14 @@ const translations = {
       settings: 'Settings',
       letters: 'Letters',
       agents: 'Agents'
+    },
+    download: {
+      title: 'Project ready for download',
+      description: 'Your generated project as ZIP file',
+      button: 'Download',
+      downloading: 'Downloading...',
+      success: 'Download successful!',
+      error: 'Download failed. Please try again.'
     }
   }
 }

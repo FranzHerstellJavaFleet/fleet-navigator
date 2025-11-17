@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -34,9 +35,11 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final GlobalStatsRepository globalStatsRepository;
-    private final OllamaService ollamaService;
+    private final LLMProviderService llmProviderService; // Uses java-llama-cpp provider
     private final ModelSelectionService modelSelectionService;
     private final SettingsService settingsService;
+    private final CodeGeneratorService codeGeneratorService;
+    private final ZipService zipService;
 
     // Thread pool for handling streaming requests
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -57,7 +60,7 @@ public class ChatService {
     }
 
     /**
-     * Send a message and get response from Ollama
+     * Send a message and get response from LLM (java-llama-cpp)
      */
     @Transactional
     public ChatResponse sendMessage(ChatRequest request) throws IOException {
@@ -122,7 +125,7 @@ public class ChatService {
         userMessage.setChat(chat);
         userMessage.setRole(MessageRole.USER);
         userMessage.setContent(request.getMessage());  // Save only user's message, not full context
-        userMessage.setTokens(ollamaService.estimateTokens(completeMessage));
+        userMessage.setTokens(llmProviderService.estimateTokens(completeMessage));
         userMessage = messageRepository.save(userMessage);
 
         // Auto-generate title from first message if still "New Chat"
@@ -145,11 +148,11 @@ public class ChatService {
             log.info("Smart model selection: {} (task type: {})", modelToUse, taskType);
         }
 
-        // Get response from Ollama (with request ID for cancellation)
+        // Get response from LLM provider (with request ID for cancellation)
         String response;
         if (request.getImages() != null && !request.getImages().isEmpty()) {
             // Use vision API for images
-            response = ollamaService.chatWithVision(
+            response = llmProviderService.chatWithVision(
                     modelToUse,
                     completeMessage,
                     request.getImages(),
@@ -158,7 +161,7 @@ public class ChatService {
             );
         } else {
             // Use regular generate API
-            response = ollamaService.chat(
+            response = llmProviderService.chat(
                     modelToUse,
                     completeMessage,
                     request.getSystemPrompt(),
@@ -172,7 +175,7 @@ public class ChatService {
         assistantMessage.setChat(chat);
         assistantMessage.setRole(MessageRole.ASSISTANT);
         assistantMessage.setContent(response);  // Store raw markdown
-        assistantMessage.setTokens(ollamaService.estimateTokens(response));
+        assistantMessage.setTokens(llmProviderService.estimateTokens(response));
         assistantMessage.setModelName(request.getModel());  // Store which model was used
         assistantMessage = messageRepository.save(assistantMessage);
 
@@ -182,13 +185,23 @@ public class ChatService {
         log.info("Chat {} - Sent message and received response ({} tokens)",
                 chat.getId(), assistantMessage.getTokens());
 
-        return new ChatResponse(
+        // Check if response contains downloadable code and auto-generate download
+        String downloadUrl = checkAndGenerateDownload(request.getMessage(), response);
+
+        ChatResponse chatResponse = new ChatResponse(
                 chat.getId(),
                 response,  // Return raw markdown for frontend to render
                 assistantMessage.getTokens(),
                 chat.getModel(),
                 requestId  // Include request ID for tracking
         );
+
+        // Add download URL if generated
+        if (downloadUrl != null) {
+            chatResponse.setDownloadUrl(downloadUrl);
+        }
+
+        return chatResponse;
     }
 
     /**
@@ -209,7 +222,7 @@ public class ChatService {
         emitter.onTimeout(() -> {
             log.warn("SSE emitter timed out for request: {}", requestId);
             isCompleted[0] = true;
-            ollamaService.cancelRequest(requestId);
+            llmProviderService.cancelRequest(requestId);
         });
 
         emitter.onCompletion(() -> {
@@ -220,7 +233,7 @@ public class ChatService {
         emitter.onError((ex) -> {
             log.error("SSE emitter error for request: {}", requestId, ex);
             isCompleted[0] = true;
-            ollamaService.cancelRequest(requestId);
+            llmProviderService.cancelRequest(requestId);
         });
 
         // IMPORTANT: Load chat WITH project and context files BEFORE async execution
@@ -341,7 +354,7 @@ public class ChatService {
                 userMessage.setChat(finalChat);
                 userMessage.setRole(MessageRole.USER);
                 userMessage.setContent(request.getMessage());  // Save only user's message, not full context
-                userMessage.setTokens(ollamaService.estimateTokens(completeMessage));
+                userMessage.setTokens(llmProviderService.estimateTokens(completeMessage));
                 messageRepository.save(userMessage);
 
                 // Auto-generate title from first message if still "New Chat"
@@ -359,9 +372,9 @@ public class ChatService {
                 // Collect full response for database storage
                 StringBuilder fullResponse = new StringBuilder();
 
-                // Stream response from Ollama
+                // Stream response from LLM provider
                 String finalCompleteMessage = completeMessage;
-                log.info("Calling Ollama chatStream for model: {}", finalModel);
+                log.info("Calling LLM provider chatStream for model: {}", finalModel);
                 log.info("📊 Request parameters - maxTokens: {}, temp: {}, topP: {}, topK: {}, repeatPenalty: {}",
                     request.getMaxTokens(), request.getTemperature(), request.getTopP(),
                     request.getTopK(), request.getRepeatPenalty());
@@ -377,7 +390,7 @@ public class ChatService {
                         log.info("Vision-Chaining enabled: Vision={}, Main={} (Smart Selection: {})",
                                 finalVisionModel, finalModel, finalUseSmartSelectionForVision);
 
-                        ollamaService.chatStreamWithVisionChaining(
+                        llmProviderService.chatStreamWithVisionChaining(
                                 request.getVisionModel() != null ? request.getVisionModel() : finalVisionModel,  // Vision Model from settings or request
                                 finalModel,  // Haupt-Model (smart selected or user chosen)
                                 finalCompleteMessage,
@@ -407,7 +420,7 @@ public class ChatService {
                         );
                     } else {
                         // Normal Vision Model (ohne Chaining)
-                        ollamaService.chatStreamWithVision(
+                        llmProviderService.chatStreamWithVision(
                                 finalModel,  // Smart selected or user chosen
                                 finalCompleteMessage,
                                 request.getImages(),
@@ -436,7 +449,7 @@ public class ChatService {
                         );
                     }
                 } else {
-                    ollamaService.chatStream(
+                    llmProviderService.chatStream(
                             finalModel,  // Smart selected or user chosen
                             finalCompleteMessage,
                             request.getSystemPrompt(),
@@ -468,14 +481,14 @@ public class ChatService {
                             request.getRepeatPenalty()   // Pass repeatPenalty
                     );
                 }
-                log.info("Ollama chatStream completed. Full response length: {}", fullResponse.length());
+                log.info("LLM chatStream completed. Full response length: {}", fullResponse.length());
 
                 // Save assistant message to database
                 Message assistantMessage = new Message();
                 assistantMessage.setChat(finalChat);
                 assistantMessage.setRole(MessageRole.ASSISTANT);
                 assistantMessage.setContent(fullResponse.toString());
-                assistantMessage.setTokens(ollamaService.estimateTokens(fullResponse.toString()));
+                assistantMessage.setTokens(llmProviderService.estimateTokens(fullResponse.toString()));
                 assistantMessage.setModelName(request.getModel());  // Store which model was used
                 messageRepository.save(assistantMessage);
 
@@ -505,17 +518,16 @@ public class ChatService {
                     try {
                         // Create user-friendly error message
                         String errorMessage = e.getMessage();
-                        if (errorMessage != null && errorMessage.contains("404") && errorMessage.contains("Ollama")) {
-                            errorMessage = "⚠️ Ollama ist nicht erreichbar!\n\n" +
-                                    "Bitte stelle sicher, dass Ollama läuft:\n" +
-                                    "• Windows: Starte Ollama Desktop App\n" +
-                                    "• Linux/Mac: Terminal: 'ollama serve'\n" +
-                                    "• Prüfe: http://localhost:11434/api/tags\n\n" +
-                                    "Installation: https://ollama.com/download";
+                        if (errorMessage != null && errorMessage.contains("404")) {
+                            errorMessage = "⚠️ LLM-Provider ist nicht erreichbar!\n\n" +
+                                    "Bitte stelle sicher, dass llama.cpp läuft:\n" +
+                                    "• Fleet Navigator sollte llama.cpp automatisch starten\n" +
+                                    "• Prüfe die Logs für Fehler beim Start\n" +
+                                    "• Stelle sicher, dass Modelle im ./models Verzeichnis vorhanden sind";
                         } else if (errorMessage != null && errorMessage.contains("Connection refused")) {
-                            errorMessage = "⚠️ Verbindung zu Ollama fehlgeschlagen!\n\n" +
-                                    "Ollama läuft nicht auf Port 11434.\n" +
-                                    "Bitte starte Ollama und versuche es erneut.";
+                            errorMessage = "⚠️ Verbindung zum LLM-Provider fehlgeschlagen!\n\n" +
+                                    "Der LLM-Provider läuft nicht.\n" +
+                                    "Bitte prüfe die Fleet Navigator Logs und starte neu.";
                         }
 
                         // Escape quotes for JSON
@@ -543,7 +555,7 @@ public class ChatService {
      */
     public boolean abortRequest(String requestId) {
         log.info("Aborting request: {}", requestId);
-        return ollamaService.cancelRequest(requestId);
+        return llmProviderService.cancelRequest(requestId);
     }
 
     /**
@@ -932,5 +944,71 @@ public class ChatService {
         html = html.replaceAll("<p>\\s*</p>", "");
 
         return html;
+    }
+
+    /**
+     * Check if AI response contains downloadable code and generate download
+     *
+     * @param userMessage The original user message
+     * @param aiResponse  The AI response
+     * @return Download URL if generated, null otherwise
+     */
+    private String checkAndGenerateDownload(String userMessage, String aiResponse) {
+        try {
+            // Check if user requested a downloadable project
+            String lowerMessage = userMessage.toLowerCase();
+            boolean wantsDownload = lowerMessage.contains("als zip") ||
+                                    lowerMessage.contains("zum download") ||
+                                    lowerMessage.contains("herunterladen") ||
+                                    lowerMessage.contains("download") ||
+                                    lowerMessage.contains("erstelle") && (
+                                            lowerMessage.contains("projekt") ||
+                                            lowerMessage.contains("maven") ||
+                                            lowerMessage.contains("spring boot") ||
+                                            lowerMessage.contains("application")
+                                    );
+
+            // Also check if response contains multiple code blocks (likely a project)
+            int codeBlockCount = countCodeBlocks(aiResponse);
+            boolean hasMultipleFiles = codeBlockCount >= 3;
+
+            if (!wantsDownload && !hasMultipleFiles) {
+                return null;
+            }
+
+            log.info("Detected download request - generating project ZIP (code blocks: {})", codeBlockCount);
+
+            // Generate project from AI response
+            Path projectPath = codeGeneratorService.generateProject(aiResponse);
+
+            // Create ZIP
+            String downloadId = UUID.randomUUID().toString();
+            Path zipPath = Path.of(codeGeneratorService.getTempDirectory(), downloadId + ".zip");
+            zipService.createZip(projectPath, zipPath);
+
+            // Return download URL
+            String downloadUrl = "/api/downloads/" + downloadId;
+            log.info("Generated download: {}", downloadUrl);
+
+            return downloadUrl;
+
+        } catch (Exception e) {
+            log.error("Failed to generate download", e);
+            return null;
+        }
+    }
+
+    /**
+     * Count code blocks in markdown
+     */
+    private int countCodeBlocks(String markdown) {
+        int count = 0;
+        String[] lines = markdown.split("\n");
+        for (String line : lines) {
+            if (line.trim().startsWith("```")) {
+                count++;
+            }
+        }
+        return count / 2; // Each block has start and end
     }
 }

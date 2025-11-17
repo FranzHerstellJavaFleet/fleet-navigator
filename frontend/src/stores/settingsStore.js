@@ -16,7 +16,7 @@ const defaultSettings = {
   temperature: 0.7,
   topP: 0.9,
   topK: 40,
-  repeatPenalty: 1.1,
+  repeatPenalty: 1.18,   // Erhöht auf 1.18 um Wiederholungen zu vermeiden (Llama-optimiert)
   contextLength: 32768,  // Erhöht für lange Ausgaben
   maxTokens: 32768,      // Erhöht für 15+ Seiten Text (~40k tokens)
 

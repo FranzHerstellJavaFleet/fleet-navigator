@@ -36,7 +36,8 @@ public class DocumentAgentService {
     private final AgentSettingsService agentSettingsService;
     private final PersonalInfoService personalInfoService;
 
-    @Value("${ollama.base-url}")
+    // DEPRECATED: Ollama support removed, this is kept for compatibility
+    @Value("${ollama.base-url:http://localhost:11434}")
     private String ollamaBaseUrl;
 
     /**

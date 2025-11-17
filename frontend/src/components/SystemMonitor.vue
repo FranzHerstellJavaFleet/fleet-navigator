@@ -17,7 +17,7 @@
             <ServerIcon class="w-5 h-5 text-white" />
           </div>
           <h3 class="text-lg font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Fleet Officers
+            Fleet Mates
           </h3>
         </div>
         <button
@@ -36,8 +36,8 @@
     </div>
 
     <div class="px-4 pb-4 space-y-4">
-      <!-- No Officers Connected -->
-      <div v-if="officers.length === 0" class="
+      <!-- No Mates Connected -->
+      <div v-if="mates.length === 0" class="
         bg-gradient-to-br from-gray-800/30 to-gray-900/30
         backdrop-blur-sm
         p-6 rounded-xl
@@ -45,15 +45,15 @@
         text-center
       ">
         <ServerIcon class="w-12 h-12 text-gray-600 mx-auto mb-3" />
-        <div class="text-sm font-medium text-gray-400 mb-1">Keine Fleet Officers verbunden</div>
+        <div class="text-sm font-medium text-gray-400 mb-1">Keine Fleet Maate verbunden</div>
         <div class="text-xs text-gray-500">
-          Starten Sie einen Fleet Officer um Hardware-Daten zu empfangen
+          Starten Sie einen Fleet Maat um Hardware-Daten zu empfangen
         </div>
       </div>
 
-      <!-- Officer Cards -->
-      <div v-for="officer in officers" :key="officer.officerId" class="space-y-4">
-        <!-- Officer Header -->
+      <!-- Mate Cards -->
+      <div v-for="mate in mates" :key="mate.mateId" class="space-y-4">
+        <!-- Mate Header -->
         <div class="
           bg-gradient-to-br from-fleet-orange-500/20 to-orange-600/20
           backdrop-blur-sm
@@ -64,24 +64,24 @@
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <ServerIcon class="w-5 h-5 text-fleet-orange-400" />
-              <span class="text-sm font-bold text-white">{{ officer.name }}</span>
+              <span class="text-sm font-bold text-white">{{ mate.name }}</span>
             </div>
             <span class="
               px-2.5 py-1 rounded-full text-xs font-semibold
               flex items-center gap-1.5
-            " :class="officer.status === 'ONLINE'
+            " :class="mate.status === 'ONLINE'
               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
               : 'bg-red-500/20 text-red-400 border border-red-500/30'">
-              <component :is="officer.status === 'ONLINE' ? CheckCircleIcon : XCircleIcon" class="w-3 h-3" />
-              {{ officer.status }}
+              <component :is="mate.status === 'ONLINE' ? CheckCircleIcon : XCircleIcon" class="w-3 h-3" />
+              {{ mate.status }}
             </span>
           </div>
-          <p class="text-xs text-gray-400">{{ officer.description }}</p>
-          <p class="text-xs text-gray-500 mt-1">ID: {{ officer.officerId }}</p>
+          <p class="text-xs text-gray-400">{{ mate.description }}</p>
+          <p class="text-xs text-gray-500 mt-1">ID: {{ mate.mateId }}</p>
         </div>
 
         <!-- Hardware Stats -->
-        <div v-if="officerStats[officer.officerId]" class="space-y-3">
+        <div v-if="mateStats[mate.mateId]" class="space-y-3">
           <!-- System Info -->
           <div class="
             bg-gradient-to-br from-gray-800/50 to-gray-900/50
@@ -97,22 +97,22 @@
             <div class="space-y-2 text-xs">
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Hostname</span>
-                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].system?.hostname || 'N/A' }}</span>
+                <span class="text-gray-200 font-medium">{{ mateStats[mate.mateId].system?.hostname || 'N/A' }}</span>
               </div>
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">OS</span>
                 <span class="text-gray-200 font-medium">
-                  {{ officerStats[officer.officerId].system?.platform || 'N/A' }}
-                  {{ officerStats[officer.officerId].system?.platform_version || '' }}
+                  {{ mateStats[mate.mateId].system?.platform || 'N/A' }}
+                  {{ mateStats[mate.mateId].system?.platform_version || '' }}
                 </span>
               </div>
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Kernel</span>
-                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].system?.kernel_version || 'N/A' }}</span>
+                <span class="text-gray-200 font-medium">{{ mateStats[mate.mateId].system?.kernel_version || 'N/A' }}</span>
               </div>
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Uptime</span>
-                <span class="text-gray-200 font-medium">{{ formatUptime(officerStats[officer.officerId].system?.uptime) }}</span>
+                <span class="text-gray-200 font-medium">{{ formatUptime(mateStats[mate.mateId].system?.uptime) }}</span>
               </div>
             </div>
           </div>
@@ -131,21 +131,21 @@
                 <span class="text-sm font-medium text-gray-300">CPU</span>
               </div>
               <span class="text-sm font-bold text-fleet-orange-500 bg-fleet-orange-500/10 px-2.5 py-1 rounded-lg">
-                {{ officerStats[officer.officerId].cpu?.usage_percent?.toFixed(1) || '0.0' }}%
+                {{ mateStats[mate.mateId].cpu?.usage_percent?.toFixed(1) || '0.0' }}%
               </span>
             </div>
             <div class="space-y-2 text-xs mb-3">
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Modell</span>
-                <span class="text-gray-200 font-medium text-right">{{ getCpuModel(officerStats[officer.officerId].cpu?.model) }}</span>
+                <span class="text-gray-200 font-medium text-right">{{ getCpuModel(mateStats[mate.mateId].cpu?.model) }}</span>
               </div>
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Kerne</span>
-                <span class="text-gray-200 font-medium">{{ officerStats[officer.officerId].cpu?.cores || 0 }}</span>
+                <span class="text-gray-200 font-medium">{{ mateStats[mate.mateId].cpu?.cores || 0 }}</span>
               </div>
               <div class="flex justify-between p-2 rounded-lg bg-gray-900/30">
                 <span class="text-gray-400">Takt</span>
-                <span class="text-gray-200 font-medium">{{ (officerStats[officer.officerId].cpu?.mhz || 0).toFixed(0) }} MHz</span>
+                <span class="text-gray-200 font-medium">{{ (mateStats[mate.mateId].cpu?.mhz || 0).toFixed(0) }} MHz</span>
               </div>
             </div>
 
@@ -157,7 +157,7 @@
               </div>
               <div class="space-y-1.5">
                 <div
-                  v-for="(usage, index) in officerStats[officer.officerId].cpu?.per_core || []"
+                  v-for="(usage, index) in mateStats[mate.mateId].cpu?.per_core || []"
                   :key="index"
                   class="flex items-center gap-2"
                 >
@@ -172,8 +172,8 @@
                   <span class="text-xs font-medium w-12 text-right" :class="getCpuTextColor(usage)">
                     {{ usage.toFixed(1) }}%
                   </span>
-                  <span class="text-xs w-10 text-right" :class="getTempTextColor(getCoreTemp(officer.officerId, index))">
-                    {{ getCoreTemp(officer.officerId, index) }}°C
+                  <span class="text-xs w-10 text-right" :class="getTempTextColor(getCoreTemp(mate.mateId, index))">
+                    {{ getCoreTemp(mate.mateId, index) }}°C
                   </span>
                 </div>
               </div>
@@ -194,24 +194,24 @@
                 <span class="text-sm font-medium text-gray-300">RAM</span>
               </div>
               <span class="text-sm font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-lg">
-                {{ officerStats[officer.officerId].memory?.used_percent?.toFixed(1) || '0.0' }}%
+                {{ mateStats[mate.mateId].memory?.used_percent?.toFixed(1) || '0.0' }}%
               </span>
             </div>
             <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden mb-2">
               <div
                 class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2.5 rounded-full transition-all duration-500"
-                :style="{ width: Math.min(officerStats[officer.officerId].memory?.used_percent || 0, 100) + '%' }"
+                :style="{ width: Math.min(mateStats[mate.mateId].memory?.used_percent || 0, 100) + '%' }"
               ></div>
             </div>
             <div class="text-xs text-gray-400">
-              {{ formatBytes(officerStats[officer.officerId].memory?.used) }} /
-              {{ formatBytes(officerStats[officer.officerId].memory?.total) }}
+              {{ formatBytes(mateStats[mate.mateId].memory?.used) }} /
+              {{ formatBytes(mateStats[mate.mateId].memory?.total) }}
             </div>
           </div>
 
           <!-- Disk -->
           <div
-            v-for="disk in officerStats[officer.officerId].disk || []"
+            v-for="disk in mateStats[mate.mateId].disk || []"
             :key="disk.mount_point"
             class="
               bg-gradient-to-br from-gray-800/50 to-gray-900/50
@@ -247,7 +247,7 @@
 
           <!-- Temperature -->
           <div
-            v-if="getCpuPackageTemp(officer.officerId)"
+            v-if="getCpuPackageTemp(mate.mateId)"
             class="
               bg-gradient-to-br from-gray-800/50 to-gray-900/50
               backdrop-blur-sm
@@ -263,9 +263,9 @@
               </div>
               <span
                 class="text-sm font-bold px-2.5 py-1 rounded-lg"
-                :class="getTempBadgeColor(getCpuPackageTemp(officer.officerId))"
+                :class="getTempBadgeColor(getCpuPackageTemp(mate.mateId))"
               >
-                {{ getCpuPackageTemp(officer.officerId) }}°C
+                {{ getCpuPackageTemp(mate.mateId) }}°C
               </span>
             </div>
           </div>
@@ -325,17 +325,17 @@ import axios from 'axios'
 
 defineEmits(['close'])
 
-const officers = ref([])
-const officerStats = ref({})
+const mates = ref([])
+const mateStats = ref({})
 const isRefreshing = ref(false)
 let intervalId = null
 
 onMounted(async () => {
-  await loadOfficers()
+  await loadMates()
   await loadAllStats()
   // Auto-refresh every 5 seconds
   intervalId = setInterval(async () => {
-    await loadOfficers()
+    await loadMates()
     await loadAllStats()
   }, 5000)
 })
@@ -344,23 +344,23 @@ onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
 })
 
-async function loadOfficers() {
+async function loadMates() {
   try {
-    const response = await axios.get('/api/fleet-officer/officers')
-    officers.value = response.data
+    const response = await axios.get('/api/fleet-mate/mates')
+    mates.value = response.data
   } catch (error) {
-    console.error('Failed to load officers:', error)
+    console.error('Failed to load mates:', error)
   }
 }
 
 async function loadAllStats() {
-  for (const officer of officers.value) {
-    if (officer.status === 'ONLINE') {
+  for (const mate of mates.value) {
+    if (mate.status === 'ONLINE') {
       try {
-        const response = await axios.get(`/api/fleet-officer/officers/${officer.officerId}/stats`)
-        officerStats.value[officer.officerId] = response.data
+        const response = await axios.get(`/api/fleet-mate/mates/${mate.mateId}/stats`)
+        mateStats.value[mate.mateId] = response.data
       } catch (error) {
-        console.error(`Failed to load stats for ${officer.officerId}:`, error)
+        console.error(`Failed to load stats for ${mate.mateId}:`, error)
       }
     }
   }
@@ -369,7 +369,7 @@ async function loadAllStats() {
 async function refreshAllData() {
   isRefreshing.value = true
   try {
-    await loadOfficers()
+    await loadMates()
     await loadAllStats()
   } finally {
     setTimeout(() => {
@@ -428,14 +428,14 @@ function getTempBadgeColor(temp) {
   return 'bg-red-500/20 text-red-400'
 }
 
-function getCoreTemp(officerId, coreIndex) {
-  const sensors = officerStats.value[officerId]?.temperature?.sensors || []
+function getCoreTemp(mateId, coreIndex) {
+  const sensors = mateStats.value[mateId]?.temperature?.sensors || []
   const coreSensor = sensors.find(s => s.name === `coretemp_core_${coreIndex}`)
   return coreSensor ? coreSensor.temperature.toFixed(0) : 'N/A'
 }
 
-function getCpuPackageTemp(officerId) {
-  const sensors = officerStats.value[officerId]?.temperature?.sensors || []
+function getCpuPackageTemp(mateId) {
+  const sensors = mateStats.value[mateId]?.temperature?.sensors || []
   const packageSensor = sensors.find(s => s.name && s.name.includes('coretemp_package'))
   return packageSensor ? packageSensor.temperature.toFixed(0) : null
 }

@@ -280,7 +280,7 @@ function formatBytes(bytes) {
 }
 
 async function confirmDelete() {
-  if (!confirm(`Möchtest du das Custom Model "${props.model.name}" wirklich löschen?\n\nHinweis: Das Modell wird nur aus der Datenbank gelöscht, bleibt aber in Ollama erhalten.`)) {
+  if (!confirm(`Möchtest du das Custom Model "${props.model.name}" wirklich löschen?\n\nHinweis: Das Modell wird nur aus der Datenbank gelöscht.`)) {
     return
   }
 

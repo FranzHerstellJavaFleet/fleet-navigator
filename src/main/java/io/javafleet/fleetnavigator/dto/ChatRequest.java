@@ -27,10 +27,23 @@ public class ChatRequest {
     // Language setting for output
     private String language = "de";  // "de", "es", "tr", "fr"
 
-    // Model parameters for generation control
+    // Model parameters for generation control (DEPRECATED - use samplingParameters instead)
+    @Deprecated
     private Integer maxTokens;      // Maximum tokens to generate (num_predict in Ollama)
+    @Deprecated
     private Double temperature;     // Randomness (0.0-2.0)
+    @Deprecated
     private Double topP;           // Nucleus sampling
+    @Deprecated
     private Integer topK;          // Top-K sampling
+    @Deprecated
     private Double repeatPenalty;  // Penalize repetitions
+
+    // Advanced Sampling Parameters (for ALL models - text and vision)
+    // If provided, overrides deprecated individual parameters above
+    private SamplingParameters samplingParameters;
+
+    // Legacy: Vision-specific parameters (DEPRECATED - use samplingParameters instead)
+    @Deprecated
+    private SamplingParameters visionParameters;
 }

@@ -19,27 +19,18 @@
           </ul>
         </div>
 
-        <!-- Installation Instructions -->
-        <div v-if="!health.ollamaAvailable" class="mt-3 p-3 bg-white dark:bg-gray-800 rounded-md">
-          <p class="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            {{ isGerman ? '📦 Ollama Installation:' : '📦 Ollama Installation:' }}
-          </p>
-          <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1 font-mono">
-            <p>Linux:   <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">curl -fsSL https://ollama.ai/install.sh | sh</code></p>
-            <p>macOS:   <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">brew install ollama</code></p>
-            <p>Windows: <a href="https://ollama.ai/download/windows" target="_blank" class="text-blue-600 hover:underline">https://ollama.ai/download/windows</a></p>
-            <p class="mt-2">{{ isGerman ? 'Nach der Installation:' : 'After installation:' }} <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">ollama serve</code></p>
-          </div>
-        </div>
-
-        <div v-if="!health.hasModels && health.ollamaAvailable" class="mt-3 p-3 bg-white dark:bg-gray-800 rounded-md">
+        <!-- Model Installation Instructions -->
+        <div v-if="!health.hasModels" class="mt-3 p-3 bg-white dark:bg-gray-800 rounded-md">
           <p class="font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {{ isGerman ? '🤖 Modell Installation:' : '🤖 Model Installation:' }}
           </p>
-          <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1 font-mono">
-            <p>{{ isGerman ? 'Empfohlen für Briefe:' : 'Recommended for letters:' }} <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">ollama pull llama3.2</code></p>
-            <p>{{ isGerman ? 'Groß und leistungsstark:' : 'Large and powerful:' }} <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">ollama pull llama3.1:70b</code></p>
-            <p>{{ isGerman ? 'Schnell und klein:' : 'Fast and small:' }} <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">ollama pull llama3.2:3b</code></p>
+          <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+            <p>{{ isGerman ? 'Öffne den Model Manager in den Einstellungen und lade GGUF-Modelle aus dem Model Store herunter.' : 'Open the Model Manager in Settings and download GGUF models from the Model Store.' }}</p>
+            <p class="font-semibold">{{ isGerman ? 'Empfohlen:' : 'Recommended:' }}</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Qwen 2.5 (3B) - Instruct</strong> - {{ isGerman ? 'Exzellentes Deutsch, klein und schnell (2.1 GB)' : 'Excellent German, small and fast (2.1 GB)' }}</li>
+              <li><strong>Phi-3.5-Mini</strong> - {{ isGerman ? 'Kompakt und leistungsstark (2.4 GB)' : 'Compact and powerful (2.4 GB)' }}</li>
+            </ul>
           </div>
         </div>
 
@@ -84,7 +75,6 @@ import api from '../services/api'
 
 const health = ref({
   healthy: true,
-  ollamaAvailable: false,
   hasModels: false,
   sufficientMemory: true,
   warnings: [],

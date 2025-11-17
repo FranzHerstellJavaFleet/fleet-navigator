@@ -1,62 +1,59 @@
 package io.javafleet.fleetnavigator.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javafleet.fleetnavigator.dto.LogAnalysisRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Service for AI-powered log analysis using Ollama
+ * Service for AI-powered log analysis using LLMProviderService
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class LogAnalysisService {
 
-    @Value("${ollama.base-url:http://localhost:11434}")
-    private String ollamaBaseUrl;
-
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
-    private final ExecutorService executorService;
+    private final LLMProviderService llmProviderService;
+    private final SettingsService settingsService;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     // Store active analysis sessions
     private final Map<String, AnalysisSession> activeSessions = new ConcurrentHashMap<>();
 
-    public LogAnalysisService() {
-        this.restTemplate = new RestTemplate();
-        this.objectMapper = new ObjectMapper();
-        this.executorService = Executors.newCachedThreadPool();
-    }
-
     /**
      * Create pending session (before log is read) so SSE can connect
      */
-    public void createPendingSession(String sessionId, String officerId, LogAnalysisRequest request) {
+    public void createPendingSession(String sessionId, String mateId, LogAnalysisRequest request) {
+        // Get model from settings
+        String modelName;
+        try {
+            modelName = settingsService.getSelectedModel();
+            if (modelName == null || modelName.isEmpty()) {
+                modelName = "qwen2.5-coder-3b-instruct-q4_k_m.gguf";
+            }
+        } catch (Exception e) {
+            log.warn("Could not load selected model from settings, using default", e);
+            modelName = "qwen2.5-coder-3b-instruct-q4_k_m.gguf";
+        }
+
         AnalysisSession session = new AnalysisSession();
         session.sessionId = sessionId;
-        session.officerId = officerId;
-        session.model = request.getModel() != null ? request.getModel() : "mistral:latest";
+        session.mateId = mateId;
+        session.model = modelName;
         session.prompt = request.getPrompt();
         session.logContent = null; // Will be set later when log is read
         session.emitter = null; // Will be set when SSE connects
 
         activeSessions.put(sessionId, session);
 
-        log.info("Created pending analysis session: {} for officer: {}", sessionId, officerId);
+        log.info("Created pending analysis session: {} for mate: {} with model: {}", sessionId, mateId, modelName);
     }
 
     /**
@@ -78,7 +75,10 @@ public class LogAnalysisService {
             try {
                 session.emitter.send(SseEmitter.event()
                     .name("progress")
-                    .data(Map.of("progress", progress)));
+                    .data(Map.of(
+                        "progress", progress,
+                        "phase", progress < 50 ? "reading" : "analyzing"
+                    )));
             } catch (IOException e) {
                 log.debug("Failed to send progress event: {}", e.getMessage());
             }
@@ -115,31 +115,87 @@ public class LogAnalysisService {
 
         executorService.execute(() -> {
             try {
-                // Wait for log content to be available (max 30 seconds)
-                int maxWaitSeconds = 30;
+                // Wait for log content to be available (max 60 seconds for large logs)
+                int maxWaitSeconds = 60;
                 int waited = 0;
                 while (session.logContent == null && waited < maxWaitSeconds) {
                     Thread.sleep(1000);
                     waited++;
+
+                    // Log progress every 10 seconds
+                    if (waited % 10 == 0) {
+                        log.info("Still waiting for log content for session {}, waited {} seconds", sessionId, waited);
+                    }
                 }
 
                 if (session.logContent == null) {
+                    log.error("Timeout waiting for log content for session {} after {} seconds", sessionId, waited);
                     emitter.send(SseEmitter.event()
                         .name("error")
-                        .data("Timeout waiting for log content"));
-                    emitter.completeWithError(new Exception("Log content not received"));
+                        .data("Timeout: Log-Inhalt wurde nicht empfangen. Möglicherweise ist die WebSocket-Verbindung abgebrochen."));
+                    emitter.completeWithError(new Exception("Log content not received after " + waited + " seconds"));
+                    activeSessions.remove(sessionId);
                     return;
                 }
 
-                String analysisPrompt = buildAnalysisPrompt(session.logContent, session.prompt);
+                // Limit log content to prevent context overflow (max ~50k chars ≈ 12k tokens)
+                String logContent = session.logContent;
+                if (logContent.length() > 50000) {
+                    log.warn("Log content too large ({} chars), truncating to 50k", logContent.length());
+                    logContent = logContent.substring(0, 50000) + "\n\n[... Log gekürzt, zu groß für Kontext ...]";
+                }
+
+                String analysisPrompt = buildAnalysisPrompt(logContent, session.prompt);
 
                 // Send start event
                 emitter.send(SseEmitter.event()
                     .name("start")
                     .data(Map.of("model", session.model, "timestamp", System.currentTimeMillis())));
 
-                // Call Ollama API with streaming
-                streamFromOllama(session.model, analysisPrompt, emitter);
+                // Signal analysis phase starting (50%)
+                sendProgress(sessionId, 50.0);
+
+                // Use LLMProviderService for streaming analysis
+                String systemPrompt = "Du bist ein erfahrener Linux System-Administrator und Experte für Log-Analyse. " +
+                    "Analysiere das Log präzise, strukturiert und auf Deutsch.";
+
+                // Track tokens for progress estimation
+                final int[] tokenCount = {0};
+                final int estimatedMaxTokens = 4096;
+
+                llmProviderService.chatStream(
+                    session.model,
+                    analysisPrompt,
+                    systemPrompt,
+                    sessionId,
+                    chunk -> {
+                        try {
+                            // Send chunk immediately (don't batch)
+                            emitter.send(SseEmitter.event()
+                                .name("chunk")
+                                .data(Map.of("chunk", chunk, "done", false)));
+
+                            // Update analysis progress (50-100% based on token generation)
+                            tokenCount[0] += chunk.length() / 4; // Rough estimate: 4 chars = 1 token
+                            double analysisProgress = 50.0 + (50.0 * Math.min(1.0, (double) tokenCount[0] / estimatedMaxTokens));
+                            sendProgress(sessionId, analysisProgress);
+
+                            // Small delay to prevent overwhelming the connection
+                            Thread.sleep(10);
+                        } catch (IOException e) {
+                            log.error("Error sending chunk to SSE emitter: {}", e.getMessage());
+                            throw new RuntimeException("SSE connection broken", e);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException("Stream interrupted", e);
+                        }
+                    },
+                    4096,  // maxTokens - limit output length
+                    0.7,   // temperature
+                    null,  // topP
+                    null,  // topK
+                    null   // repeatPenalty
+                );
 
                 // Send completion event
                 emitter.send(SseEmitter.event()
@@ -166,58 +222,7 @@ public class LogAnalysisService {
     }
 
     /**
-     * Stream responses from Ollama API
-     */
-    private void streamFromOllama(String model, String prompt, SseEmitter emitter) throws Exception {
-        String url = ollamaBaseUrl + "/api/generate";
-
-        Map<String, Object> request = Map.of(
-            "model", model,
-            "prompt", prompt,
-            "stream", true
-        );
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
-
-        restTemplate.execute(
-            URI.create(url),
-            HttpMethod.POST,
-            req -> {
-                req.getHeaders().addAll(headers);
-                objectMapper.writeValue(req.getBody(), request);
-            },
-            response -> {
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(response.getBody()))) {
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        JsonNode json = objectMapper.readTree(line);
-                        String chunk = json.get("response").asText();
-                        boolean done = json.get("done").asBoolean();
-
-                        // Stream chunk to frontend
-                        emitter.send(SseEmitter.event()
-                            .name("chunk")
-                            .data(Map.of("chunk", chunk, "done", done)));
-
-                        if (done) {
-                            break;
-                        }
-                    }
-                } catch (IOException e) {
-                    log.error("Error reading Ollama stream", e);
-                    throw new RuntimeException(e);
-                }
-                return null;
-            }
-        );
-    }
-
-    /**
-     * Build analysis prompt for Ollama
+     * Build analysis prompt for LLM
      */
     private String buildAnalysisPrompt(String logContent, String customPrompt) {
         String defaultPrompt = """
@@ -249,18 +254,11 @@ public class LogAnalysisService {
     }
 
     /**
-     * Generate unique session ID
-     */
-    private String generateSessionId(String officerId) {
-        return officerId + "-" + System.currentTimeMillis();
-    }
-
-    /**
      * Internal class to track analysis sessions
      */
     private static class AnalysisSession {
         String sessionId;
-        String officerId;
+        String mateId;
         String model;
         String logContent;
         String prompt;

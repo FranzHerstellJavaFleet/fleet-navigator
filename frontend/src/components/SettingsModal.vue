@@ -82,6 +82,11 @@
           </section>
           </div>
 
+          <!-- TAB: LLM Provider -->
+          <div v-if="activeTab === 'providers'">
+            <ProviderSettings />
+          </div>
+
           <!-- TAB: Model Selection -->
           <div v-if="activeTab === 'models'">
           <!-- Smart Model Selection -->
@@ -186,162 +191,12 @@
           <section class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <AdjustmentsHorizontalIcon class="w-5 h-5 text-orange-500" />
-              Model-Parameter
+              🎛️ LLM Sampling Parameter
             </h3>
 
-            <!-- Markdown Rendering -->
-            <div class="mb-4 p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <DocumentTextIcon class="w-4 h-4" />
-                    Markdown-Formatierung
-                  </label>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Rendert Antworten mit Markdown (fett, kursiv, Code, Listen)
-                  </p>
-                </div>
-                <ToggleSwitch v-model="settings.markdownEnabled" />
-              </div>
-            </div>
-
-            <!-- Streaming -->
-            <div class="mb-4 p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <BoltIcon class="w-4 h-4" />
-                    Streaming aktiviert
-                  </label>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Antworten werden in Echtzeit gestreamt
-                  </p>
-                </div>
-                <ToggleSwitch v-model="settings.streamingEnabled" />
-              </div>
-            </div>
-
-            <!-- Temperature -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                <span class="flex items-center gap-2">
-                  <FireIcon class="w-4 h-4 text-orange-500" />
-                  Temperature
-                </span>
-                <span class="text-fleet-orange-500 font-semibold">{{ settings.temperature }}</span>
-              </label>
-              <input
-                type="range"
-                v-model.number="settings.temperature"
-                min="0"
-                max="2"
-                step="0.1"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-fleet-orange-500"
-              >
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Niedrig = präzise, Hoch = kreativ
-              </p>
-            </div>
-
-            <!-- Top P -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                <span>Top P</span>
-                <span class="text-fleet-orange-500 font-semibold">{{ settings.topP }}</span>
-              </label>
-              <input
-                type="range"
-                v-model.number="settings.topP"
-                min="0"
-                max="1"
-                step="0.05"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-fleet-orange-500"
-              >
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Nucleus Sampling (empfohlen: 0.9)
-              </p>
-            </div>
-
-            <!-- Top K -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                <span>Top K</span>
-                <span class="text-fleet-orange-500 font-semibold">{{ settings.topK }}</span>
-              </label>
-              <input
-                type="range"
-                v-model.number="settings.topK"
-                min="1"
-                max="100"
-                step="1"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-fleet-orange-500"
-              >
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Anzahl berücksichtigter Tokens (empfohlen: 40)
-              </p>
-            </div>
-
-            <!-- Context Length -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                <span class="flex items-center gap-2">
-                  <DocumentDuplicateIcon class="w-4 h-4" />
-                  Context Length
-                </span>
-                <span class="text-fleet-orange-500 font-semibold">{{ settings.contextLength.toLocaleString() }}</span>
-              </label>
-              <input
-                type="range"
-                v-model.number="settings.contextLength"
-                min="2048"
-                max="131072"
-                step="2048"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-fleet-orange-500"
-              >
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Maximaler Kontext in Tokens
-              </p>
-            </div>
-          </section>
-
-          <!-- Advanced Settings -->
-          <section class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <WrenchScrewdriverIcon class="w-5 h-5 text-gray-500" />
-              Erweitert
-            </h3>
-
-            <!-- Max Tokens -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <HashtagIcon class="w-4 h-4" />
-                Max Tokens: {{ settings.maxTokens.toLocaleString() }}
-              </label>
-              <input
-                type="number"
-                v-model.number="settings.maxTokens"
-                min="100"
-                max="131072"
-                step="1024"
-                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all focus:ring-2 focus:ring-fleet-orange-500"
-              >
-            </div>
-
-            <!-- Debug Mode -->
-            <div class="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <BugAntIcon class="w-4 h-4" />
-                    Debug-Modus
-                  </label>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Zeigt detaillierte Logs in der Konsole
-                  </p>
-                </div>
-                <ToggleSwitch v-model="settings.debugMode" color="red" />
-              </div>
-            </div>
+            <SimpleSamplingParams
+              v-model="samplingParams"
+            />
           </section>
           </div>
 
@@ -352,9 +207,6 @@
 
           <!-- TAB: Agents -->
           <div v-if="activeTab === 'agents'">
-          <!-- Document Agent Settings -->
-          <DocumentAgentSettings />
-
           <!-- Vision Settings -->
           <section class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -395,7 +247,7 @@
                 {{ visionModels.length }} Vision-Modelle verfügbar
               </p>
               <p v-else class="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
-                ⚠️ Keine Vision-Modelle gefunden. Installiere llava oder moondream mit Ollama.
+                ⚠️ Keine Vision-Modelle gefunden. Lade Vision-Modelle aus dem Model Store herunter.
               </p>
             </div>
 
@@ -485,7 +337,7 @@
                             <span class="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 px-2 py-0.5 rounded">Optional</span>
                           </div>
                           <div class="text-xs text-gray-600 dark:text-gray-400">
-                            Ihre eigenen Modelle (Ollama-Modelle bleiben unberührt)
+                            Ihre eigenen benutzerdefinierten Modelle
                           </div>
                         </div>
                       </label>
@@ -636,11 +488,12 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useChatStore } from '../stores/chatStore'
-import DocumentAgentSettings from './DocumentAgentSettings.vue'
 import PersonalInfoTab from './PersonalInfoTab.vue'
+import ProviderSettings from './ProviderSettings.vue'
 import { useToast } from '../composables/useToast'
 import api from '../services/api'
 import ToggleSwitch from './ToggleSwitch.vue'
+import SimpleSamplingParams from './SimpleSamplingParams.vue'
 import { filterVisionModels, filterCodeModels } from '../utils/modelFilters'
 
 const { success, error: errorToast } = useToast()
@@ -658,6 +511,9 @@ const chatStore = useChatStore()
 const settings = ref({ ...settingsStore.settings })
 const saving = ref(false)
 const resetting = ref(false)
+
+// Sampling Parameters
+const samplingParams = ref({})
 
 // Reset selection checkboxes
 const resetSelection = ref({
@@ -679,7 +535,8 @@ const personalInfoTabRef = ref(null)
 // Tab configuration
 const tabs = [
   { id: 'general', label: 'Allgemein', icon: GlobeAltIcon },
-  { id: 'models', label: 'Modelle', icon: CpuChipIcon },
+  { id: 'providers', label: 'LLM Provider', icon: CpuChipIcon },
+  { id: 'models', label: 'Modellauswahl', icon: CubeIcon },
   { id: 'parameters', label: 'Parameter', icon: AdjustmentsHorizontalIcon },
   { id: 'personal', label: 'Persönliche Daten', icon: UserIcon },
   { id: 'agents', label: 'Agents', icon: SparklesIcon },
@@ -721,6 +578,22 @@ const hasAnySelection = computed(() => {
 
 // Load model selection settings and available models on mount
 onMounted(async () => {
+  // Initialize sampling params from settings store
+  samplingParams.value = {
+    maxTokens: settingsStore.settings.maxTokens || 512,
+    temperature: settingsStore.settings.temperature || 0.7,
+    topP: settingsStore.settings.topP || 0.9,
+    topK: settingsStore.settings.topK || 40,
+    minP: settingsStore.settings.minP || 0.05,
+    repeatPenalty: settingsStore.settings.repeatPenalty || 1.18,
+    repeatLastN: settingsStore.settings.repeatLastN || 64,
+    presencePenalty: settingsStore.settings.presencePenalty || 0.0,
+    frequencyPenalty: settingsStore.settings.frequencyPenalty || 0.0,
+    mirostatMode: settingsStore.settings.mirostatMode || 0,
+    mirostatTau: settingsStore.settings.mirostatTau || 5.0,
+    mirostatEta: settingsStore.settings.mirostatEta || 0.1
+  }
+
   await loadModelSelectionSettings()
   await loadAvailableModels()
 })
@@ -755,11 +628,17 @@ function close() {
 async function save() {
   saving.value = true
   try {
-    // Save general settings
-    settingsStore.updateSettings(settings.value)
+    // Merge sampling params into settings before saving
+    const mergedSettings = {
+      ...settings.value,
+      ...samplingParams.value
+    }
+
+    // Save general settings + sampling parameters
+    settingsStore.updateSettings(mergedSettings)
 
     // Apply streaming setting to chatStore
-    if (chatStore.streamingEnabled !== settings.value.streamingEnabled) {
+    if (chatStore.streamingEnabled !== mergedSettings.streamingEnabled) {
       chatStore.toggleStreaming()
     }
 

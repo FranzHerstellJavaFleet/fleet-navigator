@@ -4,6 +4,8 @@
 
 Eine benutzerfreundliche Anwendung für Gespräche mit künstlicher Intelligenz - entwickelt von JavaFleet Systems Consulting.
 
+**Powered by llama.cpp** - Die schnellste lokale AI-Engine für dein System!
+
 ![Fleet Navigator Screenshot](screenshotFleetNavigator.png)
 
 ---
@@ -27,12 +29,14 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 - ✅ **Privatsphäre**: Alle Daten bleiben auf deinem Computer
 - ✅ **Kostenlos**: Keine monatlichen Gebühren
 - ✅ **Offline**: Funktioniert ohne Internet (nach dem Setup)
+- ✅ **Model Store**: Lade AI-Modelle direkt aus HuggingFace herunter - keine externe Software nötig!
+- ✅ **Blitzschnell**: Powered by llama.cpp - optimiert für deine Hardware (CPU & GPU)
 - ✅ **Brief-Agent**: Generiert Briefe und öffnet sie automatisch in Word/LibreOffice
 - ✅ **Brief-Vorlagen**: Fertige Vorlagen für häufige Schreibanlässe
 - ✅ **System Prompts**: 12+ vorkonfigurierte Persönlichkeiten (Karla, Steuerberater, Pirat, Shakespeare, uvm.)
 - ✅ **Brief-Assistenten**: Spezialisierte Prompts für Behördenbriefe (Kita, Finanzamt, Stadtverwaltung)
 - ✅ **Multi-Sprache**: Deutsch, Englisch - automatische Erkennung der Systemsprache
-- ✅ **Dokumente**: PDFs und Bilder hochladen und analysieren
+- ✅ **Vision Support**: Analysiere Bilder und PDFs mit Vision-Modellen (llava, bakllava)
 - ✅ **Projekte & Chats**: Organisiere deine Gespräche in Projekten
 - ✅ **Collapsible Sidebar**: Mehr Platz durch ausblendbare Seitenleiste
 - ✅ **System-Check**: Prüft automatisch, ob alles richtig installiert ist
@@ -43,55 +47,32 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 
 ### Windows
 
-#### Schritt 1: Ollama installieren
-1. Gehe zu: https://ollama.ai/download/windows
-2. Lade `Ollama Setup.exe` herunter
-3. Führe die Installation aus
-4. Ollama startet automatisch im Hintergrund
-
-#### Schritt 2: AI-Modell installieren
-1. Öffne die Eingabeaufforderung (CMD) oder PowerShell
-2. Gib ein: `ollama pull llama3.2`
-3. Warte, bis der Download fertig ist (ca. 2 GB)
-
-#### Schritt 3: Fleet Navigator herunterladen
+#### Schritt 1: Fleet Navigator herunterladen
 1. Gehe zu: https://github.com/FranzHerstellJavaFleet/fleet-navigator
 2. Klicke auf "Releases" (rechte Seite)
 3. Lade `fleet-navigator-windows-amd64.zip` herunter
 4. Entpacke die ZIP-Datei
 
-#### Schritt 4: Starten
+#### Schritt 2: Starten
 1. Doppelklick auf `fleet-navigator.exe`
 2. Öffne im Browser: http://localhost:2025
 
+#### Schritt 3: AI-Modell herunterladen
+1. Im Fleet Navigator klicke auf **"Modelle"** in der Sidebar
+2. Wähle ein Modell aus (z.B. **Qwen2.5-3B** für 8GB RAM oder **Llama-3.2-1B** für 4GB RAM)
+3. Klicke auf **"Download"**
+4. Warte, bis der Download abgeschlossen ist (Progress wird live angezeigt)
+5. Das Modell ist sofort einsatzbereit!
+
 ### macOS
 
-#### Schritt 1: Ollama installieren
-```bash
-# Terminal öffnen (Programme → Dienstprogramme → Terminal)
-brew install ollama
-```
-
-Oder von https://ollama.ai/download/mac herunterladen
-
-#### Schritt 2: Ollama starten
-```bash
-ollama serve
-```
-
-#### Schritt 3: AI-Modell installieren
-```bash
-# In neuem Terminal-Fenster:
-ollama pull llama3.2
-```
-
-#### Schritt 4: Fleet Navigator herunterladen
+#### Schritt 1: Fleet Navigator herunterladen
 1. Gehe zu: https://github.com/FranzHerstellJavaFleet/fleet-navigator
 2. Klicke auf "Releases"
 3. Lade `fleet-navigator-macos-amd64.tar.gz` herunter
 4. Entpacke die Datei
 
-#### Schritt 5: Starten
+#### Schritt 2: Starten
 ```bash
 cd fleet-navigator
 ./fleet-navigator
@@ -99,40 +80,42 @@ cd fleet-navigator
 
 Browser öffnet automatisch: http://localhost:2025
 
+#### Schritt 3: AI-Modell herunterladen
+1. Im Fleet Navigator klicke auf **"Modelle"** in der Sidebar
+2. Wähle ein Modell aus der kuratierten Liste (empfohlen: **Qwen2.5-3B** oder **Llama-3.2-1B**)
+3. Klicke auf **"Download"**
+4. Der Download startet automatisch - Live-Progress wird angezeigt
+5. Nach dem Download ist das Modell sofort einsatzbereit!
+
 ### Linux (Ubuntu/Debian)
 
-#### Schritt 1: Ollama installieren
-```bash
-curl -fsSL https://ollama.ai/install.sh | sh
-```
-
-#### Schritt 2: Ollama starten
-```bash
-ollama serve
-```
-
-#### Schritt 3: AI-Modell installieren
-```bash
-# In neuem Terminal:
-ollama pull llama3.2
-```
-
-#### Schritt 4: Fleet Navigator herunterladen
+#### Schritt 1: Fleet Navigator herunterladen
 ```bash
 # Gehe zu Releases und lade herunter:
-wget https://github.com/FranzHerstellJavaFleet/fleet-navigator/releases/download/v1.0.0/fleet-navigator-linux-amd64.tar.gz
+wget https://github.com/FranzHerstellJavaFleet/fleet-navigator/releases/latest/download/fleet-navigator-linux-amd64.tar.gz
 
 # Entpacken:
 tar -xzf fleet-navigator-linux-amd64.tar.gz
 cd fleet-navigator
 ```
 
-#### Schritt 5: Starten
+#### Schritt 2: Starten
 ```bash
 ./fleet-navigator
 ```
 
 Browser: http://localhost:2025
+
+#### Schritt 3: AI-Modell herunterladen
+1. Im Fleet Navigator klicke auf **"Modelle"** in der Sidebar
+2. Wähle ein Modell aus:
+   - **Qwen2.5-3B-Instruct** (empfohlen für 8GB RAM) - Deutsch + Englisch
+   - **Llama-3.2-1B-Instruct** (für 4GB RAM) - Englisch
+   - **Llava-1.5-7B** (für Bildanalyse) - benötigt 8GB+ RAM
+3. Klicke auf **"Download"**
+4. Der Download läuft direkt von HuggingFace - kein Ollama oder andere Tools nötig!
+5. Live-Progress zeigt MB/s und verbleibende Zeit
+6. Nach dem Download ist das Modell sofort verfügbar!
 
 ---
 
@@ -141,11 +124,16 @@ Browser: http://localhost:2025
 ### 1. System-Check
 
 Beim ersten Start prüft Fleet Navigator automatisch:
-- ✅ Ist Ollama installiert?
-- ✅ Ist ein AI-Modell vorhanden?
+- ✅ Ist die llama.cpp Engine bereit?
+- ✅ Ist ein AI-Modell heruntergeladen?
 - ✅ Ist genug Arbeitsspeicher verfügbar?
 
-**Falls ein Fehler angezeigt wird**, folge den Anweisungen auf dem Bildschirm.
+**Falls noch kein Modell vorhanden ist**, wirst du automatisch zum Model Store weitergeleitet!
+
+**Empfehlung für den Start:**
+- **4-8 GB RAM**: Llama-3.2-1B-Instruct (~1.3 GB Download)
+- **8-16 GB RAM**: Qwen2.5-3B-Instruct (~2 GB Download)
+- **16+ GB RAM**: Qwen2.5-7B-Instruct (~4.4 GB Download)
 
 ### 2. Brief schreiben
 
@@ -193,23 +181,39 @@ Bei komplexen Aufgaben: Teile sie in mehrere Fragen auf.
 
 ---
 
-## 🔧 Empfohlene AI-Modelle
+## 🔧 Empfohlene AI-Modelle (aus HuggingFace Model Store)
 
-| Modell | Größe | Am besten für | Installation |
-|--------|-------|---------------|--------------|
-| **llama3.2** | 2 GB | Allgemeine Fragen, Briefe | `ollama pull llama3.2` |
-| **qwen2.5:7b** | 4.4 GB | Bessere Qualität, mehrsprachig | `ollama pull qwen2.5:7b` |
-| **llama3.1:8b** | 4.7 GB | Lange Texte, Dokumente | `ollama pull llama3.1:8b` |
-| **codellama:13b** | 7.4 GB | Programmierung | `ollama pull codellama:13b` |
-| **llava:13b** | 7.7 GB | Bildanalyse | `ollama pull llava:13b` |
+Fleet Navigator lädt Modelle **direkt aus HuggingFace** herunter - keine externe Software nötig!
 
-**Mehr Modelle:** https://ollama.ai/library
+### Kuratierte Modelle (empfohlen für Einsteiger)
+
+| Modell | Größe | RAM | Am besten für |
+|--------|-------|-----|---------------|
+| **Llama-3.2-1B-Instruct** | 1.3 GB | 4-8 GB | Schnelle Antworten, Englisch |
+| **Qwen2.5-3B-Instruct** | 2 GB | 8 GB | **Beste Wahl!** Deutsch + Englisch, gute Qualität |
+| **Qwen2.5-7B-Instruct** | 4.4 GB | 16 GB | Noch bessere Qualität, mehrsprachig |
+| **Llava-1.5-7B** | 4.7 GB | 8+ GB | **Bildanalyse** - PDF/Fotos verstehen |
+| **DeepSeek-Coder-1.3B** | 1.5 GB | 4-8 GB | Programmierung, Code-Generierung |
+
+### HuggingFace Suche (Tausende weitere Modelle!)
+
+1. Klicke im Model Store auf **"HuggingFace durchsuchen"**
+2. Suche nach Modellen (z.B. "german", "vision", "code")
+3. Filtere nach:
+   - **Popular** - Meistgenutzte Modelle
+   - **German** - Deutsche Sprachmodelle
+   - **Instruct** - Chat/Dialog-Modelle
+   - **Code** - Programmier-Assistenten
+   - **Vision** - Bildanalyse
 
 ### Welches Modell für mich?
 
-- **4-8 GB RAM**: `llama3.2` oder `qwen2.5:3b`
-- **16 GB RAM**: `qwen2.5:7b` oder `llama3.1:8b`
-- **32 GB+ RAM**: `qwen2.5:14b` oder `llama3.1:70b`
+- **4-8 GB RAM**: Llama-3.2-1B oder DeepSeek-Coder-1.3B
+- **8-16 GB RAM**: **Qwen2.5-3B** (beste Wahl!) oder Llava-1.5-7B (Bilder)
+- **16-32 GB RAM**: Qwen2.5-7B oder Qwen2.5-Coder-7B
+- **32+ GB RAM**: Llama-3.1-70B oder Qwen2.5-14B
+
+**Tipp:** Lade zuerst ein kleines Modell (Qwen2.5-3B) zum Testen herunter!
 
 ---
 
@@ -265,52 +269,32 @@ Ab jetzt werden **alle Briefe automatisch** mit deinen Daten erstellt!
 ## ❓ Häufige Fragen
 
 ### Die Anwendung startet nicht
-**Lösung:** Prüfe, ob Ollama läuft:
-```bash
-ollama list
-```
-Falls nicht: `ollama serve`
+**Lösung:**
+1. Prüfe, ob Port 2025 bereits belegt ist:
+   ```bash
+   # Linux/macOS
+   lsof -ti:2025
+
+   # Windows
+   netstat -ano | findstr :2025
+   ```
+2. Starte Fleet Navigator neu
 
 ### "Keine Modelle gefunden"
-**Lösung:** Installiere mindestens ein Modell:
-```bash
-ollama pull llama3.2
-```
+**Lösung:**
+1. Klicke auf **"Modelle"** in der Sidebar
+2. Wähle ein Modell aus der kuratierten Liste (z.B. Qwen2.5-3B)
+3. Klicke auf **"Download"**
+4. Warte, bis der Download abgeschlossen ist
+5. Das Modell ist sofort verfügbar!
 
-### "Ollama ist nicht erreichbar" (404-Fehler)
-**Symptom:** Fehlermeldung "Ollama API error: 404 Not Found"
+### Download sehr langsam
+**Ursache:** HuggingFace Server können bei großen Modellen langsam sein
 
-**Ursache:** Ollama läuft nicht oder ist nicht gestartet
-
-**Lösung je nach Betriebssystem:**
-
-#### Windows
-1. Prüfe, ob Ollama läuft:
-   - Schaue in der Taskleiste nach dem Ollama-Symbol (🦙)
-   - Wenn nicht vorhanden: Starte "Ollama" aus dem Startmenü
-2. Oder öffne PowerShell und gib ein:
-   ```powershell
-   curl http://localhost:11434/api/tags
-   ```
-   Falls Fehler: Ollama läuft nicht → Neu starten
-
-#### macOS/Linux
-1. Öffne ein Terminal und starte Ollama:
-   ```bash
-   ollama serve
-   ```
-2. Lasse dieses Terminal-Fenster geöffnet
-3. In einem neuen Terminal-Fenster: Starte Fleet Navigator
-
-#### Prüfung
-Öffne im Browser: http://localhost:11434/api/tags
-
-**Erwartetes Ergebnis:**
-```json
-{"models":[...]}
-```
-
-Falls "Connection refused": Ollama ist nicht installiert → Siehe Installation oben
+**Lösung:**
+- Lade kleinere Modelle zuerst (Qwen2.5-3B statt 7B)
+- Prüfe deine Internetverbindung
+- Download läuft im Hintergrund - du kannst den Browser schließen
 
 ### Antworten sind sehr langsam
 **Ursachen:**
@@ -322,7 +306,7 @@ Falls "Connection refused": Ollama ist nicht installiert → Siehe Installation 
 Ja! Fleet Navigator wählt automatisch das beste Modell für deine Aufgabe.
 
 ### Kostet das etwas?
-**Nein!** Fleet Navigator und Ollama sind komplett kostenlos und Open Source.
+**Nein!** Fleet Navigator, llama.cpp und alle Modelle von HuggingFace sind komplett kostenlos und Open Source.
 
 ### Funktioniert es offline?
 Ja, nach der Installation und dem Download der Modelle benötigst du kein Internet mehr.
@@ -379,7 +363,8 @@ npm run dev
 - **Backend**: Spring Boot 3.2, Java 17
 - **Frontend**: Vue.js 3, Vite, Tailwind CSS
 - **Datenbank**: H2 (file-based)
-- **AI**: Ollama REST API
+- **AI Engine**: llama.cpp (via java-llama.cpp JNI bindings)
+- **Model Source**: HuggingFace Model Hub (GGUF format)
 - **Monitoring**: OSHI (Hardware-Überwachung)
 
 ### Native Image (GraalVM)
@@ -404,9 +389,11 @@ Mehr Infos: [NATIVE-IMAGE.md](NATIVE-IMAGE.md)
 
 ### Dokumentation
 
-- [GraalVM Native Image Guide](NATIVE-IMAGE.md)
-- [GitHub Actions Setup](GITHUB-ACTIONS-GUIDE.md)
-- [Windows Build Anleitung](build-native-windows.md)
+- [GraalVM Native Image Guide](docs/NATIVE-IMAGE.md)
+- [HuggingFace Integration](docs/HUGGINGFACE-INTEGRATION.md)
+- [Vision Support Status](docs/VISION-SUPPORT-STATUS.md)
+- [GitHub Actions Setup](docs/GITHUB-ACTIONS-GUIDE.md)
+- [Vollständige Doku-Index](docs/INDEX.md)
 
 ### Updates
 
@@ -424,10 +411,13 @@ Du darfst die Software frei nutzen, verändern und weitergeben.
 
 ## 🙏 Danksagungen
 
-- **Ollama Team** - Für die großartige Local AI Platform
+- **llama.cpp Team** - Für die schnellste lokale AI-Engine
+- **HuggingFace** - Für den Zugang zu tausenden Open-Source-Modellen
 - **Spring Boot** & **Vue.js** Communities
 - **Meta** - Für die Llama-Modelle
 - **Alibaba Cloud** - Für die Qwen-Modelle
+- **Georgi Gerganov** - Für llama.cpp
+- **kherud** - Für java-llama.cpp JNI bindings
 
 ---
 

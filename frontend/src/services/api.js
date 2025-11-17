@@ -75,10 +75,6 @@ export default {
     return response.data
   },
 
-  async getOllamaLibraryModels() {
-    const response = await api.get('/models/library')
-    return response.data
-  },
 
   async pullModel(modelName, progressCallback) {
     return new Promise((resolve, reject) => {
@@ -279,6 +275,39 @@ export default {
   async updateModelSelectionSettings(settings) {
     const response = await api.put('/settings/model-selection', settings)
     return response.data
+  },
+
+  async getEmailModel() {
+    const response = await api.get('/settings/email-model')
+    return response.data
+  },
+
+  async updateEmailModel(modelName) {
+    await api.post('/settings/email-model', modelName, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  },
+
+  async getLogAnalysisModel() {
+    const response = await api.get('/settings/log-analysis-model')
+    return response.data
+  },
+
+  async updateLogAnalysisModel(modelName) {
+    await api.post('/settings/log-analysis-model', modelName, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  },
+
+  async getDocumentModel() {
+    const response = await api.get('/settings/document-model')
+    return response.data
+  },
+
+  async updateDocumentModel(modelName) {
+    await api.post('/settings/document-model', modelName, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
   },
 
   // ============================================================================
@@ -588,6 +617,147 @@ export default {
   // Generate Modelfile preview
   async generateModelfilePreview(request) {
     const response = await api.post('/custom-models/generate-modelfile', request)
+    return response.data
+  },
+
+  // LLM Provider endpoints
+  async getActiveProvider() {
+    const response = await api.get('/llm/providers/active')
+    return response.data
+  },
+
+  async getProviderStatus() {
+    const response = await api.get('/llm/providers')
+    return response.data
+  },
+
+  async switchProvider(provider) {
+    const response = await api.post('/llm/providers/switch', { provider })
+    return response.data
+  },
+
+  // Model Store endpoints (for llama.cpp)
+  async getAllModelStoreModels() {
+    const response = await api.get('/model-store/all')
+    return response.data
+  },
+
+  async getFeaturedModels() {
+    const response = await api.get('/model-store/featured')
+    return response.data
+  },
+
+  async getModelStoreDetails(modelId) {
+    const response = await api.get(`/model-store/${modelId}`)
+    return response.data
+  },
+
+  async isModelDownloaded(modelId) {
+    const response = await api.get(`/model-store/${modelId}/downloaded`)
+    return response.data
+  },
+
+  async deleteModelStoreModel(modelId) {
+    const response = await api.delete(`/model-store/${modelId}`)
+    return response.data
+  },
+
+  // HuggingFace Search & Discovery
+  async searchHuggingFaceModels(query, limit = 50) {
+    const response = await api.get('/model-store/huggingface/search', {
+      params: { query, limit }
+    })
+    return response.data
+  },
+
+  async getHuggingFaceModelDetails(modelId) {
+    const response = await api.get('/model-store/huggingface/details', {
+      params: { modelId }
+    })
+    return response.data
+  },
+
+  async getPopularHuggingFaceModels(limit = 20) {
+    const response = await api.get('/model-store/huggingface/popular', {
+      params: { limit }
+    })
+    return response.data
+  },
+
+  async getGermanHuggingFaceModels(limit = 20) {
+    const response = await api.get('/model-store/huggingface/german', {
+      params: { limit }
+    })
+    return response.data
+  },
+
+  async getInstructHuggingFaceModels(limit = 30) {
+    const response = await api.get('/model-store/huggingface/instruct', {
+      params: { limit }
+    })
+    return response.data
+  },
+
+  async getCodeHuggingFaceModels(limit = 30) {
+    const response = await api.get('/model-store/huggingface/code', {
+      params: { limit }
+    })
+    return response.data
+  },
+
+  async getVisionHuggingFaceModels(limit = 20) {
+    const response = await api.get('/model-store/huggingface/vision', {
+      params: { limit }
+    })
+    return response.data
+  },
+
+  // GGUF Model Config endpoints
+  async getAllGgufModelConfigs() {
+    const response = await api.get('/gguf-models')
+    return response.data
+  },
+
+  async getGgufModelConfig(id) {
+    const response = await api.get(`/gguf-models/${id}`)
+    return response.data
+  },
+
+  async getGgufModelConfigByName(name) {
+    const response = await api.get(`/gguf-models/by-name/${encodeURIComponent(name)}`)
+    return response.data
+  },
+
+  async createGgufModelConfig(config) {
+    const response = await api.post('/gguf-models', config)
+    return response.data
+  },
+
+  async updateGgufModelConfig(id, config) {
+    const response = await api.put(`/gguf-models/${id}`, config)
+    return response.data
+  },
+
+  async deleteGgufModelConfig(id) {
+    await api.delete(`/gguf-models/${id}`)
+  },
+
+  async getDefaultGgufModelConfig() {
+    const response = await api.get('/gguf-models/default')
+    return response.data
+  },
+
+  async setGgufModelConfigAsDefault(id) {
+    const response = await api.patch(`/gguf-models/${id}/set-default`)
+    return response.data
+  },
+
+  async uploadGgufPrompt(formData) {
+    const response = await api.post('/gguf-models/upload-prompt', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
     return response.data
   }
 }

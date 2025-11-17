@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CommandHistoryEntry {
     private String sessionId;
-    private String officerId;
+    private String mateId;
     private String command;
     private String fullCommand;       // Command with args
     private Integer exitCode;

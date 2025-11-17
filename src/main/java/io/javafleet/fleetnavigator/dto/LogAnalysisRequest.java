@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LogAnalysisRequest {
-    private String officerId;
+    private String mateId;
     private String logPath;
     private String mode;           // "smart", "full", "errors-only", "last-n"
     private Integer lines;         // Only for "last-n" mode

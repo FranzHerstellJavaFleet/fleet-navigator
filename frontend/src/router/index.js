@@ -17,41 +17,17 @@ const routes = [
   },
   // Standalone agent pages (no sidebar)
   {
-    path: '/agents/fleet-officers',
-    name: 'fleet-officers',
-    component: () => import('../views/agents/FleetOfficersView.vue'),
-    meta: { title: 'Fleet Officers' }
+    path: '/agents/fleet-mates',
+    name: 'fleet-mates',
+    component: () => import('../views/agents/FleetMatesView.vue'),
+    meta: { title: 'Fleet Mates' }
   },
   {
-    path: '/agents/fleet-officers/:officerId',
-    name: 'officer-detail',
-    component: () => import('../views/agents/OfficerDetailView.vue'),
-    meta: { title: 'Officer Details' },
+    path: '/agents/fleet-mates/:mateId',
+    name: 'mate-detail',
+    component: () => import('../views/agents/MateDetailView.vue'),
+    meta: { title: 'Mate Details' },
     props: true
-  },
-  {
-    path: '/agents/email',
-    name: 'email-agent',
-    component: () => import('../views/agents/EmailAgentView.vue'),
-    meta: { title: 'Email Agent' }
-  },
-  {
-    path: '/agents/documents',
-    name: 'document-agent',
-    component: () => import('../views/agents/DocumentAgentView.vue'),
-    meta: { title: 'Document Agent' }
-  },
-  {
-    path: '/agents/os',
-    name: 'os-agent',
-    component: () => import('../views/agents/OSAgentView.vue'),
-    meta: { title: 'OS Agent' }
-  },
-  {
-    path: '/agents/system',
-    name: 'system-monitor',
-    component: () => import('../views/agents/SystemMonitorView.vue'),
-    meta: { title: 'System Monitor' }
   },
   // Catch-all 404 route
   {

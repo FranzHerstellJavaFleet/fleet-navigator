@@ -81,6 +81,9 @@
         </div>
         <span class="text-xs text-fleet-orange-500 dark:text-fleet-orange-400 font-medium">Streaming...</span>
       </div>
+
+      <!-- Download Button (only for AI messages with downloadUrl) -->
+      <DownloadButton v-if="!isUser && message.downloadUrl" :downloadUrl="message.downloadUrl" />
     </div>
   </div>
 </template>
@@ -99,6 +102,7 @@ import { useChatStore } from '../stores/chatStore'
 import { useToast } from '../composables/useToast'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
+import DownloadButton from './DownloadButton.vue'
 
 const { success } = useToast()
 

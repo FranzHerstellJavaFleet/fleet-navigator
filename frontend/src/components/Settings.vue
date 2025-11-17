@@ -12,6 +12,9 @@
     <div class="flex-1 overflow-y-auto p-6">
       <div class="max-w-4xl mx-auto space-y-6">
 
+        <!-- Provider Settings -->
+        <ProviderSettings />
+
         <!-- Smart Model Selection -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div class="flex items-start justify-between mb-4">
@@ -54,10 +57,13 @@
                 @change="saveSettings"
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option v-for="model in availableModels" :key="model.name" :value="model.name">
+                <option v-for="model in codeModels.length > 0 ? codeModels : availableModels" :key="model.name" :value="model.name">
                   {{ model.name }} ({{ formatSize(model.size) }})
                 </option>
               </select>
+              <p v-if="codeModels.length === 0" class="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                ⚠️ Keine Coder-Modelle gefunden - zeige alle Modelle
+              </p>
             </div>
 
             <!-- Fast Model -->
@@ -84,7 +90,7 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 👁️ Vision-Modell
                 <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                  (für Bildanalyse)
+                  (für Bildanalyse PDF/JPEG/PNG)
                 </span>
               </label>
               <select
@@ -92,10 +98,85 @@
                 @change="saveSettings"
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option v-for="model in availableModels" :key="model.name" :value="model.name">
+                <option v-for="model in visionModels.length > 0 ? visionModels : availableModels" :key="model.name" :value="model.name">
                   {{ model.name }} ({{ formatSize(model.size) }})
                 </option>
               </select>
+              <p v-if="visionModels.length === 0" class="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                ⚠️ Keine Vision-Modelle gefunden - zeige alle Modelle
+              </p>
+              <p v-else class="text-xs text-green-600 dark:text-green-400 mt-2">
+                ✅ Wird automatisch bei Bild-Upload aktiviert
+              </p>
+            </div>
+
+            <!-- Email Model -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                📧 Email-Modell
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  (für Email-Klassifizierung & Antwort-Generierung)
+                </span>
+              </label>
+              <select
+                v-model="settings.emailModel"
+                @change="saveSettings"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">-- Standard-Modell verwenden --</option>
+                <option v-for="model in fastModels" :key="model.name" :value="model.name">
+                  {{ model.name }} ({{ formatSize(model.size) }})
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                💡 Tipp: Verwende ein schnelles, kleines Modell (1B-3B) für Email-Klassifizierung!
+              </p>
+            </div>
+
+            <!-- Log Analysis Model -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                📊 Log-Analyse-Modell
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  (für Log-Datei-Analyse & Fehlersuche)
+                </span>
+              </label>
+              <select
+                v-model="settings.logAnalysisModel"
+                @change="saveSettings"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">-- Standard-Modell verwenden --</option>
+                <option v-for="model in codeModels" :key="model.name" :value="model.name">
+                  {{ model.name }} ({{ formatSize(model.size) }})
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                💡 Tipp: Coder-Modelle (DeepSeek-Coder, Qwen2.5-Coder) sind ideal für Log-Analyse!
+              </p>
+            </div>
+
+            <!-- Document Generation Model -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                📝 Brief-/Dokumenten-Modell
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  (für Brief-Generierung & formale Texte)
+                </span>
+              </label>
+              <select
+                v-model="settings.documentModel"
+                @change="saveSettings"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">-- Standard-Modell verwenden --</option>
+                <option v-for="model in germanModels" :key="model.name" :value="model.name">
+                  {{ model.name }} ({{ formatSize(model.size) }})
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                💡 Tipp: Qwen-Modelle haben hervorragende Deutsch-Kenntnisse für Briefe!
+              </p>
             </div>
           </div>
         </div>
@@ -152,6 +233,40 @@
           </ul>
         </div>
 
+        <!-- Sampling Parameters -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              🎛️ LLM Sampling Parameter
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Feinsteuerung aller Parameter für text- und vision-basierte Modelle
+            </p>
+          </div>
+
+          <div class="p-4 bg-red-100 border-2 border-red-500 text-red-900 font-bold text-xl">
+            TEST: Wenn du das hier siehst, wird die Sektion geladen!
+          </div>
+
+          <SamplingParametersPanel
+            v-model="defaultSamplingParams"
+            :model-name="settings.defaultModel"
+          />
+
+          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              @click="saveSamplingParams"
+              class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <i class="fas fa-save mr-2"></i>
+              Parameter als Standard speichern
+            </button>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+              Diese Parameter werden für alle neuen Chats als Standard verwendet
+            </p>
+          </div>
+        </div>
+
         <!-- Save Status -->
         <div v-if="saveStatus" class="text-center">
           <div class="inline-flex items-center px-4 py-2 rounded-lg"
@@ -166,19 +281,61 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import * as api from '../services/api'
+import ProviderSettings from './ProviderSettings.vue'
+import SamplingParametersPanel from './SamplingParametersPanel.vue'
 
 const settings = ref({
   enabled: true,
   codeModel: 'qwen2.5-coder:7b',
   fastModel: 'llama3.2:3b',
   visionModel: 'llava:13b',
+  emailModel: '',
+  logAnalysisModel: '',
+  documentModel: '',
   defaultModel: 'qwen2.5-coder:7b'
 })
 
 const availableModels = ref([])
 const saveStatus = ref(null)
+const defaultSamplingParams = ref({})
+
+// Gefilterte Model-Listen basierend auf Capabilities
+const visionModels = computed(() => {
+  return availableModels.value.filter(m =>
+    m.name.toLowerCase().includes('llava') ||
+    m.name.toLowerCase().includes('bakllava') ||
+    m.name.toLowerCase().includes('minicpm-v') ||
+    m.name.toLowerCase().includes('vision')
+  )
+})
+
+const codeModels = computed(() => {
+  return availableModels.value.filter(m =>
+    m.name.toLowerCase().includes('coder') ||
+    m.name.toLowerCase().includes('code') ||
+    m.name.toLowerCase().includes('deepseek') ||
+    m.name.toLowerCase().includes('starcoder')
+  )
+})
+
+const fastModels = computed(() => {
+  return availableModels.value.filter(m =>
+    m.name.toLowerCase().includes('1b') ||
+    m.name.toLowerCase().includes('3b') ||
+    m.name.toLowerCase().includes('tiny') ||
+    m.name.toLowerCase().includes('mini')
+  )
+})
+
+const germanModels = computed(() => {
+  return availableModels.value.filter(m =>
+    m.name.toLowerCase().includes('qwen') ||
+    m.name.toLowerCase().includes('german') ||
+    m.name.toLowerCase().includes('leo')
+  )
+})
 
 onMounted(async () => {
   await loadSettings()
@@ -189,6 +346,16 @@ async function loadSettings() {
   try {
     const response = await api.getModelSelectionSettings()
     settings.value = response
+
+    // Load task-specific models separately
+    const emailModel = await api.getEmailModel()
+    settings.value.emailModel = emailModel || ''
+
+    const logAnalysisModel = await api.getLogAnalysisModel()
+    settings.value.logAnalysisModel = logAnalysisModel || ''
+
+    const documentModel = await api.getDocumentModel()
+    settings.value.documentModel = documentModel || ''
   } catch (error) {
     console.error('Failed to load settings:', error)
   }
@@ -205,7 +372,15 @@ async function loadAvailableModels() {
 
 async function saveSettings() {
   try {
-    await api.updateModelSelectionSettings(settings.value)
+    // Save model selection settings (without task-specific models)
+    const { emailModel, logAnalysisModel, documentModel, ...modelSelectionSettings } = settings.value
+    await api.updateModelSelectionSettings(modelSelectionSettings)
+
+    // Save task-specific models separately
+    await api.updateEmailModel(emailModel)
+    await api.updateLogAnalysisModel(logAnalysisModel)
+    await api.updateDocumentModel(documentModel)
+
     saveStatus.value = { success: true, message: 'Einstellungen erfolgreich gespeichert!' }
 
     // Clear status after 3 seconds
@@ -215,6 +390,23 @@ async function saveSettings() {
   } catch (error) {
     console.error('Failed to save settings:', error)
     saveStatus.value = { success: false, message: 'Fehler beim Speichern der Einstellungen' }
+  }
+}
+
+async function saveSamplingParams() {
+  try {
+    // Speichere Sampling Parameters im localStorage für neue Chats
+    localStorage.setItem('defaultSamplingParams', JSON.stringify(defaultSamplingParams.value))
+
+    saveStatus.value = { success: true, message: 'Sampling Parameter erfolgreich gespeichert!' }
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      saveStatus.value = null
+    }, 3000)
+  } catch (error) {
+    console.error('Failed to save sampling params:', error)
+    saveStatus.value = { success: false, message: 'Fehler beim Speichern der Parameter' }
   }
 }
 
