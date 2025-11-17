@@ -85,7 +85,7 @@ jobs:
           tar -czf ${{ matrix.artifact-name }}.tar.gz \
             ${{ matrix.binary-path }} \
             README.md \
-            NATIVE-IMAGE.md
+            docs/NATIVE-IMAGE.md
 
       - name: Package Binary (Windows)
         if: runner.os == 'Windows'
@@ -93,7 +93,7 @@ jobs:
           7z a ${{ matrix.artifact-name }}.zip `
             ${{ matrix.binary-path }} `
             README.md `
-            NATIVE-IMAGE.md
+            docs/NATIVE-IMAGE.md
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
