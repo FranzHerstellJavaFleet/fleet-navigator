@@ -402,6 +402,77 @@ Neue Versionen findest du auf GitHub unter "Releases".
 
 ---
 
+## 🖥️ Server-Deployment (für Admins)
+
+Fleet Navigator kann als **systemd-Service** auf Linux-Servern installiert werden.
+
+### Schnellinstallation
+
+```bash
+# Download und Entpacken
+wget https://github.com/FranzHerstellJavaFleet/fleet-navigator/releases/latest/download/fleet-navigator-linux-amd64.tar.gz
+tar -xzf fleet-navigator-linux-amd64.tar.gz
+cd fleet-navigator
+
+# Installation als systemd-Service
+sudo ./install-service.sh
+
+# Service starten
+sudo systemctl start fleet-navigator
+sudo systemctl enable fleet-navigator
+
+# Status prüfen
+sudo systemctl status fleet-navigator
+```
+
+### Vorteile
+
+- ✅ Automatischer Start beim Systemstart
+- ✅ Prozess-Überwachung und Neustart bei Fehler
+- ✅ Security Hardening (Sandboxing)
+- ✅ Zentrale Log-Verwaltung mit journald
+- ✅ Absolute Pfade für Modelle und Datenbank
+- ✅ Environment-Variablen für flexible Konfiguration
+
+### Konfiguration
+
+Die Service-Konfiguration ist in `/etc/systemd/system/fleet-navigator.service`:
+
+```ini
+# Modelle-Pfad anpassen
+Environment="LLM_LLAMACPP_MODELS_DIR=/mnt/storage/models"
+
+# Port ändern
+Environment="SERVER_PORT=8080"
+
+# Externes Modell-Storage einbinden
+Environment="LLM_LLAMACPP_MODELS_DIR=/nfs/shared/ai-models"
+```
+
+Nach Änderungen:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart fleet-navigator
+```
+
+### Logs anzeigen
+
+```bash
+# Live-Logs verfolgen
+sudo journalctl -u fleet-navigator -f
+
+# Logs der letzten Stunde
+sudo journalctl -u fleet-navigator --since "1 hour ago"
+```
+
+### Dokumentation
+
+Detaillierte Anleitungen findest du in:
+- **[docs/SYSTEMD-DEPLOYMENT.md](docs/SYSTEMD-DEPLOYMENT.md)** - Vollständige systemd-Anleitung
+- **[docs/INSTALL.md](docs/INSTALL.md)** - Installations-Guide für alle Plattformen
+
+---
+
 ## 📜 Lizenz
 
 Fleet Navigator ist Open Source Software unter der MIT-Lizenz.
