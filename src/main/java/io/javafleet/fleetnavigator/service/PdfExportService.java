@@ -5,6 +5,7 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -13,9 +14,11 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Service for exporting log analysis reports as PDF
+ * Note: Disabled by default in Native Image builds due to Flexmark compatibility issues
  */
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "fleet.pdf.enabled", havingValue = "true", matchIfMissing = false)
 public class PdfExportService {
 
     private final Parser markdownParser;

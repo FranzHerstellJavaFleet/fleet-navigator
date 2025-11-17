@@ -1,0 +1,60 @@
+server:
+  port: 2025
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: Fleet Navigator
+
+  datasource:
+    url: jdbc:h2:file:/opt/fleet-navigator/data/fleetnavdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        period: 31536000
+
+  mvc:
+    static-path-pattern: /**
+
+logging:
+  level:
+    root: INFO
+    io.javafleet: INFO
+  file:
+    name: /opt/fleet-navigator/logs/fleet-navigator.log
+    max-size: 100MB
+    max-history: 30
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# LLM Configuration
+llm:
+  llamacpp:
+    enabled: true
+    models-dir: /opt/fleet-navigator/models
+    binary-path: /opt/fleet-navigator/bin/llama-server
+    auto-download: true
+    default-model: qwen2.5:3b
+
+# Ollama configuration (fallback)
+ollama:
+  base-url: http://localhost:11434
+  timeout: 300000
+  model: llama3.2

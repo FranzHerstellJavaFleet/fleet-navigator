@@ -3,6 +3,7 @@ package io.javafleet.fleetnavigator.controller;
 import io.javafleet.fleetnavigator.service.PdfExportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,13 @@ import java.util.Map;
 
 /**
  * Controller for exporting log analysis reports as PDF
+ * Note: Disabled by default in Native Image builds due to Flexmark compatibility issues
  */
 @RestController
 @RequestMapping("/api/fleet-mate")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "fleet.pdf.enabled", havingValue = "true", matchIfMissing = false)
 public class PdfExportController {
 
     private final PdfExportService pdfExportService;
