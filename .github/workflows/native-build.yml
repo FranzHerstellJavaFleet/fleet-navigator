@@ -1,4 +1,4 @@
-name: GraalVM Native Image Build
+name: Java JAR Build
 
 on:
   push:
@@ -10,34 +10,18 @@ permissions:
   contents: write  # Required for creating releases
 
 jobs:
-  build-native:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            artifact-name: fleet-navigator-linux-amd64
-            binary-path: target/fleet-navigator
-          - os: windows-latest
-            artifact-name: fleet-navigator-windows-amd64
-            binary-path: target/fleet-navigator.exe
-          - os: macos-latest
-            artifact-name: fleet-navigator-macos-amd64
-            binary-path: target/fleet-navigator
-
-    runs-on: ${{ matrix.os }}
+  build-jar:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'graalvm-community'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          distribution: 'temurin'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,67 +36,61 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build Native Image (Linux)
-        if: runner.os == 'Linux'
+      - name: Build JAR
         run: |
-          # Use compatibility mode for maximum CPU compatibility (x86-64 baseline)
-          mvn -Pnative clean package -DskipTests \
-            "-Dnative.buildArg=-march=compatibility"
+          mvn clean package -DskipTests
 
-      - name: Build Native Image (macOS)
-        if: runner.os == 'macOS'
+      - name: Get version from pom.xml
+        id: version
         run: |
-          # Use compatibility mode for maximum CPU compatibility (Intel Macs)
-          mvn -Pnative clean package -DskipTests \
-            "-Dnative.buildArg=-march=compatibility"
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Setup Visual Studio (Windows)
-        if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Build Native Image (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+      - name: Package JAR
         run: |
-          # Use GitHub Actions runner's Visual Studio with explicit AMD64 architecture
-          & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64
-          # Windows: Use compatibility mode for older CPUs
-          mvn -Pnative clean package -DskipTests "-Dnative.buildArg=-march=compatibility"
-
-      - name: Package Binary (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          tar -czf ${{ matrix.artifact-name }}.tar.gz \
-            ${{ matrix.binary-path }} \
-            README.md \
-            docs/NATIVE-IMAGE.md
-
-      - name: Package Binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          7z a ${{ matrix.artifact-name }}.zip `
-            ${{ matrix.binary-path }} `
-            README.md `
-            docs/NATIVE-IMAGE.md
+          mkdir -p release
+          cp target/fleet-navigator-*.jar release/fleet-navigator.jar
+          cp README.md release/
+          cp docs/INSTALL.md release/ || echo "INSTALL.md not found, skipping"
+          tar -czf fleet-navigator-${{ steps.version.outputs.VERSION }}.tar.gz -C release .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
-          path: |
-            ${{ matrix.artifact-name }}.tar.gz
-            ${{ matrix.artifact-name }}.zip
+          name: fleet-navigator-jar
+          path: fleet-navigator-*.tar.gz
           retention-days: 30
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ${{ matrix.artifact-name }}.tar.gz
-            ${{ matrix.artifact-name }}.zip
+          files: fleet-navigator-*.tar.gz
           draft: false
           prerelease: false
           generate_release_notes: true
+          body: |
+            ## Fleet Navigator JAR Release
+
+            **Plattform-unabhängiges Java JAR**
+
+            ### Installation:
+            ```bash
+            # Download und entpacken
+            tar -xzf fleet-navigator-*.tar.gz
+
+            # Starten (Java 21 erforderlich)
+            java -jar fleet-navigator.jar
+            ```
+
+            ### Systemanforderungen:
+            - Java 21 oder höher
+            - 2 GB RAM empfohlen
+            - llama.cpp server (optional, für lokale LLM-Unterstützung)
+
+            ### Erste Schritte:
+            1. JAR herunterladen und entpacken
+            2. `java -jar fleet-navigator.jar` ausführen
+            3. Browser öffnen: http://localhost:2025
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

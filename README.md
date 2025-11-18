@@ -10,6 +10,27 @@ Eine benutzerfreundliche Anwendung für Gespräche mit künstlicher Intelligenz 
 
 ---
 
+## 🆕 NEU: Version 0.3.0 - Einfachere Installation!
+
+**Fleet Navigator läuft jetzt als Java JAR** - schneller zu bauen, einfacher zu installieren!
+
+### ⚡ Automatische Setup-Skripte für alle Plattformen:
+
+- **Windows:** `setup-fleet-navigator.ps1` - Vollautomatisch mit PowerShell
+- **macOS:** `setup-fleet-navigator-macos.sh` - Erkennt Apple Silicon/Intel automatisch
+- **Linux:** `setup-fleet-navigator-linux.sh` - Mit systemd Service Support
+
+**Alle Skripte:**
+- ✅ Prüfen Java 21 (wird automatisch erkannt)
+- ✅ Laden llama.cpp herunter
+- ✅ Laden KI-Modell herunter (~2 GB)
+- ✅ Konfigurieren alles
+- ✅ Erstellen Desktop-Verknüpfung/Service
+
+**→ Siehe [Installation](#-installation-schritt-für-schritt) unten für Details**
+
+---
+
 ## 🎯 Für wen ist Fleet Navigator?
 
 Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
@@ -47,7 +68,10 @@ Fleet Navigator ist für **jeden**, der eine private AI nutzen möchte:
 
 Fleet Navigator läuft auf fast jedem modernen PC - hier sind die Empfehlungen für optimale Leistung:
 
+**⚠️ NEU:** Fleet Navigator benötigt jetzt **Java 21** (wird automatisch von Setup-Skripten geprüft)
+
 ### Minimum (Für kleine Modelle wie Llama-3.2-1B)
+- **Java**: OpenJDK 21 oder neuer
 - **Prozessor**: Intel Core i3 / AMD Ryzen 3 (ab 2015)
 - **RAM**: 4 GB
 - **Speicher**: 5 GB frei
@@ -103,49 +127,134 @@ Fleet Navigator läuft auf fast jedem modernen PC - hier sind die Empfehlungen f
 
 ## 🚀 Installation (Schritt für Schritt)
 
-### Windows
+**NEU:** Automatische Setup-Skripte machen die Installation super einfach!
 
-#### Schritt 1: Fleet Navigator herunterladen
-1. Gehe zu: https://github.com/FranzHerstellJavaFleet/fleet-navigator
-2. Klicke auf "Releases" (rechte Seite)
-3. Lade `fleet-navigator-windows-amd64.zip` herunter
-4. Entpacke die ZIP-Datei
+### Windows (Automatisch)
 
-#### Schritt 2: Starten
-1. Doppelklick auf `fleet-navigator.exe`
-2. Öffne im Browser: http://localhost:2025
+#### Voraussetzung: Java 21
+Falls noch nicht installiert:
+1. Download: https://adoptium.net/de/temurin/releases/?version=21
+2. Installer ausführen und durchklicken
 
-#### Schritt 3: AI-Modell herunterladen
-1. Im Fleet Navigator klicke auf **"Modelle"** in der Sidebar
-2. Wähle ein Modell aus (z.B. **Qwen2.5-3B** für 8GB RAM oder **Llama-3.2-1B** für 4GB RAM)
-3. Klicke auf **"Download"**
-4. Warte, bis der Download abgeschlossen ist (Progress wird live angezeigt)
-5. Das Modell ist sofort einsatzbereit!
+#### Installation:
+1. Repository herunterladen oder klonen
+2. PowerShell **als Administrator** öffnen
+3. Zum Projektordner navigieren:
+   ```powershell
+   cd C:\Pfad\zu\fleet-navigator
+   ```
+4. Setup-Skript ausführen:
+   ```powershell
+   .\setup-fleet-navigator.ps1
+   ```
 
-### macOS
+**Das Skript:**
+- Prüft Java 21 Installation
+- Lädt llama.cpp herunter (~50 MB)
+- Lädt Qwen 2.5 3B Modell herunter (~2 GB)
+- Erstellt Desktop-Verknüpfung
+- Konfiguriert alles
 
-#### Schritt 1: Fleet Navigator herunterladen
-1. Gehe zu: https://github.com/FranzHerstellJavaFleet/fleet-navigator
-2. Klicke auf "Releases"
-3. Lade `fleet-navigator-macos-amd64.tar.gz` herunter
-4. Entpacke die Datei
+**Nach Installation:** Doppelklick auf "Fleet Navigator" auf dem Desktop!
 
-#### Schritt 2: Starten
+### macOS (Automatisch)
+
+#### Voraussetzung: Java 21
 ```bash
-cd fleet-navigator
-./fleet-navigator
+# Mit Homebrew
+brew install openjdk@21
+
+# Oder manuell von:
+# https://adoptium.net/de/temurin/releases/?version=21
 ```
 
-Browser öffnet automatisch: http://localhost:2025
+#### Installation:
+```bash
+# Repository klonen oder ZIP herunterladen
+cd /pfad/zu/fleet-navigator
 
-#### Schritt 3: AI-Modell herunterladen
-1. Im Fleet Navigator klicke auf **"Modelle"** in der Sidebar
-2. Wähle ein Modell aus der kuratierten Liste (empfohlen: **Qwen2.5-3B** oder **Llama-3.2-1B**)
-3. Klicke auf **"Download"**
-4. Der Download startet automatisch - Live-Progress wird angezeigt
-5. Nach dem Download ist das Modell sofort einsatzbereit!
+# Setup-Skript ausführen
+chmod +x setup-fleet-navigator-macos.sh
+./setup-fleet-navigator-macos.sh
+```
 
-### Linux (Ubuntu/Debian)
+**Das Skript:**
+- Erkennt automatisch Apple Silicon (M1/M2/M3) vs Intel
+- Lädt passende llama.cpp Binary
+- Lädt Qwen 2.5 3B Modell (~2 GB)
+- Erstellt LaunchAgent für Autostart
+
+**Nach Installation:**
+```bash
+cd ~/Applications/FleetNavigator
+./start-fleet-navigator.sh
+```
+
+Browser öffnen: http://localhost:2025
+
+### Linux (Automatisch)
+
+#### Voraussetzung: Java 21
+```bash
+# Ubuntu/Debian
+sudo apt update && sudo apt install openjdk-21-jdk
+
+# Fedora
+sudo dnf install java-21-openjdk
+
+# Arch
+sudo pacman -S jdk-openjdk
+```
+
+#### Desktop Installation:
+```bash
+cd /pfad/zu/fleet-navigator
+
+chmod +x setup-fleet-navigator-linux.sh
+./setup-fleet-navigator-linux.sh
+```
+
+#### Server Installation mit systemd:
+```bash
+# Repository klonen oder bauen
+mvn clean package -DskipTests
+
+# Setup mit systemd Service
+sudo ./setup-fleet-navigator-linux.sh --systemd
+
+# Service starten
+sudo systemctl start fleet-navigator
+
+# Autostart aktivieren
+sudo systemctl enable fleet-navigator
+```
+
+**Das Skript:**
+- Erkennt x86_64 vs ARM64
+- Lädt llama.cpp Binary
+- Lädt Modell (~2 GB)
+- Optional: Erstellt systemd Service
+
+**Nach Installation:**
+```bash
+# Als User
+cd /opt/fleet-navigator
+./start-fleet-navigator.sh
+
+# Oder als Service
+sudo systemctl start fleet-navigator
+```
+
+Browser öffnen: http://localhost:2025
+
+---
+
+### Manuelle Installation
+
+Falls die Setup-Skripte nicht funktionieren, siehe:
+- **Detaillierte Anleitung:** [docs/INSTALL.md](docs/INSTALL.md)
+- **systemd Deployment:** [docs/JAR-DEPLOYMENT.md](docs/JAR-DEPLOYMENT.md)
+- **GitHub Releases:** https://github.com/FranzHerstellJavaFleet/fleet-navigator/releases
 
 #### Schritt 1: Fleet Navigator herunterladen
 ```bash
