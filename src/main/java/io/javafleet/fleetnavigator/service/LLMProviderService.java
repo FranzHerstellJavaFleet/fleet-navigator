@@ -6,6 +6,7 @@ import io.javafleet.fleetnavigator.llm.LLMProviderType;
 import io.javafleet.fleetnavigator.llm.dto.ModelInfo;
 import io.javafleet.fleetnavigator.llm.providers.LlamaCppProvider;
 import io.javafleet.fleetnavigator.llm.providers.JavaLlamaCppProvider;
+import io.javafleet.fleetnavigator.llm.providers.OllamaProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,7 @@ public class LLMProviderService {
     public LLMProviderService(
             LlamaCppProvider llamaCppProvider,
             JavaLlamaCppProvider javaLlamaCppProvider,
+            OllamaProvider ollamaProvider,
             LLMConfigProperties config,
             SettingsService settingsService
     ) {
@@ -55,6 +57,7 @@ public class LLMProviderService {
         this.providers = new java.util.LinkedHashMap<>();
         providers.put("java-llama-cpp", javaLlamaCppProvider);  // JNI-based provider (preferred)
         providers.put("llamacpp", llamaCppProvider);  // Server-based provider (legacy)
+        providers.put("ollama", ollamaProvider);     // Ollama provider
 
         this.config = config;
         this.settingsService = settingsService;
@@ -169,11 +172,14 @@ public class LLMProviderService {
      * Vision-Chaining: 2-Step Process
      * Step 1: Vision Model analysiert Bild
      * Step 2: Haupt-Model erhält Vision-Output als Kontext
+     *
+     * @param showIntermediateOutput If true, send vision output to frontend
      */
     public void chatStreamWithVisionChaining(String visionModel, String mainModel, String prompt,
                                               List<String> images, String systemPrompt,
-                                              String requestId, Consumer<String> chunkConsumer) throws IOException {
-        log.info("Vision-Chaining (Stream): Vision={}, Main={}", visionModel, mainModel);
+                                              String requestId, Consumer<String> chunkConsumer,
+                                              boolean showIntermediateOutput) throws IOException {
+        log.info("Vision-Chaining (Stream): Vision={}, Main={}, ShowIntermediate={}", visionModel, mainModel, showIntermediateOutput);
 
         // Step 1: Vision Model analysiert Bild - Interne Kommunikation (kann Englisch sein)
         String visionPrompt = "Describe in detail what you see in this image. " +
@@ -184,8 +190,13 @@ public class LLMProviderService {
         log.info("Vision Model Output (first 100 chars): {}",
                 visionOutput.substring(0, Math.min(100, visionOutput.length())));
 
-        // Optional: Sende Info an Frontend dass Vision-Step abgeschlossen ist
-        chunkConsumer.accept("🔍 [Vision-Analyse abgeschlossen]\n\n");
+        // Sende Vision-Output an Frontend (wenn aktiviert)
+        if (showIntermediateOutput) {
+            chunkConsumer.accept("🔍 **Vision-Modell (" + visionModel + ") Analyse:**\n\n");
+            chunkConsumer.accept(visionOutput + "\n\n");
+            chunkConsumer.accept("---\n\n");
+            chunkConsumer.accept("💬 **Antwort des Haupt-Modells:**\n\n");
+        }
 
         // Step 2: Haupt-Model erhält Vision-Output + Original-Prompt (AUSGABE AUF DEUTSCH!)
         String chainedPrompt = "WICHTIG: Deine Antwort MUSS auf Deutsch sein!\n\n" +
@@ -319,6 +330,48 @@ public class LLMProviderService {
      */
     public String getActiveProviderName() {
         return activeProvider.getProviderName();
+    }
+
+    /**
+     * Gibt Default-Modell mit Fallback zurück
+     *
+     * Option A: Wenn Default-Modell nicht verfügbar ist, nimm erstes verfügbares Modell
+     *
+     * @param preferredModel Das bevorzugte Modell (kann null sein)
+     * @return Verfügbares Modell oder null wenn keine Modelle verfügbar
+     */
+    public String getDefaultModelWithFallback(String preferredModel) {
+        try {
+            List<ModelInfo> availableModels = activeProvider.getAvailableModels();
+
+            if (availableModels.isEmpty()) {
+                log.warn("⚠️  No models available for provider: {}", activeProvider.getProviderName());
+                return null;
+            }
+
+            // 1. Versuche das bevorzugte Modell
+            if (preferredModel != null && !preferredModel.isEmpty()) {
+                boolean modelExists = availableModels.stream()
+                    .anyMatch(m -> m.getName().equals(preferredModel));
+
+                if (modelExists) {
+                    log.debug("✅ Using preferred model: {}", preferredModel);
+                    return preferredModel;
+                } else {
+                    log.warn("⚠️  Preferred model '{}' not found, using first available model", preferredModel);
+                }
+            }
+
+            // 2. Fallback: Nimm erstes verfügbares Modell
+            String fallbackModel = availableModels.get(0).getName();
+            log.info("🔄 Using fallback model: {} (from {} available models)",
+                fallbackModel, availableModels.size());
+            return fallbackModel;
+
+        } catch (IOException e) {
+            log.error("❌ Failed to get available models: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**

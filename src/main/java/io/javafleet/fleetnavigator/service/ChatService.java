@@ -416,7 +416,8 @@ public class ChatService {
                                             emitter.completeWithError(e);
                                         }
                                     }
-                                }
+                                },
+                                request.getShowIntermediateOutput() != null && request.getShowIntermediateOutput()
                         );
                     } else {
                         // Normal Vision Model (ohne Chaining)
@@ -516,17 +517,27 @@ public class ChatService {
                 log.error("Error during streaming", e);
                 if (!isCompleted[0]) {
                     try {
-                        // Create user-friendly error message
+                        // Create user-friendly error message based on active provider
                         String errorMessage = e.getMessage();
+                        String providerName = llmProviderService.getActiveProviderName();
+
                         if (errorMessage != null && errorMessage.contains("404")) {
-                            errorMessage = "⚠️ LLM-Provider ist nicht erreichbar!\n\n" +
-                                    "Bitte stelle sicher, dass llama.cpp läuft:\n" +
-                                    "• Fleet Navigator sollte llama.cpp automatisch starten\n" +
-                                    "• Prüfe die Logs für Fehler beim Start\n" +
-                                    "• Stelle sicher, dass Modelle im ./models Verzeichnis vorhanden sind";
+                            if ("ollama".equalsIgnoreCase(providerName)) {
+                                errorMessage = "⚠️ Modell nicht gefunden!\n\n" +
+                                        "Das ausgewählte Modell ist in Ollama nicht verfügbar.\n" +
+                                        "• Prüfe ob das Modell korrekt installiert ist: ollama list\n" +
+                                        "• Installiere das Modell mit: ollama pull <modellname>\n" +
+                                        "• Prüfe die Schreibweise des Modellnamens";
+                            } else {
+                                errorMessage = "⚠️ LLM-Provider ist nicht erreichbar!\n\n" +
+                                        "Bitte stelle sicher, dass " + providerName + " läuft:\n" +
+                                        "• Fleet Navigator sollte den Provider automatisch starten\n" +
+                                        "• Prüfe die Logs für Fehler beim Start\n" +
+                                        "• Stelle sicher, dass Modelle verfügbar sind";
+                            }
                         } else if (errorMessage != null && errorMessage.contains("Connection refused")) {
                             errorMessage = "⚠️ Verbindung zum LLM-Provider fehlgeschlagen!\n\n" +
-                                    "Der LLM-Provider läuft nicht.\n" +
+                                    "Der Provider '" + providerName + "' läuft nicht.\n" +
                                     "Bitte prüfe die Fleet Navigator Logs und starte neu.";
                         }
 

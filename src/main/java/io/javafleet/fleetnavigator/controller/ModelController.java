@@ -49,6 +49,7 @@ public class ModelController {
                 enriched.put("size", model.getSize());
                 enriched.put("modifiedAt", model.getModifiedAt());
                 enriched.put("digest", model.getDigest());  // Include digest for update detection
+                enriched.put("custom", model.isCustom());  // Include custom flag for frontend filtering
 
                 // Add curated metadata (release date, training cutoff, etc.)
                 enrichmentService.enrichModelInfo(enriched);

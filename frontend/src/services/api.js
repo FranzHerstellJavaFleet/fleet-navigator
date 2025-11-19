@@ -631,8 +631,24 @@ export default {
     return response.data
   },
 
+  async getProviderConfig() {
+    const response = await api.get('/llm/providers/config')
+    return response.data
+  },
+
   async switchProvider(provider) {
     const response = await api.post('/llm/providers/switch', { provider })
+    return response.data
+  },
+
+  // Ollama endpoints
+  async getOllamaModels() {
+    const response = await api.get('/ollama/models')
+    return response.data
+  },
+
+  async getOllamaStatus() {
+    const response = await api.get('/ollama/status')
     return response.data
   },
 
@@ -659,6 +675,11 @@ export default {
 
   async deleteModelStoreModel(modelId) {
     const response = await api.delete(`/model-store/${modelId}`)
+    return response.data
+  },
+
+  async cancelModelStoreDownload(modelId) {
+    const response = await api.post(`/model-store/download/${modelId}/cancel`)
     return response.data
   },
 

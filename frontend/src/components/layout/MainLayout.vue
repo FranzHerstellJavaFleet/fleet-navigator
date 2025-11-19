@@ -5,6 +5,7 @@
       @toggle-monitor="showMonitor = !showMonitor"
       @toggle-model-manager="showModelManager = !showModelManager"
       @toggle-settings="showSettings = !showSettings"
+      @open-settings-tab="openSettingsOnTab"
       @toggle-theme="toggleDarkMode"
       :dark-mode="darkMode"
     />
@@ -45,7 +46,7 @@
 
     <!-- Settings Modal -->
     <Transition name="fade">
-      <SettingsModal v-if="showSettings" :is-open="showSettings" @close="showSettings = false" />
+      <SettingsModal v-if="showSettings" :is-open="showSettings" :initial-tab="settingsInitialTab" @close="showSettings = false; settingsInitialTab = null" />
     </Transition>
 
     <!-- Abort Confirmation Modal -->
@@ -88,6 +89,7 @@ const showModelManager = ref(false)
 const showSettings = ref(false)
 const showAbortModal = ref(false)
 const selectedProject = ref(null)
+const settingsInitialTab = ref(null)
 
 // Get chats that belong to the selected project
 const projectChats = computed(() => {
@@ -108,6 +110,11 @@ onMounted(async () => {
 function toggleDarkMode() {
   darkMode.value = !darkMode.value
   localStorage.setItem('darkMode', JSON.stringify(darkMode.value))
+}
+
+function openSettingsOnTab(tabName) {
+  settingsInitialTab.value = tabName
+  showSettings.value = true
 }
 
 // Watch for chat changes - close project view if chat is not part of current project

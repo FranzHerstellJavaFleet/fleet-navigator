@@ -36,24 +36,24 @@
 
         <div class="param-row">
           <label for="maxTokens" class="param-label">
-            Max Tokens
-            <span class="param-info" title="Maximale Anzahl generierter Tokens">ⓘ</span>
+            Max Tokens (num_predict)
+            <span class="param-info" title="Maximale Anzahl generierter Tokens (Ollama: num_predict, llama.cpp: n_predict)">ⓘ</span>
           </label>
           <div class="param-control">
             <input
               type="range"
               id="maxTokens"
               v-model.number="params.maxTokens"
-              min="50"
-              max="2048"
-              step="50"
+              min="512"
+              max="131072"
+              step="512"
               class="param-slider"
             />
             <input
               type="number"
               v-model.number="params.maxTokens"
-              min="50"
-              max="2048"
+              min="512"
+              max="131072"
               class="param-value"
             />
           </div>
@@ -460,7 +460,7 @@ export default {
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const params = reactive({
-      maxTokens: 512,
+      maxTokens: 32768,  // Default: 32k tokens für lange Antworten (ca. 15-20 Seiten)
       temperature: 0.7,
       topP: 0.9,
       topK: 40,
@@ -574,10 +574,11 @@ export default {
 
     // Hints
     const getMaxTokensHint = () => {
-      if (params.maxTokens < 200) return 'Sehr kurz';
-      if (params.maxTokens < 500) return 'Kurz bis mittel';
-      if (params.maxTokens < 1000) return 'Mittel';
-      return 'Lang/Detailliert';
+      if (params.maxTokens < 2048) return 'Sehr kurz (< 1 Seite)';
+      if (params.maxTokens < 8192) return 'Kurz (1-3 Seiten)';
+      if (params.maxTokens < 32768) return 'Mittel (3-15 Seiten)';
+      if (params.maxTokens < 65536) return 'Lang (15-30 Seiten)';
+      return 'Sehr lang (30+ Seiten)';
     };
 
     const getTemperatureHint = () => {

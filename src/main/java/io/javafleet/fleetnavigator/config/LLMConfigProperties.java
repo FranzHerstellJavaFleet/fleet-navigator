@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * LLM Provider Konfiguration
  *
- * Unterstützt nur llama.cpp (java-llama-cpp und llamacpp)
+ * Unterstützt llama.cpp (java-llama-cpp und llamacpp) und Ollama
  * Native Image: @ConfigurationProperties ist kompatibel
  *
  * @author JavaFleet Systems Consulting
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class LLMConfigProperties {
 
     /**
-     * Default Provider (java-llama-cpp oder llamacpp)
+     * Default Provider (java-llama-cpp, llamacpp, oder ollama)
      * "auto" = Auto-Detection mit Fallback-Logik
      */
     private String defaultProvider = "java-llama-cpp";
@@ -28,6 +28,11 @@ public class LLMConfigProperties {
      * llama.cpp-spezifische Konfiguration
      */
     private LlamaCppConfig llamacpp = new LlamaCppConfig();
+
+    /**
+     * Ollama-spezifische Konfiguration
+     */
+    private OllamaConfig ollama = new OllamaConfig();
 
     /**
      * llama.cpp Provider Config
@@ -73,5 +78,31 @@ public class LLMConfigProperties {
          * Aktiviert/Deaktiviert llama.cpp Provider
          */
         private boolean enabled = true;
+    }
+
+    /**
+     * Ollama Provider Config
+     */
+    @Data
+    public static class OllamaConfig {
+        /**
+         * Ollama Server URL
+         */
+        private String baseUrl = "http://localhost:11434";
+
+        /**
+         * Default Model für Ollama
+         */
+        private String defaultModel = "mistral:latest";
+
+        /**
+         * Timeout in Sekunden
+         */
+        private int timeoutSeconds = 300;
+
+        /**
+         * Aktiviert/Deaktiviert Ollama Provider
+         */
+        private boolean enabled = false; // Default: disabled
     }
 }

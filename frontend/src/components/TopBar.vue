@@ -5,6 +5,7 @@
     border-b border-gray-200/50 dark:border-gray-700/50
     px-6 py-3
     shadow-sm
+    relative z-50
   ">
     <div class="flex items-center justify-between">
       <!-- Left Side: Hamburger + Logo + Title -->
@@ -67,30 +68,90 @@
       <div class="flex items-center space-x-2">
         <!-- Current Model Display -->
         <div class="flex items-center space-x-3 mr-2">
-          <!-- System Prompt Title (Clickable) - ALWAYS show, even when "Kein System-Prompt" -->
+          <!-- System Prompt Title (Clickable) - Opens Settings Modal -->
           <button
-            @click="showSystemPrompt = !showSystemPrompt"
+            @click="openSystemPromptsSettings"
             class="
               flex items-center space-x-2 px-3 py-2
-              bg-gradient-to-br from-purple-100 to-purple-50
-              dark:from-purple-900/30 dark:to-purple-800/20
-              rounded-lg border border-purple-200 dark:border-purple-700/50
-              shadow-sm
-              hover:from-purple-200 hover:to-purple-100
-              dark:hover:from-purple-800/40 dark:hover:to-purple-700/30
-              hover:border-purple-300 dark:hover:border-purple-600/50
+              rounded-lg shadow-sm
               hover:shadow-md
               transition-all duration-200
               cursor-pointer
               transform hover:scale-105 active:scale-95
             "
-            title="System Prompt ändern"
+            :class="isUsingCustomModelPrompt
+              ? 'bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 border border-green-200 dark:border-green-700/50 hover:from-green-200 hover:to-green-100 dark:hover:from-green-800/40 dark:hover:to-green-700/30 hover:border-green-300 dark:hover:border-green-600/50'
+              : 'bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700/50 hover:from-purple-200 hover:to-purple-100 dark:hover:from-purple-800/40 dark:hover:to-purple-700/30 hover:border-purple-300 dark:hover:border-purple-600/50'"
+            :title="isUsingCustomModelPrompt ? 'Custom Model verwendet eigenen System-Prompt' : 'System Prompts verwalten (öffnet Einstellungen)'"
           >
-            <ChatBubbleLeftRightIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            <span class="text-sm font-medium text-purple-900 dark:text-purple-100">
-              {{ chatStore.systemPromptTitle || 'Kein System-Prompt' }}
+            <ChatBubbleLeftRightIcon class="w-4 h-4" :class="isUsingCustomModelPrompt ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'" />
+            <span class="text-sm font-medium" :class="isUsingCustomModelPrompt ? 'text-green-900 dark:text-green-100' : 'text-purple-900 dark:text-purple-100'">
+              {{ systemPromptDisplayText }}
             </span>
+            <Cog6ToothIcon v-if="!isUsingCustomModelPrompt" class="w-3 h-3 text-purple-500 dark:text-purple-400 opacity-60" />
           </button>
+
+          <!-- Provider Switcher -->
+          <div class="relative">
+            <button
+              @click="showProviderDropdown = !showProviderDropdown"
+              class="
+                flex items-center space-x-2 px-3 py-2
+                bg-gradient-to-br from-blue-100 to-blue-50
+                dark:from-blue-900/30 dark:to-blue-800/20
+                rounded-lg border border-blue-200 dark:border-blue-700/50
+                shadow-sm
+                hover:from-blue-200 hover:to-blue-100
+                dark:hover:from-blue-800/40 dark:hover:to-blue-700/30
+                hover:border-blue-300 dark:hover:border-blue-600/50
+                hover:shadow-md
+                transition-all duration-200
+                cursor-pointer
+                transform hover:scale-105 active:scale-95
+              "
+              title="LLM Provider wechseln"
+            >
+              <ServerIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                {{ activeProvider ? (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1)) : 'Loading...' }}
+              </span>
+              <ChevronDownIcon class="w-3 h-3 text-blue-500 dark:text-blue-400" />
+            </button>
+
+            <!-- Provider Dropdown -->
+            <Transition name="dropdown">
+              <div
+                v-if="showProviderDropdown"
+                @click.stop
+                class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[9999]"
+              >
+                <div class="p-2">
+                  <div
+                    v-for="provider in availableProviders"
+                    :key="provider.id"
+                    @click="switchProvider(provider.id)"
+                    class="
+                      flex items-center justify-between px-3 py-2 rounded-lg
+                      hover:bg-gray-100 dark:hover:bg-gray-700
+                      cursor-pointer transition-colors
+                    "
+                    :class="{ 'bg-blue-50 dark:bg-blue-900/20': provider.id === activeProvider }"
+                  >
+                    <div class="flex items-center gap-2">
+                      <ServerIcon class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                      <span class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ provider.name }}
+                      </span>
+                    </div>
+                    <CheckIcon
+                      v-if="provider.id === activeProvider"
+                      class="w-4 h-4 text-blue-600 dark:text-blue-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
 
           <!-- Model (Clickable - Opens Model Manager) -->
           <button
@@ -395,7 +456,9 @@ import {
   XMarkIcon,
   BoltIcon,
   FireIcon,
-  ServerIcon
+  ServerIcon,
+  ChevronDownIcon,
+  CheckIcon
 } from '@heroicons/vue/24/outline'
 import { BoltIcon as BoltIconSolid } from '@heroicons/vue/24/solid'
 import { useChatStore } from '../stores/chatStore'
@@ -418,6 +481,25 @@ const showSaveTemplateModal = ref(false)
 const newTemplateName = ref('')
 const promptTemplates = ref([])
 
+// Computed: Display text for system prompt button
+const systemPromptDisplayText = computed(() => {
+  // Check if current model is a custom model
+  if (chatStore.isCustomModel(chatStore.selectedModel)) {
+    return 'Eigener Modell-Prompt'
+  }
+  return chatStore.systemPromptTitle || 'Kein System-Prompt'
+})
+
+// Computed: Check if custom model is active (for styling)
+const isUsingCustomModelPrompt = computed(() => {
+  return chatStore.isCustomModel(chatStore.selectedModel)
+})
+
+// Provider Management
+const showProviderDropdown = ref(false)
+const activeProvider = ref('')
+const availableProviders = ref([])
+
 // System monitoring - Fleet Mate Stats laden
 const mates = ref([])
 const mateStats = ref({})
@@ -429,11 +511,27 @@ const loadMateData = async () => {
     const response = await axios.get('/api/fleet-mate/mates')
     mates.value = response.data || []
 
-    // Lade Stats für ersten aktiven Mate
-    const firstOnline = mates.value.find(o => o.status === 'ONLINE')
-    if (firstOnline) {
-      const statsResponse = await axios.get(`/api/fleet-mate/mates/${firstOnline.mateId}/stats`)
-      mateStats.value = statsResponse.data || {}
+    // Lade Stats nur für Hardware-Monitoring-Mates (nicht Email-Mates!)
+    // Priorität: ubuntu-desktop-01 oder erster Mate mit lastStatsUpdate
+    const hardwareMates = mates.value.filter(m =>
+      m.status === 'ONLINE' && m.lastStatsUpdate != null
+    )
+
+    // 1. Versuche ubuntu-desktop-01 zu finden
+    let hardwareMate = hardwareMates.find(m => m.mateId === 'ubuntu-desktop-01')
+
+    // 2. Fallback: Erster Hardware-Mate
+    if (!hardwareMate) {
+      hardwareMate = hardwareMates[0]
+    }
+
+    if (hardwareMate) {
+      try {
+        const statsResponse = await axios.get(`/api/fleet-mate/mates/${hardwareMate.mateId}/stats`)
+        mateStats.value = statsResponse.data || {}
+      } catch (statsError) {
+        console.debug(`No stats for mate ${hardwareMate.mateId}`)
+      }
     }
   } catch (error) {
     console.error('Failed to load mate data:', error)
@@ -479,6 +577,7 @@ let mateDataInterval = null
 
 onMounted(async () => {
   await loadTemplates()
+  await loadProviders()
 
   // Load Karla prompt if only title is set but no content
   if (chatStore.systemPromptTitle === 'Karla' && !chatStore.systemPrompt) {
@@ -514,6 +613,65 @@ const loadTemplate = async (template) => {
   chatStore.systemPromptTitle = template.name
   // Auto-close after selection
   showSystemPrompt.value = false
+}
+
+// Provider Management Functions
+async function loadProviders() {
+  try {
+    const response = await api.getProviderStatus()
+    // Response structure: { activeProvider: "ollama", availableProviders: [...], providerStatus: {...} }
+
+    if (response.availableProviders && Array.isArray(response.availableProviders)) {
+      availableProviders.value = response.availableProviders.map(p => ({
+        id: p,
+        name: formatProviderName(p)
+      }))
+    }
+
+    if (response.activeProvider) {
+      activeProvider.value = response.activeProvider
+    }
+
+    console.log('✅ Loaded providers:', availableProviders.value, 'Active:', activeProvider.value)
+  } catch (error) {
+    console.error('Failed to load providers:', error)
+    // Fallback: set some defaults
+    availableProviders.value = [
+      { id: 'ollama', name: 'Ollama' },
+      { id: 'llamacpp', name: 'Llama.cpp' },
+      { id: 'java-llama-cpp', name: 'Java Llama.cpp' }
+    ]
+    activeProvider.value = 'ollama'
+  }
+}
+
+function formatProviderName(provider) {
+  // Format provider names nicely with clear distinction
+  const nameMap = {
+    'ollama': 'Ollama',
+    'llamacpp': 'Llama.cpp (Native)',
+    'java-llama-cpp': 'Llama.cpp (JNI)'
+  }
+  return nameMap[provider] || provider.charAt(0).toUpperCase() + provider.slice(1)
+}
+
+async function switchProvider(providerId) {
+  try {
+    await api.switchProvider(providerId)
+    activeProvider.value = providerId
+    showProviderDropdown.value = false
+    console.log(`✅ Switched to provider: ${providerId}`)
+  } catch (error) {
+    console.error('Failed to switch provider:', error)
+  }
+}
+
+// Open Settings Modal on "templates" tab
+const emit = defineEmits(['toggle-theme', 'toggle-settings', 'toggle-model-manager', 'open-settings-tab'])
+
+function openSystemPromptsSettings() {
+  // Emit event to open settings on specific tab
+  emit('open-settings-tab', 'templates')
 }
 
 const deleteTemplate = async (id) => {

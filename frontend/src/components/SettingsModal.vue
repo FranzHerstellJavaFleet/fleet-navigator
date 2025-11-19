@@ -200,6 +200,77 @@
           </section>
           </div>
 
+          <!-- TAB: Templates / System Prompts -->
+          <div v-if="activeTab === 'templates'">
+            <section class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <DocumentTextIcon class="w-5 h-5 text-blue-500" />
+                    System-Prompts Verwaltung
+                  </h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Erstelle und verwalte wiederverwendbare System-Prompts für deine Chats
+                  </p>
+                </div>
+                <button
+                  @click="showPromptEditor = true; editingPrompt = null; resetPromptForm()"
+                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <DocumentDuplicateIcon class="w-4 h-4" />
+                  Neuer Prompt
+                </button>
+              </div>
+
+              <!-- Prompts List -->
+              <div v-if="systemPrompts.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <DocumentTextIcon class="w-16 h-16 mx-auto mb-3 opacity-20" />
+                <p class="font-medium">Keine System-Prompts vorhanden</p>
+                <p class="text-xs mt-2">Erstelle deinen ersten System-Prompt mit dem Button oben</p>
+              </div>
+
+              <div v-else class="space-y-2">
+                <div
+                  v-for="prompt in systemPrompts"
+                  :key="prompt.id"
+                  class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:border-blue-400 dark:hover:border-blue-600 transition-colors bg-white dark:bg-gray-800"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-sm text-gray-900 dark:text-white">
+                          {{ prompt.name }}
+                        </h4>
+                        <span v-if="prompt.isDefault" class="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">
+                          Standard
+                        </span>
+                      </div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                        {{ prompt.content }}
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <button
+                        @click="editSystemPrompt(prompt)"
+                        class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                        title="Bearbeiten"
+                      >
+                        <WrenchScrewdriverIcon class="w-4 h-4" />
+                      </button>
+                      <button
+                        @click="deleteSystemPrompt(prompt.id)"
+                        class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        title="Löschen"
+                      >
+                        <TrashIcon class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
           <!-- TAB: Personal Info -->
           <div v-if="activeTab === 'personal'">
             <PersonalInfoTab ref="personalInfoTabRef" />
@@ -423,6 +494,84 @@
 
         </div>
 
+        <!-- System Prompt Editor Modal -->
+        <Transition name="modal">
+          <div v-if="showPromptEditor" class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="showPromptEditor = false">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div class="p-5 border-b border-gray-200 dark:border-gray-700">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ editingPrompt ? 'System-Prompt bearbeiten' : 'Neuer System-Prompt' }}
+                </h4>
+              </div>
+
+              <div class="p-5 space-y-4">
+                <!-- Name -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Name
+                  </label>
+                  <input
+                    v-model="promptForm.name"
+                    type="text"
+                    placeholder="z.B. Java-Experte, Code-Reviewer, ..."
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                </div>
+
+                <!-- Content -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    System-Prompt Text
+                  </label>
+                  <textarea
+                    v-model="promptForm.content"
+                    rows="8"
+                    placeholder="Du bist ein hilfreicher Assistent, der..."
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+                  ></textarea>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {{ promptForm.content.length }} Zeichen
+                  </p>
+                </div>
+
+                <!-- Is Default -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Als Standard-Prompt setzen
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Dieser Prompt wird automatisch für neue Chats verwendet
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    v-model="promptForm.isDefault"
+                    class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  >
+                </div>
+              </div>
+
+              <div class="p-5 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                <button
+                  @click="showPromptEditor = false"
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  @click="saveSystemPrompt"
+                  :disabled="!promptForm.name.trim() || !promptForm.content.trim()"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <CheckIcon class="w-4 h-4" />
+                  {{ editingPrompt ? 'Aktualisieren' : 'Erstellen' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+
         <!-- Footer with Gradient -->
         <div class="sticky bottom-0 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 px-6 py-4 flex justify-between">
           <button
@@ -499,7 +648,8 @@ import { filterVisionModels, filterCodeModels } from '../utils/modelFilters'
 const { success, error: errorToast } = useToast()
 
 const props = defineProps({
-  isOpen: Boolean
+  isOpen: Boolean,
+  initialTab: String
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -527,7 +677,7 @@ const resetSelection = ref({
 })
 
 // Active tab
-const activeTab = ref('general')
+const activeTab = ref(props.initialTab || 'general')
 
 // Ref to PersonalInfoTab
 const personalInfoTabRef = ref(null)
@@ -538,6 +688,7 @@ const tabs = [
   { id: 'providers', label: 'LLM Provider', icon: CpuChipIcon },
   { id: 'models', label: 'Modellauswahl', icon: CubeIcon },
   { id: 'parameters', label: 'Parameter', icon: AdjustmentsHorizontalIcon },
+  { id: 'templates', label: 'System-Prompts', icon: DocumentTextIcon },
   { id: 'personal', label: 'Persönliche Daten', icon: UserIcon },
   { id: 'agents', label: 'Agents', icon: SparklesIcon },
   { id: 'danger', label: 'Danger Zone', icon: ShieldExclamationIcon }
@@ -556,6 +707,16 @@ const modelSelectionSettings = ref({
 
 // Available models
 const availableModels = ref([])
+
+// System Prompts Management
+const systemPrompts = ref([])
+const showPromptEditor = ref(false)
+const editingPrompt = ref(null)
+const promptForm = ref({
+  name: '',
+  content: '',
+  isDefault: false
+})
 
 // Filtered models for specific use cases
 const visionModels = computed(() => {
@@ -594,8 +755,14 @@ onMounted(async () => {
     mirostatEta: settingsStore.settings.mirostatEta || 0.1
   }
 
+  // Set initial tab if provided
+  if (props.initialTab) {
+    activeTab.value = props.initialTab
+  }
+
   await loadModelSelectionSettings()
   await loadAvailableModels()
+  await loadSystemPrompts()
 })
 
 async function loadModelSelectionSettings() {
@@ -724,6 +891,78 @@ function resetToDefaults() {
     settingsStore.resetToDefaults()
     settings.value = { ...settingsStore.settings }
     success('Einstellungen zurückgesetzt')
+  }
+}
+
+// System Prompts Functions
+async function loadSystemPrompts() {
+  try {
+    const prompts = await api.getAllSystemPrompts()
+    systemPrompts.value = prompts
+  } catch (error) {
+    console.error('Failed to load system prompts:', error)
+    errorToast('Fehler beim Laden der System-Prompts')
+  }
+}
+
+function resetPromptForm() {
+  promptForm.value = {
+    name: '',
+    content: '',
+    isDefault: false
+  }
+}
+
+function editSystemPrompt(prompt) {
+  editingPrompt.value = prompt
+  promptForm.value = {
+    name: prompt.name,
+    content: prompt.content,
+    isDefault: prompt.isDefault || false
+  }
+  showPromptEditor.value = true
+}
+
+async function saveSystemPrompt() {
+  try {
+    if (!promptForm.value.name.trim() || !promptForm.value.content.trim()) {
+      errorToast('Name und Inhalt dürfen nicht leer sein')
+      return
+    }
+
+    if (editingPrompt.value) {
+      // Update existing prompt
+      await api.updateSystemPrompt(editingPrompt.value.id, promptForm.value)
+      success('System-Prompt erfolgreich aktualisiert!')
+    } else {
+      // Create new prompt
+      await api.createSystemPrompt(promptForm.value)
+      success('System-Prompt erfolgreich erstellt!')
+    }
+
+    // Reload prompts and close editor
+    await loadSystemPrompts()
+    showPromptEditor.value = false
+    editingPrompt.value = null
+    resetPromptForm()
+  } catch (error) {
+    console.error('Failed to save system prompt:', error)
+    errorToast('Fehler beim Speichern des System-Prompts')
+  }
+}
+
+async function deleteSystemPrompt(promptId) {
+  if (!confirm('Möchtest du diesen System-Prompt wirklich löschen?')) {
+    return
+  }
+
+  try {
+    await api.deleteSystemPrompt(promptId)
+    success('System-Prompt erfolgreich gelöscht!')
+    await loadSystemPrompts()
+  } catch (error) {
+    console.error('Failed to delete system prompt:', error)
+    errorToast('Fehler beim Löschen des System-Prompts')
   }
 }
 </script>

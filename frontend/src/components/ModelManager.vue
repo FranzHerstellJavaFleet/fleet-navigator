@@ -413,7 +413,7 @@
           <div v-else class="space-y-3">
             <div
               v-for="model in filteredCustomModels"
-              :key="model.id"
+              :key="model.id || model.name"
               class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-indigo-200/50 dark:border-indigo-700/50"
             >
               <div class="flex items-start justify-between">
@@ -622,12 +622,14 @@
         </div>
 
         <div v-else class="space-y-4">
-          <!-- Model Store Info Banner -->
-          <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3 mb-4">
-            <p class="text-sm text-blue-800 dark:text-blue-200">
-              🏪 <strong>{{ availableModels.length }} GGUF-Modelle</strong> im Model Store verfügbar
-            </p>
-          </div>
+          <!-- llama.cpp Provider: GGUF Model Store -->
+          <div v-if="activeProvider !== 'ollama'">
+            <!-- Model Store Info Banner -->
+            <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3 mb-4">
+              <p class="text-sm text-blue-800 dark:text-blue-200">
+                🏪 <strong>{{ availableModels.length }} GGUF-Modelle</strong> im Model Store verfügbar
+              </p>
+            </div>
 
           <!-- Category Filter -->
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4">
@@ -886,6 +888,194 @@
                     Installiert
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+          </div> <!-- End llama.cpp Provider -->
+
+          <!-- Ollama Provider: Ollama Library -->
+          <div v-else>
+            <!-- Info Banner -->
+            <div class="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-3 mb-4">
+              <p class="text-sm text-purple-800 dark:text-purple-200">
+                🔮 <strong>Ollama Library</strong> - Beliebte Modelle zum Download
+              </p>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <button
+                @click="ollamaCategoryFilter = 'alle'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+                  ollamaCategoryFilter === 'alle'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                🌐 Alle ({{ ollamaLibraryModels.length }})
+              </button>
+              <button
+                @click="ollamaCategoryFilter = 'chat'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+                  ollamaCategoryFilter === 'chat'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                💬 Chat ({{ ollamaLibraryModels.filter(m => m.category === 'chat').length }})
+              </button>
+              <button
+                @click="ollamaCategoryFilter = 'code'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+                  ollamaCategoryFilter === 'code'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                💻 Code ({{ ollamaLibraryModels.filter(m => m.category === 'code').length }})
+              </button>
+              <button
+                @click="ollamaCategoryFilter = 'vision'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+                  ollamaCategoryFilter === 'vision'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                👁️ Vision ({{ ollamaLibraryModels.filter(m => m.category === 'vision').length }})
+              </button>
+              <button
+                @click="ollamaCategoryFilter = 'spezialisiert'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+                  ollamaCategoryFilter === 'spezialisiert'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ]"
+              >
+                🎯 Spezialisiert ({{ ollamaLibraryModels.filter(m => m.category === 'spezialisiert').length }})
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="isLoadingOllamaLibrary" class="text-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+              <span class="text-sm text-gray-600 dark:text-gray-400">Lade Ollama Library...</span>
+            </div>
+
+            <!-- Ollama Library Models -->
+            <div v-else class="space-y-3">
+              <div
+                v-for="model in filteredOllamaLibraryModels"
+                :key="model.name"
+                class="bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-lg p-4 hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1">
+                    <!-- Model Header -->
+                    <div class="flex items-center gap-3 mb-2">
+                      <span class="text-2xl">{{ model.emoji || '🔮' }}</span>
+                      <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">{{ model.name }}</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ model.description }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Metadata Tags -->
+                    <div class="flex flex-wrap gap-2 mt-3">
+                      <!-- Size & Parameters -->
+                      <span v-if="model.size" class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded border border-blue-300 dark:border-blue-700">
+                        📦 {{ model.size }}
+                      </span>
+                      <span v-if="model.parameters" class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded border border-purple-300 dark:border-purple-700">
+                        🧠 {{ model.parameters }}
+                      </span>
+
+                      <!-- Publisher -->
+                      <span v-if="model.publisher" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-600">
+                        🏢 {{ model.publisher }}
+                      </span>
+
+                      <!-- RAM Requirement -->
+                      <span v-if="model.recommendedRAM" class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded border border-green-300 dark:border-green-700">
+                        💾 {{ model.recommendedRAM }}
+                      </span>
+
+                      <!-- Release Date -->
+                      <span v-if="model.releaseDate" class="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded border border-orange-300 dark:border-orange-700">
+                        📅 {{ model.releaseDate }}
+                      </span>
+
+                      <!-- Training Cutoff -->
+                      <span v-if="model.trainedUntil" class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 rounded border border-yellow-300 dark:border-yellow-700">
+                        📚 Wissen bis {{ model.trainedUntil }}
+                      </span>
+
+                      <!-- Languages -->
+                      <span v-if="model.languages" class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded border border-indigo-300 dark:border-indigo-700">
+                        🌍 {{ model.languages }}
+                      </span>
+
+                      <!-- Perfect Match Badge (supports all 5 required languages: DE, TR, ES, EN, FR) -->
+                      <span v-if="supportsAllRequiredLanguages(model)" class="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-300 dark:border-emerald-700 font-semibold">
+                        ✓ DE + TR + ES + EN + FR
+                      </span>
+                    </div>
+
+                    <!-- Specialties -->
+                    <div v-if="model.specialties" class="mt-3">
+                      <p class="text-xs text-gray-600 dark:text-gray-400">
+                        <span class="font-semibold">🎯 Spezialitäten:</span> {{ model.specialties }}
+                      </p>
+                    </div>
+
+                    <!-- License -->
+                    <div v-if="model.license" class="mt-2">
+                      <p class="text-xs text-gray-500 dark:text-gray-500">
+                        <span class="font-semibold">⚖️ Lizenz:</span> {{ model.license }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex-shrink-0 flex gap-2">
+                    <!-- Info Link -->
+                    <a
+                      :href="getOllamaLibraryUrl(model.name)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors flex items-center gap-2"
+                      title="Weitere Informationen auf Ollama.com"
+                    >
+                      ℹ️ Info
+                    </a>
+
+                    <!-- Download/Installed Button -->
+                    <button
+                      v-if="!isInstalled(model.name)"
+                      @click="downloadOllamaModel(model.name)"
+                      class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                    >
+                      ⬇ Download
+                    </button>
+                    <span
+                      v-else
+                      class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 rounded-lg flex items-center gap-2 whitespace-nowrap"
+                    >
+                      ✓ Installiert
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="ollamaLibraryModels.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <p>Keine Modelle verfügbar</p>
+                <p class="text-sm mt-2">Besuche <a href="https://ollama.com/library" target="_blank" class="text-purple-600 dark:text-purple-400 hover:underline">ollama.com/library</a></p>
               </div>
             </div>
           </div>
@@ -1297,7 +1487,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   XMarkIcon,
   SparklesIcon,
@@ -1333,7 +1523,8 @@ const chatStore = useChatStore()
 const models = ref([])
 const isLoading = ref(false)
 
-// LlamaCpp Provider (only provider now)
+// Active Provider Detection (Ollama or llama.cpp)
+const activeProvider = ref('java-llama-cpp') // Default to llama.cpp
 const providerAvailable = ref(true)
 
 // Custom Model Modal
@@ -1374,6 +1565,11 @@ const activeCategory = ref('Alle')
 const availableModels = ref([])
 const isLoadingLibrary = ref(false)
 
+// Ollama Library models
+const ollamaLibraryModels = ref([])
+const isLoadingOllamaLibrary = ref(false)
+const ollamaCategoryFilter = ref('alle')
+
 // HuggingFace search
 const hfSearchQuery = ref('')
 const hfSearchResults = ref([])
@@ -1392,12 +1588,39 @@ const filteredInstalledModels = computed(() => {
 })
 
 // Filtered custom models based on search
+// Combines both: Database custom models + Ollama custom models (with custom: true flag)
+// DEDUPLICATES by model name to prevent duplicates
 const filteredCustomModels = computed(() => {
+  // Merge database custom models with Ollama custom models
+  const ollamaCustomModels = models.value.filter(m => m.custom === true || m.isCustom === true)
+
+  // Deduplicate by name - database models take priority
+  const seenNames = new Set()
+  const allCustomModels = []
+
+  // First add database custom models (priority)
+  for (const model of customModels.value) {
+    const normalizedName = model.name?.toLowerCase()
+    if (normalizedName && !seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName)
+      allCustomModels.push(model)
+    }
+  }
+
+  // Then add Ollama custom models (only if not already in list)
+  for (const model of ollamaCustomModels) {
+    const normalizedName = model.name?.toLowerCase()
+    if (normalizedName && !seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName)
+      allCustomModels.push(model)
+    }
+  }
+
   if (!customSearchQuery.value.trim()) {
-    return customModels.value
+    return allCustomModels
   }
   const query = customSearchQuery.value.toLowerCase()
-  return customModels.value.filter(m =>
+  return allCustomModels.filter(m =>
     m.name.toLowerCase().includes(query) ||
     m.description?.toLowerCase().includes(query) ||
     m.baseModel?.toLowerCase().includes(query)
@@ -1421,8 +1644,8 @@ function getModelCategory(modelName) {
     return 'unknown'
   }
 
-  // Check if it's a custom model (GgufModelConfig from database)
-  if (model.isCustom || model.baseModel) {
+  // Check if it's a custom model (GgufModelConfig from database OR Ollama custom model)
+  if (model.isCustom || model.custom || model.baseModel) {
     return 'custom'
   }
 
@@ -1513,9 +1736,36 @@ const filteredAvailableModels = computed(() => {
   return filtered.sort((a, b) => (b.sizeBytes || 0) - (a.sizeBytes || 0))
 })
 
+// Filtered Ollama Library models based on category
+const filteredOllamaLibraryModels = computed(() => {
+  if (ollamaCategoryFilter.value === 'alle') {
+    return ollamaLibraryModels.value
+  }
+  return ollamaLibraryModels.value.filter(m => m.category === ollamaCategoryFilter.value)
+})
+
 // Check if model is already installed
 function isInstalled(modelName) {
   return models.value.some(m => m.name === modelName)
+}
+
+// Get Ollama Library URL for model
+function getOllamaLibraryUrl(modelName) {
+  // Extract base name (before colon) for URL
+  // Example: "llama3.2:3b" -> "llama3.2"
+  const baseName = modelName.includes(':') ? modelName.split(':')[0] : modelName
+  return `https://ollama.com/library/${baseName}`
+}
+
+// Check if model supports all 5 required languages: DE, TR, ES, EN, FR
+function supportsAllRequiredLanguages(model) {
+  if (!model.languages) return false
+
+  const langs = model.languages.toUpperCase()
+  const requiredLanguages = ['DE', 'TR', 'ES', 'EN', 'FR']
+
+  // Check if all required languages are present in the languages string
+  return requiredLanguages.every(lang => langs.includes(lang))
 }
 
 // Check if model has updates available by comparing digests
@@ -1567,17 +1817,71 @@ const currentDownloadModelId = ref('')
 const activeDownloadEventSource = ref(null)
 
 onMounted(async () => {
-  await loadModels()
-  await loadLibraryModels()  // Load GGUF Model Store
+  await loadProviderInfo()   // First: Load active provider
+  await loadModels()          // Then: Load models for that provider (Flip-Flop!)
+
+  // Load library models based on provider
+  if (activeProvider.value === 'ollama') {
+    await loadOllamaLibrary()
+  } else {
+    await loadLibraryModels()
+  }
+
   await loadCustomModels()   // Then detect custom models
+
+  // Listen for provider changes
+  window.addEventListener('provider-changed', handleProviderChange)
 })
 
+onUnmounted(() => {
+  // Clean up event listener
+  window.removeEventListener('provider-changed', handleProviderChange)
+})
+
+// Handle provider change event
+async function handleProviderChange(event) {
+  console.log('Provider changed event received:', event.detail.provider)
+  activeProvider.value = event.detail.provider
+
+  // Reload models for new provider
+  await loadModels()
+
+  // Reload library models if switching to llama.cpp
+  if (activeProvider.value !== 'ollama') {
+    await loadLibraryModels()
+  }
+}
+
+// Load active provider information
+async function loadProviderInfo() {
+  try {
+    const response = await api.getProviderStatus()
+    activeProvider.value = response.activeProvider || 'java-llama-cpp'
+    console.log('Active provider:', activeProvider.value)
+  } catch (error) {
+    console.error('Failed to load provider info:', error)
+    activeProvider.value = 'java-llama-cpp' // Fallback to llama.cpp
+  }
+}
+
+// Load models based on active provider (Flip-Flop!)
 async function loadModels() {
   isLoading.value = true
   try {
-    models.value = await api.getAvailableModels()
+    if (activeProvider.value === 'ollama') {
+      // Load Ollama models
+      console.log('Loading Ollama models...')
+      models.value = await api.getOllamaModels()
+      console.log(`Loaded ${models.value.length} Ollama models`)
+    } else {
+      // Load llama.cpp models (default)
+      console.log('Loading llama.cpp models...')
+      models.value = await api.getAvailableModels()
+      console.log(`Loaded ${models.value.length} llama.cpp models`)
+    }
   } catch (error) {
     console.error('Failed to load models:', error)
+    models.value = []
   } finally {
     isLoading.value = false
   }
@@ -1597,9 +1901,706 @@ async function loadLibraryModels() {
   }
 }
 
+/**
+ * Load Ollama Library models
+ */
+async function loadOllamaLibrary() {
+  isLoadingOllamaLibrary.value = true
+  try {
+    console.log('Loading Ollama Library...')
+    // Curated list of 40 popular Ollama models with comprehensive metadata
+    ollamaLibraryModels.value = [
+      // === General Chat Models (Top Performers) ===
+      {
+        name: 'llama3.2:3b',
+        description: 'Meta Llama 3.2 - Klein, schnell, für den Alltag',
+        size: '2.0 GB',
+        parameters: '3B',
+        emoji: '🦙',
+        publisher: 'Meta AI',
+        releaseDate: '2024-09',
+        trainedUntil: '2023-12',
+        license: 'Llama 3.2 Community License',
+        specialties: 'Chat, Instruction Following, Mehrsprachig',
+        recommendedRAM: '4 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'llama3.2:1b',
+        description: 'Meta Llama 3.2 - Ultra kompakt für schwache Hardware',
+        size: '1.3 GB',
+        parameters: '1B',
+        emoji: '🦙',
+        publisher: 'Meta AI',
+        releaseDate: '2024-09',
+        trainedUntil: '2023-12',
+        license: 'Llama 3.2 Community License',
+        specialties: 'Chat, Edge Devices, Mobile',
+        recommendedRAM: '2 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'llama3.1:8b',
+        description: 'Meta Llama 3.1 - Balanced Performance',
+        size: '4.7 GB',
+        parameters: '8B',
+        emoji: '🦙',
+        publisher: 'Meta AI',
+        releaseDate: '2024-07',
+        trainedUntil: '2023-12',
+        license: 'Llama 3.1 Community License',
+        specialties: 'Chat, Reasoning, Multilingua',
+        recommendedRAM: '8 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'llama3.1:70b',
+        description: 'Meta Llama 3.1 - Top-Tier Performance, High Quality',
+        size: '40 GB',
+        parameters: '70B',
+        emoji: '🦙',
+        publisher: 'Meta AI',
+        releaseDate: '2024-07',
+        trainedUntil: '2023-12',
+        license: 'Llama 3.1 Community License',
+        specialties: 'Advanced Reasoning, Professional Use, Research',
+        recommendedRAM: '64 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'mistral:7b',
+        description: 'Mistral AI - Ausgewogen und leistungsstark',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '🌪️',
+        publisher: 'Mistral AI',
+        releaseDate: '2023-09',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Chat, Instruction, Reasoning',
+        recommendedRAM: '8 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'mistral:7b-instruct',
+        description: 'Mistral AI - Instruction-tuned für präzise Antworten',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '🌪️',
+        publisher: 'Mistral AI',
+        releaseDate: '2023-10',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Instructions, Tasks, Q&A',
+        recommendedRAM: '8 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'mixtral:8x7b',
+        description: 'Mistral AI - Mixture of Experts, extrem leistungsstark',
+        size: '26 GB',
+        parameters: '47B (8x7B MoE)',
+        emoji: '⚡',
+        publisher: 'Mistral AI',
+        releaseDate: '2023-12',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Advanced Reasoning, Multilingual, Code',
+        recommendedRAM: '32 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'qwen2.5:7b',
+        description: 'Alibaba Qwen 2.5 - Hervorragend für Chat & Code',
+        size: '4.7 GB',
+        parameters: '7B',
+        emoji: '🧠',
+        publisher: 'Alibaba Cloud',
+        releaseDate: '2024-09',
+        trainedUntil: '2024-06',
+        license: 'Apache 2.0',
+        specialties: 'Chat, Code, Multilingual (29 Sprachen)',
+        recommendedRAM: '8 GB',
+        category: 'chat',
+        languages: '29 Sprachen (DE, EN, ZH, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'qwen2.5:14b',
+        description: 'Alibaba Qwen 2.5 - Größere Version für komplexe Aufgaben',
+        size: '9.0 GB',
+        parameters: '14B',
+        emoji: '🧠',
+        publisher: 'Alibaba Cloud',
+        releaseDate: '2024-09',
+        trainedUntil: '2024-06',
+        license: 'Apache 2.0',
+        specialties: 'Advanced Chat, Code, Math, Reasoning',
+        recommendedRAM: '16 GB',
+        category: 'chat',
+        languages: '29 Sprachen (DE, EN, ZH, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'qwen2.5:32b',
+        description: 'Alibaba Qwen 2.5 - Premium-Modell für höchste Qualität',
+        size: '19 GB',
+        parameters: '32B',
+        emoji: '🧠',
+        publisher: 'Alibaba Cloud',
+        releaseDate: '2024-09',
+        trainedUntil: '2024-06',
+        license: 'Apache 2.0',
+        specialties: 'Professional Use, Research, Advanced Reasoning',
+        recommendedRAM: '32 GB',
+        category: 'chat',
+        languages: '29 Sprachen (DE, EN, ZH, FR, ES, IT, PT, TR, ...)'
+      },
+      {
+        name: 'gemma2:2b',
+        description: 'Google Gemma 2 - Ultra kompakt und schnell',
+        size: '1.6 GB',
+        parameters: '2B',
+        emoji: '💎',
+        publisher: 'Google DeepMind',
+        releaseDate: '2024-06',
+        trainedUntil: '2024-02',
+        license: 'Gemma Terms of Use',
+        specialties: 'Fast Chat, Edge Devices',
+        recommendedRAM: '4 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (EN, DE, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'gemma2:9b',
+        description: 'Google Gemma 2 - Effizient und präzise',
+        size: '5.4 GB',
+        parameters: '9B',
+        emoji: '💎',
+        publisher: 'Google DeepMind',
+        releaseDate: '2024-06',
+        trainedUntil: '2024-02',
+        license: 'Gemma Terms of Use',
+        specialties: 'Chat, Reasoning, Multilingual',
+        recommendedRAM: '12 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (EN, DE, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'gemma2:27b',
+        description: 'Google Gemma 2 - Höchste Qualität, sehr leistungsstark',
+        size: '16 GB',
+        parameters: '27B',
+        emoji: '💎',
+        publisher: 'Google DeepMind',
+        releaseDate: '2024-06',
+        trainedUntil: '2024-02',
+        license: 'Gemma Terms of Use',
+        specialties: 'Advanced Reasoning, Professional Use',
+        recommendedRAM: '32 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (EN, DE, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'phi3:14b',
+        description: 'Microsoft Phi-3 - Mittelgroß, sehr effizient',
+        size: '7.9 GB',
+        parameters: '14B',
+        emoji: '🔬',
+        publisher: 'Microsoft Research',
+        releaseDate: '2024-04',
+        trainedUntil: '2023-10',
+        license: 'MIT',
+        specialties: 'Reasoning, Math, Code',
+        recommendedRAM: '16 GB',
+        category: 'chat',
+        languages: 'Mehrsprachig (EN, DE, FR, ES, IT, TR, ...)'
+      },
+
+      // === Code Specialists ===
+      {
+        name: 'codellama:7b',
+        description: 'Meta Code Llama - Code-Spezialist, schnell',
+        size: '3.8 GB',
+        parameters: '7B',
+        emoji: '💻',
+        publisher: 'Meta AI',
+        releaseDate: '2023-08',
+        trainedUntil: '2023-07',
+        license: 'Llama 2 Community License',
+        specialties: 'Code Generation, Completion, Infilling',
+        recommendedRAM: '8 GB',
+        category: 'code',
+        languages: 'Englisch (Code-Kommentare mehrsprachig)'
+      },
+      {
+        name: 'codellama:13b',
+        description: 'Meta Code Llama - Ausgewogene Code-Performance',
+        size: '7.3 GB',
+        parameters: '13B',
+        emoji: '💻',
+        publisher: 'Meta AI',
+        releaseDate: '2023-08',
+        trainedUntil: '2023-07',
+        license: 'Llama 2 Community License',
+        specialties: 'Code, Python, C++, Java',
+        recommendedRAM: '16 GB',
+        category: 'code',
+        languages: 'Englisch (Code-Kommentare mehrsprachig)'
+      },
+      {
+        name: 'codellama:34b',
+        description: 'Meta Code Llama - Professionelle Code-Qualität',
+        size: '19 GB',
+        parameters: '34B',
+        emoji: '💻',
+        publisher: 'Meta AI',
+        releaseDate: '2023-08',
+        trainedUntil: '2023-07',
+        license: 'Llama 2 Community License',
+        specialties: 'Advanced Code, Architecture, Debugging',
+        recommendedRAM: '32 GB',
+        category: 'code',
+        languages: 'Englisch (Code-Kommentare mehrsprachig)'
+      },
+      {
+        name: 'deepseek-coder:6.7b',
+        description: 'DeepSeek Coder - Exzellenter Code-Experte',
+        size: '3.8 GB',
+        parameters: '6.7B',
+        emoji: '🔎',
+        publisher: 'DeepSeek AI',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'DeepSeek License',
+        specialties: 'Code, 80+ Programming Languages',
+        recommendedRAM: '8 GB',
+        category: 'code',
+        languages: 'Englisch + Chinesisch'
+      },
+      {
+        name: 'deepseek-coder:33b',
+        description: 'DeepSeek Coder - Top-Tier Code Generation',
+        size: '18 GB',
+        parameters: '33B',
+        emoji: '🔎',
+        publisher: 'DeepSeek AI',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'DeepSeek License',
+        specialties: 'Advanced Code, Refactoring, Code Review',
+        recommendedRAM: '32 GB',
+        category: 'code',
+        languages: 'Englisch + Chinesisch'
+      },
+      {
+        name: 'qwen2.5-coder:7b',
+        description: 'Qwen Coder - Spezialisiert auf Code, sehr modern',
+        size: '4.3 GB',
+        parameters: '7B',
+        emoji: '⌨️',
+        publisher: 'Alibaba Cloud',
+        releaseDate: '2024-11',
+        trainedUntil: '2024-08',
+        license: 'Apache 2.0',
+        specialties: 'Code, 40+ Languages, Code Reasoning',
+        recommendedRAM: '8 GB',
+        category: 'code',
+        languages: 'Mehrsprachig (DE, EN, ZH, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'qwen2.5-coder:14b',
+        description: 'Qwen Coder - Professionelle Code-Qualität',
+        size: '8.7 GB',
+        parameters: '14B',
+        emoji: '⌨️',
+        publisher: 'Alibaba Cloud',
+        releaseDate: '2024-11',
+        trainedUntil: '2024-08',
+        license: 'Apache 2.0',
+        specialties: 'Advanced Code, Architecture, Testing',
+        recommendedRAM: '16 GB',
+        category: 'code',
+        languages: 'Mehrsprachig (DE, EN, ZH, FR, ES, IT, TR, ...)'
+      },
+      {
+        name: 'starcoder2:7b',
+        description: 'BigCode StarCoder2 - Open-Source Code-Champion',
+        size: '4.0 GB',
+        parameters: '7B',
+        emoji: '⭐',
+        publisher: 'BigCode Project',
+        releaseDate: '2024-02',
+        trainedUntil: '2023-09',
+        license: 'BigCode OpenRAIL-M',
+        specialties: 'Code, 600+ Languages, Fill-in-Middle',
+        recommendedRAM: '8 GB',
+        category: 'code',
+        languages: 'Englisch'
+      },
+      {
+        name: 'starcoder2:15b',
+        description: 'BigCode StarCoder2 - Leistungsstarke Code-Generation',
+        size: '9.1 GB',
+        parameters: '15B',
+        emoji: '⭐',
+        publisher: 'BigCode Project',
+        releaseDate: '2024-02',
+        trainedUntil: '2023-09',
+        license: 'BigCode OpenRAIL-M',
+        specialties: 'Advanced Code, Multiple Languages',
+        recommendedRAM: '16 GB',
+        category: 'code',
+        languages: 'Englisch'
+      },
+
+      // === Vision Models (Multimodal) ===
+      {
+        name: 'llava:7b',
+        description: 'LLaVA - Vision & Chat kombiniert, kompakte Version',
+        size: '4.5 GB',
+        parameters: '7B',
+        emoji: '👁️',
+        publisher: 'Microsoft/University of Wisconsin',
+        releaseDate: '2023-10',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Vision, Image Understanding, Visual Q&A',
+        recommendedRAM: '8 GB',
+        category: 'vision',
+        languages: 'Englisch'
+      },
+      {
+        name: 'llava:13b',
+        description: 'LLaVA - Multimodal mit Vision, ausgewogen',
+        size: '8.0 GB',
+        parameters: '13B',
+        emoji: '👁️',
+        publisher: 'Microsoft/University of Wisconsin',
+        releaseDate: '2023-10',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Advanced Vision, OCR, Chart Analysis',
+        recommendedRAM: '16 GB',
+        category: 'vision',
+        languages: 'Englisch'
+      },
+      {
+        name: 'llava:34b',
+        description: 'LLaVA - Höchste Vision-Qualität, professionell',
+        size: '19 GB',
+        parameters: '34B',
+        emoji: '👁️',
+        publisher: 'Microsoft/University of Wisconsin',
+        releaseDate: '2024-01',
+        trainedUntil: '2023-12',
+        license: 'Apache 2.0',
+        specialties: 'Professional Vision, Complex Scenes, Details',
+        recommendedRAM: '32 GB',
+        category: 'vision',
+        languages: 'Englisch + begrenzt mehrsprachig'
+      },
+      {
+        name: 'bakllava:7b',
+        description: 'BakLLaVA - Verbesserte Vision-Fähigkeiten',
+        size: '4.5 GB',
+        parameters: '7B',
+        emoji: '🥐',
+        publisher: 'SkunkworksAI',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-10',
+        license: 'Llama 2 License',
+        specialties: 'Vision, Image Description, Visual Reasoning',
+        recommendedRAM: '8 GB',
+        category: 'vision',
+        languages: 'Englisch'
+      },
+
+      // === Small & Efficient Models ===
+      {
+        name: 'tinyllama:1.1b',
+        description: 'TinyLlama - Kleinster Chat-Bot, für schwache Hardware',
+        size: '637 MB',
+        parameters: '1.1B',
+        emoji: '🐁',
+        publisher: 'TinyLlama Team',
+        releaseDate: '2024-01',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Edge Devices, Embedded, Raspberry Pi',
+        recommendedRAM: '2 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'phi:3b',
+        description: 'Microsoft Phi - Klein aber leistungsstark',
+        size: '2.3 GB',
+        parameters: '3B',
+        emoji: '🔬',
+        publisher: 'Microsoft Research',
+        releaseDate: '2023-12',
+        trainedUntil: '2023-10',
+        license: 'MIT',
+        specialties: 'Compact, Reasoning, Knowledge',
+        recommendedRAM: '4 GB',
+        category: 'spezialisiert',
+        languages: 'Mehrsprachig (EN, DE, FR, ES, IT, TR, ...)'
+      },
+
+      // === Specialized Models ===
+      {
+        name: 'neural-chat:7b',
+        description: 'Intel Neural Chat - Optimiert für CPU-Performance',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '🧪',
+        publisher: 'Intel',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-10',
+        license: 'Apache 2.0',
+        specialties: 'CPU Optimized, Chat, Instruction',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'dolphin-mistral:7b',
+        description: 'Dolphin - Uncensored Mistral für kreative Aufgaben',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '🐬',
+        publisher: 'Eric Hartford',
+        releaseDate: '2023-10',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Uncensored, Creative Writing, Roleplay',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, ...)'
+      },
+      {
+        name: 'orca2:7b',
+        description: 'Microsoft Orca 2 - Reasoning-Spezialist',
+        size: '3.8 GB',
+        parameters: '7B',
+        emoji: '🐋',
+        publisher: 'Microsoft Research',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'Microsoft Research License',
+        specialties: 'Step-by-Step Reasoning, Complex Tasks',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'orca2:13b',
+        description: 'Microsoft Orca 2 - Advanced Reasoning',
+        size: '7.3 GB',
+        parameters: '13B',
+        emoji: '🐋',
+        publisher: 'Microsoft Research',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'Microsoft Research License',
+        specialties: 'Advanced Reasoning, Problem Solving',
+        recommendedRAM: '16 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'wizard-vicuna:13b',
+        description: 'WizardLM + Vicuna - Hybrid für komplexe Aufgaben',
+        size: '7.3 GB',
+        parameters: '13B',
+        emoji: '🧙',
+        publisher: 'WizardLM Team',
+        releaseDate: '2023-06',
+        trainedUntil: '2023-03',
+        license: 'Non-Commercial',
+        specialties: 'Complex Instructions, Creative Tasks',
+        recommendedRAM: '16 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'openchat:7b',
+        description: 'OpenChat - Fine-tuned für präzise Konversation',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '💬',
+        publisher: 'OpenChat Team',
+        releaseDate: '2023-07',
+        trainedUntil: '2023-06',
+        license: 'Apache 2.0',
+        specialties: 'Conversation, Q&A, Helpfulness',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Mehrsprachig (EN, ZH, ...)'
+      },
+      {
+        name: 'solar:10.7b',
+        description: 'Upstage SOLAR - Depth Upscaling Technology',
+        size: '6.1 GB',
+        parameters: '10.7B',
+        emoji: '☀️',
+        publisher: 'Upstage AI',
+        releaseDate: '2023-12',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Advanced Architecture, Efficiency',
+        recommendedRAM: '12 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch + Koreanisch'
+      },
+      {
+        name: 'yi:6b',
+        description: 'Yi - Bilingual (English/Chinese), kompakt',
+        size: '3.5 GB',
+        parameters: '6B',
+        emoji: '🀄',
+        publisher: '01.AI',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'Yi License',
+        specialties: 'Bilingual, Chinese/English, Chat',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Zweisprachig (EN, ZH)'
+      },
+      {
+        name: 'yi:34b',
+        description: 'Yi - High-Performance Bilingual Model',
+        size: '19 GB',
+        parameters: '34B',
+        emoji: '🀄',
+        publisher: '01.AI',
+        releaseDate: '2023-11',
+        trainedUntil: '2023-06',
+        license: 'Yi License',
+        specialties: 'Advanced Bilingual, Professional Use',
+        recommendedRAM: '32 GB',
+        category: 'spezialisiert',
+        languages: 'Zweisprachig (EN, ZH)'
+      },
+      {
+        name: 'nous-hermes2:10.7b',
+        description: 'Nous Hermes 2 - Fine-tuned für Hilfsbereitschaft',
+        size: '6.4 GB',
+        parameters: '10.7B',
+        emoji: '🎭',
+        publisher: 'Nous Research',
+        releaseDate: '2024-01',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Helpful, Honest, Harmless (3H)',
+        recommendedRAM: '12 GB',
+        category: 'spezialisiert',
+        languages: 'Englisch'
+      },
+      {
+        name: 'zephyr:7b',
+        description: 'Zephyr - Aligned Mistral für sichere Antworten',
+        size: '4.1 GB',
+        parameters: '7B',
+        emoji: '💨',
+        publisher: 'Hugging Face H4',
+        releaseDate: '2023-10',
+        trainedUntil: '2023-09',
+        license: 'Apache 2.0',
+        specialties: 'Aligned, Safe, Helpful Responses',
+        recommendedRAM: '8 GB',
+        category: 'spezialisiert',
+        languages: 'Mehrsprachig (DE, EN, FR, ES, ...)'
+      }
+    ]
+    console.log(`Loaded ${ollamaLibraryModels.value.length} Ollama library models`)
+  } catch (error) {
+    console.error('Failed to load Ollama library:', error)
+    ollamaLibraryModels.value = []
+  } finally {
+    isLoadingOllamaLibrary.value = false
+  }
+}
+
+/**
+ * Download Ollama model
+ */
+async function downloadOllamaModel(modelName) {
+  console.log(`Downloading Ollama model: ${modelName}`)
+  try {
+    const response = await fetch('/api/models/pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: modelName })
+    })
+
+    if (!response.ok) {
+      throw new Error('Download failed')
+    }
+
+    // Start downloading - show progress via SSE
+    showDownloadDialog.value = true
+    downloadProgress.value = 0
+    downloadModelName.value = modelName
+    downloadStatus.value = 'downloading'
+
+    // Monitor progress via SSE
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const text = decoder.decode(value)
+      const lines = text.split('\n').filter(line => line.trim())
+
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line.replace(/^data: /, ''))
+          if (data.progress !== undefined) {
+            downloadProgress.value = Math.round(data.progress)
+          }
+          if (data.status) {
+            downloadStatus.value = data.status
+          }
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      }
+    }
+
+    downloadStatus.value = 'completed'
+    setTimeout(() => {
+      showDownloadDialog.value = false
+      loadModels() // Refresh model list
+    }, 2000)
+
+  } catch (error) {
+    console.error('Failed to download model:', error)
+    downloadStatus.value = 'error'
+    setTimeout(() => {
+      showDownloadDialog.value = false
+    }, 3000)
+  }
+}
+
 async function refreshModels() {
-  await loadModels()
-  await loadLibraryModels()
+  await loadProviderInfo()   // Re-check active provider
+  await loadModels()          // Reload models for active provider
+
+  // Load library models only for llama.cpp
+  if (activeProvider.value !== 'ollama') {
+    await loadLibraryModels()
+  }
+
   await loadCustomModels()
 }
 
@@ -1771,7 +2772,7 @@ async function startLlamaCppDownload(modelId) {
 
 function cancelLlamaCppDownload() {
   if (currentDownloadModelId.value && activeDownloadEventSource.value) {
-    api.post(`/model-store/download/${currentDownloadModelId.value}/cancel`)
+    api.cancelModelStoreDownload(currentDownloadModelId.value)
     activeDownloadEventSource.value.close()
     showLlamaCppDownloadModal.value = false
     currentDownloadModelId.value = ''

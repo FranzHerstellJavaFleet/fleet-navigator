@@ -778,6 +778,15 @@ public class LlamaCppProvider implements LLMProvider {
             command.add(String.valueOf(config.getLlamacpp().getThreads()));
         }
 
+        // Performance optimizations for GPU inference
+        command.add("-b");  // batch-size
+        command.add("512");
+        command.add("-ub"); // ubatch-size (micro-batch for prompt processing)
+        command.add("256");
+        command.add("-np");  // parallel slots (multiple requests simultaneously)
+        command.add("4");
+        command.add("--flash-attn");  // Flash Attention (if supported)
+
         // Add MMPROJ file for vision models (LLaVA, etc.)
         Optional<Path> mmprojFile = findMmprojFile(modelPath);
         if (mmprojFile.isPresent()) {

@@ -209,6 +209,72 @@
             </div>
           </div>
 
+          <!-- GPU -->
+          <div
+            v-for="gpu in mateStats[mate.mateId].gpu || []"
+            :key="gpu.index"
+            class="
+              bg-gradient-to-br from-purple-900/30 to-pink-900/30
+              backdrop-blur-sm
+              p-4 rounded-xl
+              border border-purple-500/30
+              shadow-lg
+            "
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                <span class="text-sm font-medium text-gray-300">GPU {{ gpu.index }}</span>
+              </div>
+              <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-lg">
+                {{ gpu.temperature?.toFixed(0) || '0' }}°C
+              </span>
+            </div>
+
+            <!-- GPU Model -->
+            <div class="text-xs text-gray-400 mb-3 truncate">
+              {{ gpu.name }}
+            </div>
+
+            <!-- GPU Utilization -->
+            <div class="mb-3">
+              <div class="flex justify-between text-xs mb-1.5">
+                <span class="text-gray-400">GPU Auslastung</span>
+                <span class="font-bold" :class="getGpuTextColor(gpu.utilization_gpu)">
+                  {{ gpu.utilization_gpu?.toFixed(1) || '0.0' }}%
+                </span>
+              </div>
+              <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden">
+                <div
+                  class="h-2.5 rounded-full transition-all duration-500"
+                  :class="getGpuBarColor(gpu.utilization_gpu)"
+                  :style="{ width: Math.min(gpu.utilization_gpu || 0, 100) + '%' }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- VRAM -->
+            <div>
+              <div class="flex justify-between text-xs mb-1.5">
+                <span class="text-gray-400">VRAM</span>
+                <span class="font-bold" :class="getVramTextColor(gpu.memory_used_percent)">
+                  {{ gpu.memory_used_percent?.toFixed(1) || '0.0' }}%
+                </span>
+              </div>
+              <div class="w-full bg-gray-700/50 rounded-full h-2.5 shadow-inner overflow-hidden mb-2">
+                <div
+                  class="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                  :style="{ width: Math.min(gpu.memory_used_percent || 0, 100) + '%' }"
+                ></div>
+              </div>
+              <div class="text-xs text-gray-400">
+                {{ (gpu.memory_used / 1024).toFixed(1) }} GB / {{ (gpu.memory_total / 1024).toFixed(1) }} GB
+              </div>
+            </div>
+          </div>
+
           <!-- Disk -->
           <div
             v-for="disk in mateStats[mate.mateId].disk || []"
@@ -355,12 +421,14 @@ async function loadMates() {
 
 async function loadAllStats() {
   for (const mate of mates.value) {
-    if (mate.status === 'ONLINE') {
+    // Nur für Hardware-Monitoring Mates (nicht Email-Mates!)
+    // Email-Mates haben keine lastStatsUpdate
+    if (mate.status === 'ONLINE' && mate.lastStatsUpdate != null) {
       try {
         const response = await axios.get(`/api/fleet-mate/mates/${mate.mateId}/stats`)
         mateStats.value[mate.mateId] = response.data
       } catch (error) {
-        console.error(`Failed to load stats for ${mate.mateId}:`, error)
+        console.debug(`Failed to load stats for ${mate.mateId}:`, error)
       }
     }
   }
@@ -438,6 +506,27 @@ function getCpuPackageTemp(mateId) {
   const sensors = mateStats.value[mateId]?.temperature?.sensors || []
   const packageSensor = sensors.find(s => s.name && s.name.includes('coretemp_package'))
   return packageSensor ? packageSensor.temperature.toFixed(0) : null
+}
+
+function getGpuTextColor(usage) {
+  if (!usage) return 'text-gray-400'
+  if (usage < 50) return 'text-green-400'
+  if (usage < 75) return 'text-yellow-400'
+  return 'text-red-400'
+}
+
+function getGpuBarColor(usage) {
+  if (!usage) return 'bg-gray-600'
+  if (usage < 50) return 'bg-gradient-to-r from-green-500 to-emerald-500'
+  if (usage < 75) return 'bg-gradient-to-r from-yellow-500 to-orange-500'
+  return 'bg-gradient-to-r from-red-500 to-rose-500'
+}
+
+function getVramTextColor(usage) {
+  if (!usage) return 'text-gray-400'
+  if (usage < 70) return 'text-purple-400'
+  if (usage < 85) return 'text-yellow-400'
+  return 'text-red-400'
 }
 </script>
 

@@ -181,6 +181,138 @@
           </div>
         </div>
 
+        <!-- Vision-to-Model Chaining -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                🔗 Vision-to-Model Chaining
+              </h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Automatische Bild-Analyse mit LLaVA → Übergabe an aktuelles Modell
+              </p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="chainingSettings.enabled"
+                class="sr-only peer"
+                @change="saveChainingSettings"
+              >
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div v-if="!chainingSettings.enabled" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+              ⚠️ Vision-Chaining ist deaktiviert. Bilder werden nur mit Vision-Modell analysiert.
+            </p>
+          </div>
+
+          <div v-else class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-4">
+            <p class="text-sm text-purple-800 dark:text-purple-200">
+              ✨ <strong>Aktiv:</strong> PNG/JPEG/PDF → LLaVA analysiert → Beschreibung → Aktuelles Modell (Chat/Code/etc.)
+            </p>
+          </div>
+
+          <div class="space-y-4" :class="{ 'opacity-50 pointer-events-none': !chainingSettings.enabled }">
+            <!-- Vision Model Selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                👁️ Vision-Modell für Chaining
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  (Bild-Analyse im ersten Schritt)
+                </span>
+              </label>
+              <select
+                v-model="chainingSettings.visionModel"
+                @change="saveChainingSettings"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="llava:7b">llava:7b (4.5 GB) - ⚡ Schnell</option>
+                <option value="llava:13b">llava:13b (8.0 GB) - ⚖️ Ausgewogen</option>
+                <option value="llava:34b">llava:34b (19 GB) - 🏆 Beste Qualität</option>
+              </select>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                💡 Empfohlen: llava:7b für schnelle Antworten
+              </p>
+            </div>
+
+            <!-- Show Intermediate Output -->
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  📄 LLaVA-Zwischenergebnis anzeigen
+                </label>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Zeige Bildbeschreibung vor finaler Antwort
+                </p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="chainingSettings.showIntermediateOutput"
+                  class="sr-only peer"
+                  @change="saveChainingSettings"
+                >
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            <!-- Supported File Types -->
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
+                📎 Unterstützte Dateiformate
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                  .png
+                </span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                  .jpg / .jpeg
+                </span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                  .gif
+                </span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                  .webp
+                </span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                  .pdf
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                ℹ️ Diese Formate werden automatisch erkannt und via LLaVA verarbeitet
+              </p>
+            </div>
+
+            <!-- Example Workflow -->
+            <div class="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
+                🔄 Beispiel-Workflow
+              </label>
+              <div class="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                <div class="flex items-center gap-2">
+                  <span class="text-purple-600 dark:text-purple-400">1.</span>
+                  <span>Du lädst <strong>code-screenshot.png</strong> hoch</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-purple-600 dark:text-purple-400">2.</span>
+                  <span><strong>LLaVA</strong> analysiert: "Python code with function..."</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-purple-600 dark:text-purple-400">3.</span>
+                  <span>Beschreibung → <strong>Dein aktuelles Modell</strong> (z.B. qwen2.5-coder:14b)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-purple-600 dark:text-purple-400">4.</span>
+                  <span><strong>Finale Antwort</strong> in deiner Sprache (DE/TR/ES/EN/FR)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Default Model -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -267,6 +399,153 @@
           </div>
         </div>
 
+        <!-- System Prompt Management -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                📝 System-Prompts Verwaltung
+              </h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Erstelle und verwalte wiederverwendbare System-Prompts für deine Chats
+              </p>
+            </div>
+            <button
+              @click="showPromptEditor = true; editingPrompt = null"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <i class="fas fa-plus"></i>
+              Neuer Prompt
+            </button>
+          </div>
+
+          <!-- Prompts List -->
+          <div v-if="systemPrompts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-inbox text-4xl mb-3 opacity-30"></i>
+            <p>Keine System-Prompts vorhanden</p>
+            <p class="text-sm mt-2">Erstelle deinen ersten System-Prompt mit dem Button oben</p>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="prompt in systemPrompts"
+              :key="prompt.id"
+              class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                      {{ prompt.name }}
+                    </h3>
+                    <span v-if="prompt.isDefault" class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded-full">
+                      Standard
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    {{ prompt.content }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="editPrompt(prompt)"
+                    class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    title="Bearbeiten"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="deletePrompt(prompt.id)"
+                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="Löschen"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Prompt Editor Modal -->
+        <div v-if="showPromptEditor" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                {{ editingPrompt ? 'System-Prompt bearbeiten' : 'Neuer System-Prompt' }}
+              </h3>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <!-- Name -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Name
+                </label>
+                <input
+                  v-model="promptForm.name"
+                  type="text"
+                  placeholder="z.B. Java-Experte, Code-Reviewer, ..."
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- Content -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  System-Prompt Text
+                </label>
+                <textarea
+                  v-model="promptForm.content"
+                  rows="10"
+                  placeholder="Du bist ein hilfreicher Assistent, der..."
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+                ></textarea>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{ promptForm.content.length }} Zeichen
+                </p>
+              </div>
+
+              <!-- Is Default -->
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div>
+                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Als Standard-Prompt setzen
+                  </label>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Dieser Prompt wird automatisch für neue Chats verwendet
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    v-model="promptForm.isDefault"
+                    class="sr-only peer"
+                  >
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+              <button
+                @click="showPromptEditor = false; editingPrompt = null"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button
+                @click="savePrompt"
+                :disabled="!promptForm.name.trim() || !promptForm.content.trim()"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-save mr-2"></i>
+                {{ editingPrompt ? 'Aktualisieren' : 'Erstellen' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Save Status -->
         <div v-if="saveStatus" class="text-center">
           <div class="inline-flex items-center px-4 py-2 rounded-lg"
@@ -297,9 +576,25 @@ const settings = ref({
   defaultModel: 'qwen2.5-coder:7b'
 })
 
+const chainingSettings = ref({
+  enabled: true,
+  visionModel: 'llava:7b',
+  showIntermediateOutput: false
+})
+
 const availableModels = ref([])
 const saveStatus = ref(null)
 const defaultSamplingParams = ref({})
+
+// System Prompts Management
+const systemPrompts = ref([])
+const showPromptEditor = ref(false)
+const editingPrompt = ref(null)
+const promptForm = ref({
+  name: '',
+  content: '',
+  isDefault: false
+})
 
 // Gefilterte Model-Listen basierend auf Capabilities
 const visionModels = computed(() => {
@@ -340,6 +635,8 @@ const germanModels = computed(() => {
 onMounted(async () => {
   await loadSettings()
   await loadAvailableModels()
+  loadChainingSettings()
+  await loadSystemPrompts()
 })
 
 async function loadSettings() {
@@ -393,6 +690,37 @@ async function saveSettings() {
   }
 }
 
+function loadChainingSettings() {
+  try {
+    const saved = localStorage.getItem('chainingSettings')
+    if (saved) {
+      chainingSettings.value = JSON.parse(saved)
+      console.log('📥 Chaining settings loaded:', chainingSettings.value)
+    } else {
+      console.log('🔗 Using default chaining settings')
+    }
+  } catch (error) {
+    console.error('Failed to load chaining settings:', error)
+  }
+}
+
+function saveChainingSettings() {
+  try {
+    localStorage.setItem('chainingSettings', JSON.stringify(chainingSettings.value))
+    console.log('💾 Chaining settings saved:', chainingSettings.value)
+
+    saveStatus.value = { success: true, message: 'Vision-Chaining Einstellungen gespeichert!' }
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      saveStatus.value = null
+    }, 3000)
+  } catch (error) {
+    console.error('Failed to save chaining settings:', error)
+    saveStatus.value = { success: false, message: 'Fehler beim Speichern der Chaining-Einstellungen' }
+  }
+}
+
 async function saveSamplingParams() {
   try {
     // Speichere Sampling Parameters im localStorage für neue Chats
@@ -414,5 +742,79 @@ function formatSize(bytes) {
   if (!bytes) return 'N/A'
   const gb = bytes / (1024 * 1024 * 1024)
   return `${gb.toFixed(1)} GB`
+}
+
+// System Prompts Functions
+async function loadSystemPrompts() {
+  try {
+    const prompts = await api.getAllSystemPrompts()
+    systemPrompts.value = prompts
+  } catch (error) {
+    console.error('Failed to load system prompts:', error)
+    saveStatus.value = { success: false, message: 'Fehler beim Laden der System-Prompts' }
+  }
+}
+
+function editPrompt(prompt) {
+  editingPrompt.value = prompt
+  promptForm.value = {
+    name: prompt.name,
+    content: prompt.content,
+    isDefault: prompt.isDefault || false
+  }
+  showPromptEditor.value = true
+}
+
+async function savePrompt() {
+  try {
+    if (!promptForm.value.name.trim() || !promptForm.value.content.trim()) {
+      saveStatus.value = { success: false, message: 'Name und Inhalt dürfen nicht leer sein' }
+      return
+    }
+
+    if (editingPrompt.value) {
+      // Update existing prompt
+      await api.updateSystemPrompt(editingPrompt.value.id, promptForm.value)
+      saveStatus.value = { success: true, message: 'System-Prompt erfolgreich aktualisiert!' }
+    } else {
+      // Create new prompt
+      await api.createSystemPrompt(promptForm.value)
+      saveStatus.value = { success: true, message: 'System-Prompt erfolgreich erstellt!' }
+    }
+
+    // Reload prompts and close editor
+    await loadSystemPrompts()
+    showPromptEditor.value = false
+    editingPrompt.value = null
+    promptForm.value = { name: '', content: '', isDefault: false }
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      saveStatus.value = null
+    }, 3000)
+  } catch (error) {
+    console.error('Failed to save system prompt:', error)
+    saveStatus.value = { success: false, message: 'Fehler beim Speichern des System-Prompts' }
+  }
+}
+
+async function deletePrompt(promptId) {
+  if (!confirm('Möchtest du diesen System-Prompt wirklich löschen?')) {
+    return
+  }
+
+  try {
+    await api.deleteSystemPrompt(promptId)
+    saveStatus.value = { success: true, message: 'System-Prompt erfolgreich gelöscht!' }
+    await loadSystemPrompts()
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      saveStatus.value = null
+    }, 3000)
+  } catch (error) {
+    console.error('Failed to delete system prompt:', error)
+    saveStatus.value = { success: false, message: 'Fehler beim Löschen des System-Prompts' }
+  }
 }
 </script>

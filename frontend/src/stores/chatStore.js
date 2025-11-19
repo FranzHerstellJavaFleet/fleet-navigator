@@ -114,6 +114,9 @@ export const useChatStore = defineStore('chat', () => {
     chatCount: 0
   })
 
+  // Custom models from database (for detecting when to skip system prompt)
+  const customModels = ref([])
+
   // System status
   const systemStatus = ref({
     cpuUsage: 0,
@@ -123,29 +126,15 @@ export const useChatStore = defineStore('chat', () => {
   })
 
   // Helper function: Check if model is a custom model
+  // Simple rule: If it's in the custom_models database, it's custom
   const isCustomModel = (modelName) => {
     if (!modelName) return false
 
-    const knownOfficialModels = [
-      'llama2', 'llama3', 'llama3.1', 'llama3.2', 'llama3.3',
-      'mistral', 'mixtral',
-      'phi', 'phi3',
-      'gemma', 'gemma2',
-      'codellama',
-      'qwen', 'qwen2', 'qwen2.5', 'qwen3',
-      'qwen-coder', 'qwen2.5-coder', 'qwen3-coder',
-      'deepseek-coder', 'deepseek-coder-v2',
-      'deepseek-r1',
-      'llava',
-      'moondream',
-      'bge-m3',
-      'nomic-embed-text',
-      'mxbai-embed-large',
-      'all-minilm'
-    ]
-
-    const baseName = modelName.split(':')[0]
-    return !knownOfficialModels.includes(baseName)
+    // Check if model exists in custom models database
+    return customModels.value.some(cm =>
+      cm.name === modelName ||
+      cm.name.toLowerCase() === modelName.toLowerCase()
+    )
   }
 
   // Computed
@@ -172,6 +161,16 @@ export const useChatStore = defineStore('chat', () => {
   async function loadModels() {
     try {
       models.value = await api.getAvailableModels()
+
+      // Load custom models from database (for system prompt detection)
+      try {
+        const customModelsData = await api.getAllCustomModels()
+        customModels.value = customModelsData || []
+        console.log(`📦 Loaded ${customModels.value.length} custom model configurations from database`)
+      } catch (e) {
+        console.warn('⚠️ Could not load custom models:', e.message)
+        customModels.value = []
+      }
 
       // Load user's last selected model from database
       const savedModel = await api.getSelectedModel()
@@ -303,12 +302,19 @@ export const useChatStore = defineStore('chat', () => {
         // Load sampling parameters (from localStorage or defaults)
         const samplingParams = loadSamplingParams()
 
+        // For custom models: don't send system prompt (they have their own built-in)
+        const useCustomModelPrompt = isCustomModel(selectedModel.value)
+
         const request = {
           chatId: currentChat.value?.id,
           message: messageText,
           model: selectedModel.value,
-          systemPrompt: systemPrompt.value,
+          systemPrompt: useCustomModelPrompt ? null : systemPrompt.value,
           stream: false
+        }
+
+        if (useCustomModelPrompt) {
+          console.log('🤖 Custom Model detected - skipping external system prompt')
         }
 
         // Add sampling parameters if available
@@ -394,12 +400,19 @@ export const useChatStore = defineStore('chat', () => {
       console.log('🔍 Sampling Params:', samplingParams)
 
       // Create EventSource with POST body (using fetch to send body, then EventSource for reading)
+      // For custom models: don't send system prompt (they have their own built-in)
+      const useCustomModelPrompt = isCustomModel(selectedModel.value)
+
       const requestBody = {
         chatId: currentChat.value?.id,
         message: messageText,
         model: selectedModel.value,
-        systemPrompt: systemPrompt.value,
+        systemPrompt: useCustomModelPrompt ? null : systemPrompt.value,
         stream: true
+      }
+
+      if (useCustomModelPrompt) {
+        console.log('🤖 Custom Model detected - skipping external system prompt')
       }
 
       // Add sampling parameters if available
@@ -431,6 +444,19 @@ export const useChatStore = defineStore('chat', () => {
       if (visionChainEnabled && visionModel) {
         requestBody.visionChainEnabled = true
         requestBody.visionModel = visionModel
+
+        // Load chaining settings to check showIntermediateOutput
+        try {
+          const chainingSettingsStr = localStorage.getItem('chainingSettings')
+          if (chainingSettingsStr) {
+            const chainingSettings = JSON.parse(chainingSettingsStr)
+            requestBody.showIntermediateOutput = chainingSettings.showIntermediateOutput || false
+            console.log('🔗 Chaining Settings:', chainingSettings)
+          }
+        } catch (e) {
+          console.warn('Failed to load chaining settings', e)
+          requestBody.showIntermediateOutput = false
+        }
 
         // Erzwinge deutsche Ausgabe im System-Prompt (nur wenn kein Custom Model)
         if (!isCustomModel(selectedModel.value)) {
@@ -754,10 +780,14 @@ export const useChatStore = defineStore('chat', () => {
     globalStats,
     systemStatus,
     currentRequestId,
+    customModels,
 
     // Computed
     currentChatTokens,
     memoryUsagePercent,
+
+    // Helper Functions
+    isCustomModel,
 
     // Actions
     loadChats,

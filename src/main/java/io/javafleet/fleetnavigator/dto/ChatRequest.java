@@ -23,6 +23,7 @@ public class ChatRequest {
     // Vision-Chaining settings
     private Boolean visionChainEnabled = false;
     private String visionModel;  // Vision Model für Chaining (z.B. llava:13b)
+    private Boolean showIntermediateOutput = false;  // Zeige LLaVA-Beschreibung im Chat
 
     // Language setting for output
     private String language = "de";  // "de", "es", "tr", "fr"

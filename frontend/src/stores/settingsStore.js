@@ -22,7 +22,7 @@ const defaultSettings = {
 
   // Vision
   autoSelectVisionModel: true,
-  preferredVisionModel: 'llava:13b',
+  preferredVisionModel: 'llava:7b',  // Default: llava:7b (schnell und effizient)
   visionChainEnabled: true,  // Vision Model Output an Haupt-Model weiterreichen
 
   // Advanced
@@ -39,6 +39,19 @@ export const useSettingsStore = defineStore('settings', () => {
         // Merge: defaults first, then stored values (but ensure all new defaults are present)
         // This ensures new settings get their defaults even if not in localStorage
         const merged = { ...defaultSettings, ...storedSettings }
+
+        // Load chaining settings from separate localStorage key and override merged settings
+        try {
+          const chainingSettingsStr = localStorage.getItem('chainingSettings')
+          if (chainingSettingsStr) {
+            const chainingSettings = JSON.parse(chainingSettingsStr)
+            merged.visionChainEnabled = chainingSettings.enabled
+            merged.preferredVisionModel = chainingSettings.visionModel
+            console.log('🔗 Loaded chaining settings:', chainingSettings)
+          }
+        } catch (e) {
+          console.warn('Failed to load chaining settings, using defaults', e)
+        }
 
         // Log if we're using stored settings
         console.log('✅ Settings loaded from localStorage')

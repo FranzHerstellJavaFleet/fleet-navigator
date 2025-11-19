@@ -91,6 +91,34 @@ mvn clean package
 
 **Ergebnis:** Ein JAR-File mit ALLEM drin!
 
+### ⚠️ WICHTIG: Vite Build-Cache-Problem
+
+**Problem:** Vite cached manchmal alte Builds. Symptome:
+- Frontend-Änderungen erscheinen nicht nach `mvn clean package`
+- Browser lädt alte JavaScript-Dateien (alter Hash in Dateinamen)
+- Console zeigt alte Fehler obwohl Code gefixt wurde
+
+**Lösung (IMMER wenn Frontend-Änderungen nicht erscheinen):**
+
+```bash
+# 1. Lösche ALLE Build-Artefakte
+rm -rf frontend/dist target
+
+# 2. Baue FRISCH ohne Cache
+mvn clean package -DskipTests
+
+# 3. Update Service
+sudo ./update-fleet-navigator.sh
+
+# 4. Browser: NEUES Inkognito-Fenster oder Ctrl+Shift+R
+```
+
+**Erkennungsmerkmale:**
+- ✅ Neue Version: JavaScript-Hash ändert sich (z.B. `index-CHZ3aMt5.js` → `index-XYZ123.js`)
+- ❌ Alte Version: Hash bleibt gleich, obwohl Code geändert wurde
+
+**Faustregel:** Bei Frontend-Änderungen IMMER `rm -rf frontend/dist target` VOR dem Build!
+
 ---
 
 ## 🔧 Technologie-Stack

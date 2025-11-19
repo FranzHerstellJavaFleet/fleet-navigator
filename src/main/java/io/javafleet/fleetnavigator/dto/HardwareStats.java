@@ -20,6 +20,7 @@ public class HardwareStats {
     private List<DiskStats> disk;
     private TemperatureStats temperature;
     private List<NetworkStats> network;
+    private List<GPUStats> gpu;
     private SystemStats system;
 
     @Data
@@ -104,6 +105,29 @@ public class HardwareStats {
 
         private long errin;
         private long errout;
+    }
+
+    @Data
+    public static class GPUStats {
+        private int index;
+        private String name;
+
+        @JsonProperty("utilization_gpu")
+        private double utilizationGpu;
+
+        @JsonProperty("memory_total")
+        private long memoryTotal;
+
+        @JsonProperty("memory_used")
+        private long memoryUsed;
+
+        @JsonProperty("memory_free")
+        private long memoryFree;
+
+        @JsonProperty("memory_used_percent")
+        private double memoryUsedPercent;
+
+        private double temperature;
     }
 
     @Data
