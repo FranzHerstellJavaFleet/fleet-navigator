@@ -186,53 +186,8 @@ jobs:
       - name: Build with Maven (Windows)
         run: mvn -B clean package -DskipTests
 
-      - name: Slim JAR - Remove non-Windows natives from llama.jar
-        shell: bash
-        run: |
-          echo "=== Removing non-Windows natives from JAR to reduce size ==="
-          JAR_FILE=$(ls target/fleet-navigator-*.jar | head -1)
-          JAR_BASENAME=$(basename "$JAR_FILE")
-          ORIGINAL_SIZE=$(du -h "$JAR_FILE" | cut -f1)
-          echo "Original JAR size: $ORIGINAL_SIZE"
-
-          # Create temp directory
-          TEMP_DIR=$(mktemp -d)
-          cd "$TEMP_DIR"
-
-          # Extract JAR using 7z (available on Windows runners)
-          7z x -y "$GITHUB_WORKSPACE/$JAR_FILE" > /dev/null
-
-          # Remove non-Windows natives from llama JAR inside BOOT-INF/lib
-          if [ -f "BOOT-INF/lib/llama-4.1.0.jar" ]; then
-            echo "Processing llama-4.1.0.jar..."
-            mkdir -p llama-extract
-            cd llama-extract
-            7z x -y ../BOOT-INF/lib/llama-4.1.0.jar > /dev/null
-
-            # Remove all non-Windows natives
-            rm -rf de/kherud/llama/Mac 2>/dev/null || true
-            rm -rf de/kherud/llama/Linux 2>/dev/null || true
-            rm -rf de/kherud/llama/Linux-Android 2>/dev/null || true
-            rm -rf de/kherud/llama/Windows/x86 2>/dev/null || true
-
-            # Keep only Windows/x86_64
-            echo "Keeping only: de/kherud/llama/Windows/x86_64/"
-
-            # Repack llama JAR using 7z
-            rm ../BOOT-INF/lib/llama-4.1.0.jar
-            7z a -tzip -mx=5 ../BOOT-INF/lib/llama-4.1.0.jar . > /dev/null
-            cd ..
-            rm -rf llama-extract
-          fi
-
-          # Repack main JAR using 7z (preserves structure)
-          rm "$GITHUB_WORKSPACE/$JAR_FILE"
-          7z a -tzip -mx=5 "$GITHUB_WORKSPACE/$JAR_FILE" . > /dev/null
-          cd "$GITHUB_WORKSPACE"
-          rm -rf "$TEMP_DIR"
-
-          NEW_SIZE=$(du -h "$JAR_FILE" | cut -f1)
-          echo "New JAR size: $NEW_SIZE (was $ORIGINAL_SIZE)"
+      # Note: JAR slimming disabled for Windows - causes class loading issues
+      # Windows gets the full JAR (~157MB) which works reliably
 
       - name: Package Windows distribution
         shell: pwsh
@@ -258,6 +213,15 @@ jobs:
             Copy-Item "src/main/resources/application.properties" "$distDir/config/"
           }
 
+          # Setup-Scripts kopieren (install.bat + setup.ps1)
+          if (Test-Path "packaging/win-x64/install.bat") {
+            Copy-Item "packaging/win-x64/install.bat" "$distDir/"
+          }
+          if (Test-Path "packaging/win-x64/setup.ps1") {
+            Copy-Item "packaging/win-x64/setup.ps1" "$distDir/"
+          }
+
+          # Einfaches Start-Script (falls Benutzer nicht installieren will)
           $startScript = "@echo off`r`ncd /d `"%~dp0`"`r`njava -jar bin\fleet-navigator.jar`r`npause"
           $startScript | Out-File -FilePath "$distDir/start.bat" -Encoding ASCII
 
