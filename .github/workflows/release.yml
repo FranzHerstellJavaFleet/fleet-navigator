@@ -3,12 +3,9 @@ name: Build and Release Fleet Navigator
 on:
   push:
     tags:
-      - "v*.*.*"    # z.B. v1.0.0 -> löst den Workflow aus
+      - "v*.*.*"
 
 jobs:
-  # =========================
-  # Linux-Build
-  # =========================
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -34,38 +31,26 @@ jobs:
           mkdir -p "$DIST_DIR"/native/llama
           mkdir -p "$DIST_DIR"/config
 
-          # JAR (mit korrektem Namen)
           cp target/fleet-navigator-*.jar "$DIST_DIR/bin/fleet-navigator.jar"
 
-          # OCR (Tesseract + tessdata) - falls vorhanden
           if [ -d "packaging/linux-x64/ocr" ] && [ "$(ls -A packaging/linux-x64/ocr 2>/dev/null)" ]; then
             cp -r packaging/linux-x64/ocr/* "$DIST_DIR/native/ocr/"
           fi
 
-          # llama.cpp JNI - falls vorhanden
           if [ -d "packaging/linux-x64/native/llama" ] && [ "$(ls -A packaging/linux-x64/native/llama 2>/dev/null)" ]; then
             cp -r packaging/linux-x64/native/llama/* "$DIST_DIR/native/llama/"
           fi
 
-          # Konfiguration
           if [ -f "config/application-linux.yml" ]; then
             cp config/application-linux.yml "$DIST_DIR/config/application.yml"
           else
             cp src/main/resources/application.properties "$DIST_DIR/config/"
           fi
 
-          # Start-Skript erstellen
-          cat > "$DIST_DIR/start.sh" << 'EOF'
-#!/bin/bash
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
-java -jar bin/fleet-navigator.jar
-EOF
+          printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\ncd "$SCRIPT_DIR"\njava -jar bin/fleet-navigator.jar\n' > "$DIST_DIR/start.sh"
           chmod +x "$DIST_DIR/start.sh"
 
-          # Tarball erzeugen
           tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
-
           mkdir -p dist
           mv "${DIST_DIR}.tar.gz" dist/
 
@@ -75,9 +60,6 @@ EOF
           name: dist-linux
           path: dist/*
 
-  # =========================
-  # Windows-Build
-  # =========================
   build-windows:
     runs-on: windows-latest
     steps:
@@ -101,35 +83,25 @@ EOF
 
           New-Item -ItemType Directory -Path "$distDir/bin","$distDir/native/ocr","$distDir/native/llama","$distDir/config" -Force | Out-Null
 
-          # JAR
           Copy-Item "target/fleet-navigator-*.jar" "$distDir/bin/fleet-navigator.jar"
 
-          # OCR - falls vorhanden
           if (Test-Path "packaging/win-x64/ocr/*") {
             Copy-Item "packaging/win-x64/ocr/*" "$distDir/native/ocr/" -Recurse -ErrorAction SilentlyContinue
           }
 
-          # llama.cpp JNI - falls vorhanden
           if (Test-Path "packaging/win-x64/native/llama/*") {
             Copy-Item "packaging/win-x64/native/llama/*" "$distDir/native/llama/" -Recurse -ErrorAction SilentlyContinue
           }
 
-          # Konfiguration
           if (Test-Path "config/application-windows.yml") {
             Copy-Item "config/application-windows.yml" "$distDir/config/application.yml"
           } else {
             Copy-Item "src/main/resources/application.properties" "$distDir/config/"
           }
 
-          # Start-Skript erstellen
-          @"
-@echo off
-cd /d "%~dp0"
-java -jar bin\fleet-navigator.jar
-pause
-"@ | Out-File -FilePath "$distDir/start.bat" -Encoding ASCII
+          $startScript = "@echo off`r`ncd /d `"%~dp0`"`r`njava -jar bin\fleet-navigator.jar`r`npause"
+          $startScript | Out-File -FilePath "$distDir/start.bat" -Encoding ASCII
 
-          # ZIP erzeugen
           $zipPath = "$distDir.zip"
           Compress-Archive -Path "$distDir/*" -DestinationPath $zipPath
 
@@ -142,9 +114,6 @@ pause
           name: dist-windows
           path: dist/*
 
-  # =========================
-  # macOS-Build
-  # =========================
   build-macos:
     runs-on: macos-latest
     steps:
@@ -170,38 +139,26 @@ pause
           mkdir -p "$DIST_DIR"/native/llama
           mkdir -p "$DIST_DIR"/config
 
-          # JAR
           cp target/fleet-navigator-*.jar "$DIST_DIR/bin/fleet-navigator.jar"
 
-          # OCR - falls vorhanden
           if [ -d "packaging/macos-arm64/ocr" ] && [ "$(ls -A packaging/macos-arm64/ocr 2>/dev/null)" ]; then
             cp -r packaging/macos-arm64/ocr/* "$DIST_DIR/native/ocr/"
           fi
 
-          # llama.cpp JNI - falls vorhanden
           if [ -d "packaging/macos-arm64/native/llama" ] && [ "$(ls -A packaging/macos-arm64/native/llama 2>/dev/null)" ]; then
             cp -r packaging/macos-arm64/native/llama/* "$DIST_DIR/native/llama/"
           fi
 
-          # Konfiguration
           if [ -f "config/application-macos.yml" ]; then
             cp config/application-macos.yml "$DIST_DIR/config/application.yml"
           else
             cp src/main/resources/application.properties "$DIST_DIR/config/"
           fi
 
-          # Start-Skript erstellen
-          cat > "$DIST_DIR/start.sh" << 'EOF'
-#!/bin/bash
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
-java -jar bin/fleet-navigator.jar
-EOF
+          printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\ncd "$SCRIPT_DIR"\njava -jar bin/fleet-navigator.jar\n' > "$DIST_DIR/start.sh"
           chmod +x "$DIST_DIR/start.sh"
 
-          # Tarball erzeugen
           tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
-
           mkdir -p dist
           mv "${DIST_DIR}.tar.gz" dist/
 
@@ -211,9 +168,6 @@ EOF
           name: dist-macos
           path: dist/*
 
-  # =========================
-  # Release erstellen
-  # =========================
   create-release:
     runs-on: ubuntu-latest
     needs:
