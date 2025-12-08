@@ -1,0 +1,94 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# NetBeans
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database Files
+*.db
+*.h2.db
+
+# Temp Files
+tmp/
+temp/
+
+# Application Data
+data/
+uploads/
+
+# Environment
+.env
+
+# GraalVM Native Image
+*.build_artifacts.txt
+models/
+*.gguf
+
+# Large Binary Files (CUDA libraries exceed GitHub 100MB limit)
+# Exclude all bin/ contents first
+bin/
+# Then whitelist specific shell scripts we want to keep
+!bin/llama-server
+!bin/llama-server-wrapper.sh
+!bin/llama-server.old
+BOOT-INF/
+
+# Native Libraries (plattformspezifisch, zu groß für Git)
+packaging/linux-x64/native/
+packaging/win-x64/native/
+packaging/macos-arm64/native/
+packaging/linux-x64/ocr/
+packaging/win-x64/ocr/
+packaging/macos-arm64/ocr/
+# Keep .gitkeep files
+!packaging/**/.gitkeep
+
+# Backup files
+*.backup
+*.bak
+
+# Error logs
+hs_err_pid*.log
+
+# Update files
+*.jar.update
+pending-update.marker
+
+# Old release archives
+*.tar.gz
+*.zip
+
+# Old YAML files (use .github/workflows/ instead)
+Fleet Navigator.yaml

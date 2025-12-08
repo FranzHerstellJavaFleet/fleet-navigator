@@ -1,0 +1,36 @@
+# Fleet Navigator - Windows Configuration
+# =======================================
+
+spring:
+  application:
+    name: fleet-navigator
+
+server:
+  port: 2025
+
+# Plattformspezifische Pfade (Windows)
+# Daten: %LOCALAPPDATA%\JavaFleet\
+fleet-navigator:
+  paths:
+    # Optional: Pfade überschreiben
+    # base-dir: C:\ProgramData\FleetNavigator
+    # data-dir: C:\ProgramData\FleetNavigator\data
+    # models-dir: C:\ProgramData\FleetNavigator\models
+
+# LLM Provider
+llm:
+  default-provider: java-llama-cpp
+  llamacpp:
+    context-size: 4096
+    gpu-layers: 999
+    threads: 8
+    enabled: true
+  ollama:
+    base-url: http://localhost:11434
+    enabled: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    io.javafleet.fleetnavigator: INFO

@@ -1,0 +1,49 @@
+[Unit]
+Description=Fleet Navigator - AI Chat Interface for Ollama
+Documentation=https://github.com/javafleet/fleet-navigator
+After=network.target ollama.service
+Wants=ollama.service
+
+[Service]
+Type=simple
+User=trainer
+Group=trainer
+WorkingDirectory=/opt/fleet-navigator
+
+# Native Image Binary
+ExecStart=/opt/fleet-navigator/fleet-navigator
+
+# Environment
+Environment="SPRING_PROFILES_ACTIVE=production"
+Environment="SERVER_PORT=2025"
+Environment="JAVA_OPTS=-Xmx512m"
+
+# LLM Configuration - Absolute paths for systemd
+Environment="LLM_LLAMACPP_MODELS_DIR=/opt/fleet-navigator/models"
+Environment="LLM_LLAMACPP_BINARY_PATH=/opt/fleet-navigator/bin/llama-server-wrapper.sh"
+Environment="SPRING_DATASOURCE_URL=jdbc:h2:file:/opt/fleet-navigator/data/fleetnavdb"
+
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+
+# Limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=fleet-navigator
+
+# Security (recommended for production)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/fleet-navigator/data
+ReadWritePaths=/opt/fleet-navigator/models
+ReadWritePaths=/opt/fleet-navigator/logs
+
+[Install]
+WantedBy=multi-user.target

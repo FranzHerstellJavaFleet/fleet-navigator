@@ -1,0 +1,66 @@
+server:
+  port: 2025
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: Fleet Navigator
+
+  # H2 Database - Pfad wird von DataSourceConfiguration gesetzt
+  # basierend auf plattformspezifischen Konventionen:
+  #   Linux/macOS: ~/.java-fleet/data/fleetnavdb
+  #   Windows:     %LOCALAPPDATA%\JavaFleet\data\fleetnavdb
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        period: 31536000
+
+  mvc:
+    static-path-pattern: /**
+
+# ===== Plattformspezifische Pfade =====
+# Werden automatisch ermittelt, können aber überschrieben werden:
+# fleet-navigator:
+#   paths:
+#     base-dir: /custom/base        # Überschreibt Basis-Verzeichnis
+#     data-dir: /custom/data        # Nur Daten-Verzeichnis
+#     models-dir: /custom/models    # Nur Modelle-Verzeichnis
+#     logs-dir: /custom/logs        # Nur Logs-Verzeichnis
+
+logging:
+  level:
+    root: INFO
+    io.javafleet: INFO
+  # Log-Datei wird von FleetPathsConfiguration ermittelt
+  # Default: ~/.java-fleet/logs/fleet-navigator.log (Linux/macOS)
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# LLM Configuration
+llm:
+  llamacpp:
+    enabled: true
+    # models-dir wird von FleetPathsConfiguration ermittelt
+    # Default: ~/.java-fleet/models (Linux/macOS)
+    binary-path: /opt/fleet-navigator/bin/llama-server
+    auto-download: true
+    default-model: qwen2.5:3b
+
+# Ollama configuration (fallback)
+ollama:
+  base-url: http://localhost:11434
+  timeout: 300000
+  model: llama3.2

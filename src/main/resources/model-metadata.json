@@ -1,0 +1,351 @@
+{
+  "models": [
+    {
+      "name": "qwen2.5-coder",
+      "publisher": "Alibaba Cloud",
+      "releaseDate": "2024-11",
+      "trainedUntil": "2024-09",
+      "contextWindow": 131072,
+      "license": "Apache 2.0",
+      "primaryTasks": ["Code Generation", "Code Completion", "Code Explanation", "Debugging"],
+      "description": "Qwen2.5-Coder ist ein Code-fokussiertes LLM von Alibaba Cloud, trainiert auf 5.5T Tokens Code-Daten.",
+      "strengths": ["Exzellente Code-Qualität", "Multi-Language Support", "128k Context", "Schnelle Inferenz"],
+      "languages": ["Python", "Java", "C++", "JavaScript", "Go", "Rust", "SQL"],
+      "benchmarks": {
+        "humaneval": "92.3% (7B)",
+        "mbpp": "85.7% (7B)"
+      }
+    },
+    {
+      "name": "llama3.1",
+      "publisher": "Meta AI",
+      "releaseDate": "2024-07",
+      "trainedUntil": "2023-12",
+      "contextWindow": 131072,
+      "license": "Llama 3 Community License",
+      "primaryTasks": ["General Chat", "Question Answering", "Reasoning", "Multilingual"],
+      "description": "Llama 3.1 von Meta AI - State-of-the-art Open-Source LLM mit 8B, 70B und 405B Varianten.",
+      "strengths": ["Starkes Reasoning", "Multilingual", "128k Context", "Open Weights"],
+      "languages": ["English", "German", "French", "Spanish", "Italian", "Portuguese", "Hindi", "Thai"],
+      "benchmarks": {
+        "mmlu": "86.0% (405B)",
+        "gpqa": "51.2% (405B)"
+      }
+    },
+    {
+      "name": "llama3.3",
+      "publisher": "Meta AI",
+      "releaseDate": "2024-12",
+      "trainedUntil": "2024-10",
+      "contextWindow": 131072,
+      "license": "Llama 3 Community License",
+      "primaryTasks": ["General Chat", "Instruction Following", "Reasoning", "Multilingual"],
+      "description": "Llama 3.3 70B - Neueste Version mit verbessertem Instruction Following und Reasoning.",
+      "strengths": ["Top-Qualität bei 70B", "Verbesserte Multilingual-Fähigkeiten", "Exzellentes Reasoning"],
+      "languages": ["English", "German", "French", "Spanish", "Italian", "Portuguese", "Hindi", "Thai"],
+      "benchmarks": {
+        "mmlu": "86.0% (70B)",
+        "ifeval": "88.6% (70B)"
+      }
+    },
+    {
+      "name": "deepseek-coder",
+      "publisher": "DeepSeek AI",
+      "releaseDate": "2024-01",
+      "trainedUntil": "2023-11",
+      "contextWindow": 16384,
+      "license": "MIT",
+      "primaryTasks": ["Code Generation", "Code Completion", "Code Understanding"],
+      "description": "DeepSeek Coder - Hochspezialisiertes Code-Modell mit exzellenter Performance.",
+      "strengths": ["Top Code-Qualität", "Fill-in-Middle", "Schnelle Inferenz"],
+      "languages": ["Python", "Java", "C++", "JavaScript", "TypeScript", "Go"],
+      "benchmarks": {
+        "humaneval": "89.0% (33B)",
+        "mbpp": "80.4% (33B)"
+      }
+    },
+    {
+      "name": "deepseek-coder-v2",
+      "publisher": "DeepSeek AI",
+      "releaseDate": "2024-06",
+      "trainedUntil": "2024-04",
+      "contextWindow": 163840,
+      "license": "MIT",
+      "primaryTasks": ["Code Generation", "General Chat", "Math", "Reasoning"],
+      "description": "DeepSeek Coder V2 - Multimodale Weiterentwicklung mit Code + General Knowledge.",
+      "strengths": ["Code + Chat kombiniert", "164k Context", "MoE Architecture", "Sehr effizient"],
+      "languages": ["80+ Programming Languages", "English", "Chinese"],
+      "benchmarks": {
+        "humaneval": "90.2% (236B)",
+        "mmlu": "78.5% (236B)"
+      }
+    },
+    {
+      "name": "codellama",
+      "publisher": "Meta AI",
+      "releaseDate": "2023-08",
+      "trainedUntil": "2023-07",
+      "contextWindow": 16384,
+      "license": "Llama 2 Community License",
+      "primaryTasks": ["Code Generation", "Code Infilling", "Instruction Following"],
+      "description": "Code Llama - Spezialisierte Code-Version von Llama 2.",
+      "strengths": ["Fill-in-Middle", "Long Context", "Instruction Tuned"],
+      "languages": ["Python", "C++", "Java", "PHP", "C#", "TypeScript", "Bash"],
+      "benchmarks": {
+        "humaneval": "53.7% (34B)",
+        "mbpp": "56.2% (34B)"
+      }
+    },
+    {
+      "name": "llama2",
+      "publisher": "Meta AI",
+      "releaseDate": "2023-07",
+      "trainedUntil": "2023-06",
+      "contextWindow": 4096,
+      "license": "Llama 2 Community License",
+      "primaryTasks": ["General Chat", "Question Answering", "Summarization"],
+      "description": "Llama 2 - Vorgängermodell von Llama 3, solide Basis für viele Anwendungen.",
+      "strengths": ["Stabil", "Gut dokumentiert", "Weit verbreitet"],
+      "languages": ["English"],
+      "benchmarks": {
+        "mmlu": "68.9% (70B)"
+      }
+    },
+    {
+      "name": "mistral",
+      "publisher": "Mistral AI",
+      "releaseDate": "2023-09",
+      "trainedUntil": "2023-08",
+      "contextWindow": 32768,
+      "license": "Apache 2.0",
+      "primaryTasks": ["General Chat", "Instruction Following", "Reasoning"],
+      "description": "Mistral 7B - Kompaktes aber leistungsstarkes Modell mit Sliding Window Attention.",
+      "strengths": ["Effizient", "32k Context", "Schnell", "Open Weights"],
+      "languages": ["English", "French", "German", "Spanish", "Italian"],
+      "benchmarks": {
+        "mmlu": "60.1% (7B)"
+      }
+    },
+    {
+      "name": "mixtral",
+      "publisher": "Mistral AI",
+      "releaseDate": "2023-12",
+      "trainedUntil": "2023-11",
+      "contextWindow": 32768,
+      "license": "Apache 2.0",
+      "primaryTasks": ["General Chat", "Code", "Multilingual", "Reasoning"],
+      "description": "Mixtral 8x7B - Mixture-of-Experts Modell mit 47B Parametern (8 Experten à 7B).",
+      "strengths": ["MoE Efficiency", "Multilingual", "Code + Chat", "32k Context"],
+      "languages": ["English", "French", "German", "Spanish", "Italian"],
+      "benchmarks": {
+        "mmlu": "70.6%",
+        "humaneval": "40.2%"
+      }
+    },
+    {
+      "name": "llava",
+      "publisher": "Microsoft / UW Madison",
+      "releaseDate": "2023-10",
+      "trainedUntil": "2023-09",
+      "contextWindow": 4096,
+      "license": "Apache 2.0",
+      "primaryTasks": ["Vision-Language", "Image Understanding", "Visual QA"],
+      "description": "LLaVA - Large Language and Vision Assistant für multimodale Aufgaben.",
+      "strengths": ["Vision + Text", "Image Understanding", "OCR", "Chart Analysis"],
+      "languages": ["English"],
+      "benchmarks": {
+        "mmmu": "35.3%",
+        "vqav2": "80.0%"
+      }
+    },
+    {
+      "name": "gemma",
+      "publisher": "Google DeepMind",
+      "releaseDate": "2024-02",
+      "trainedUntil": "2024-01",
+      "contextWindow": 8192,
+      "license": "Gemma Terms of Use",
+      "primaryTasks": ["General Chat", "Question Answering", "Summarization"],
+      "description": "Gemma - Leichtgewichtiges Open-Source-Modell von Google basierend auf Gemini.",
+      "strengths": ["Effizient", "Gut tuned", "Safety-focused"],
+      "languages": ["English"],
+      "benchmarks": {
+        "mmlu": "64.3% (7B)"
+      }
+    },
+    {
+      "name": "phi",
+      "publisher": "Microsoft Research",
+      "releaseDate": "2023-12",
+      "trainedUntil": "2023-11",
+      "contextWindow": 2048,
+      "license": "MIT",
+      "primaryTasks": ["General Chat", "Reasoning", "Code"],
+      "description": "Phi-2 - Kompaktes 2.7B Modell mit überraschend guter Performance.",
+      "strengths": ["Sehr klein", "Gute Reasoning-Fähigkeiten", "Schnell"],
+      "languages": ["English"],
+      "benchmarks": {
+        "mmlu": "56.3% (2.7B)"
+      }
+    },
+    {
+      "name": "magicoder",
+      "publisher": "ise-uiuc",
+      "releaseDate": "2023-12",
+      "trainedUntil": "2023-11",
+      "contextWindow": 16384,
+      "license": "MIT",
+      "primaryTasks": ["Code Generation", "Code Completion", "Instruction Following"],
+      "description": "Magicoder - State-of-the-Art Code-Modell trainiert mit OSS-Instruct Methode auf synthetischen Daten.",
+      "strengths": ["Exzellente Code-Qualität", "Diverse Programmiersprachen", "Instruction-tuned", "Open Source"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go", "Rust", "TypeScript", "PHP"],
+      "benchmarks": {
+        "humaneval": "76.8% (7B)",
+        "mbpp": "75.7% (7B)"
+      }
+    },
+    {
+      "name": "starcoder",
+      "publisher": "BigCode",
+      "releaseDate": "2023-05",
+      "trainedUntil": "2023-04",
+      "contextWindow": 8192,
+      "license": "BigCode OpenRAIL-M",
+      "primaryTasks": ["Code Generation", "Code Completion", "Fill-in-Middle"],
+      "description": "StarCoder - Open-Source Code-LLM von BigCode, trainiert auf The Stack Datensatz.",
+      "strengths": ["80+ Sprachen", "Fill-in-Middle", "Gut für IDE-Integration"],
+      "languages": ["Python", "Java", "JavaScript", "C", "C++", "und 80+ weitere"],
+      "benchmarks": {
+        "humaneval": "40.8% (15B)",
+        "mbpp": "49.5% (15B)"
+      }
+    },
+    {
+      "name": "starcoder2",
+      "publisher": "BigCode",
+      "releaseDate": "2024-02",
+      "trainedUntil": "2024-01",
+      "contextWindow": 16384,
+      "license": "BigCode OpenRAIL-M",
+      "primaryTasks": ["Code Generation", "Code Completion", "Code Understanding"],
+      "description": "StarCoder2 - Verbesserte Version mit 3B, 7B und 15B Varianten, trainiert auf The Stack v2.",
+      "strengths": ["Verbesserte Qualität", "Größere Trainingsdaten", "16k Context", "Effizient"],
+      "languages": ["Python", "Java", "JavaScript", "C", "C++", "Go", "Rust", "und 600+ weitere"],
+      "benchmarks": {
+        "humaneval": "46.3% (15B)",
+        "mbpp": "55.1% (15B)"
+      }
+    },
+    {
+      "name": "wizardcoder",
+      "publisher": "WizardLM Team",
+      "releaseDate": "2023-06",
+      "trainedUntil": "2023-05",
+      "contextWindow": 8192,
+      "license": "Llama 2 Community License",
+      "primaryTasks": ["Code Generation", "Complex Coding Tasks", "Algorithm Implementation"],
+      "description": "WizardCoder - Evol-Instruct trainiertes Code-Modell für komplexe Programmieraufgaben.",
+      "strengths": ["Komplexe Aufgaben", "Algorithmen", "Starkes Reasoning", "Instruction Following"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go"],
+      "benchmarks": {
+        "humaneval": "73.2% (34B)",
+        "mbpp": "61.2% (34B)"
+      }
+    },
+    {
+      "name": "codestral",
+      "publisher": "Mistral AI",
+      "releaseDate": "2024-05",
+      "trainedUntil": "2024-04",
+      "contextWindow": 32768,
+      "license": "Mistral AI Non-Production License",
+      "primaryTasks": ["Code Generation", "Code Completion", "Fill-in-Middle", "Code Explanation"],
+      "description": "Codestral - Mistral AIs spezialisiertes Code-Modell mit 22B Parametern und 32k Context.",
+      "strengths": ["32k Context", "Fill-in-Middle", "Sehr schnell", "Hohe Qualität"],
+      "languages": ["Python", "Java", "JavaScript", "C", "C++", "Rust", "Go", "und 80+ weitere"],
+      "benchmarks": {
+        "humaneval": "81.1% (22B)",
+        "mbpp": "78.2% (22B)"
+      }
+    },
+    {
+      "name": "codegemma",
+      "publisher": "Google DeepMind",
+      "releaseDate": "2024-04",
+      "trainedUntil": "2024-03",
+      "contextWindow": 8192,
+      "license": "Gemma Terms of Use",
+      "primaryTasks": ["Code Generation", "Code Completion", "Fill-in-Middle"],
+      "description": "CodeGemma - Googles spezialisiertes Code-Modell basierend auf Gemma.",
+      "strengths": ["Effizient", "Fill-in-Middle", "Gut für IDE-Integration", "Schnell"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go", "Rust"],
+      "benchmarks": {
+        "humaneval": "56.1% (7B)",
+        "mbpp": "54.2% (7B)"
+      }
+    },
+    {
+      "name": "granite-code",
+      "publisher": "IBM Research",
+      "releaseDate": "2024-05",
+      "trainedUntil": "2024-04",
+      "contextWindow": 8192,
+      "license": "Apache 2.0",
+      "primaryTasks": ["Code Generation", "Code Explanation", "Code Fixing", "Enterprise Code"],
+      "description": "Granite Code - IBMs Enterprise-fokussiertes Code-Modell für professionelle Entwicklung.",
+      "strengths": ["Enterprise-ready", "Code Fixing", "Dokumentation", "Apache 2.0 Lizenz"],
+      "languages": ["Python", "Java", "JavaScript", "C", "C++", "Go", "Rust", "COBOL"],
+      "benchmarks": {
+        "humaneval": "61.0% (34B)",
+        "mbpp": "56.3% (34B)"
+      }
+    },
+    {
+      "name": "codeqwen",
+      "publisher": "Alibaba Cloud",
+      "releaseDate": "2024-04",
+      "trainedUntil": "2024-03",
+      "contextWindow": 65536,
+      "license": "Tongyi Qianwen License",
+      "primaryTasks": ["Code Generation", "Code Completion", "Repository-level Code"],
+      "description": "CodeQwen1.5 - Vorgänger von Qwen2.5-Coder mit starker Repository-Level Performance.",
+      "strengths": ["64k Context", "Repository-level", "Multi-File Understanding"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go", "Rust", "SQL"],
+      "benchmarks": {
+        "humaneval": "83.5% (7B)",
+        "mbpp": "77.6% (7B)"
+      }
+    },
+    {
+      "name": "stable-code",
+      "publisher": "Stability AI",
+      "releaseDate": "2024-01",
+      "trainedUntil": "2023-12",
+      "contextWindow": 16384,
+      "license": "Stability AI Non-Commercial License",
+      "primaryTasks": ["Code Generation", "Code Completion", "Autocomplete"],
+      "description": "Stable Code - Stability AIs Code-Modell optimiert für Code-Completion.",
+      "strengths": ["16k Context", "Schnelle Completion", "Autocomplete-optimiert"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go", "Rust"],
+      "benchmarks": {
+        "humaneval": "32.4% (3B)"
+      }
+    },
+    {
+      "name": "yi-coder",
+      "publisher": "01.AI",
+      "releaseDate": "2024-09",
+      "trainedUntil": "2024-08",
+      "contextWindow": 131072,
+      "license": "Apache 2.0",
+      "primaryTasks": ["Code Generation", "Code Completion", "Long Context Code"],
+      "description": "Yi-Coder - 01.AIs Code-Modell mit 128k Context für lange Code-Dateien.",
+      "strengths": ["128k Context", "Long File Support", "Apache 2.0", "Multi-Language"],
+      "languages": ["Python", "Java", "JavaScript", "C++", "Go", "Rust", "TypeScript"],
+      "benchmarks": {
+        "humaneval": "75.6% (9B)",
+        "mbpp": "68.4% (9B)"
+      }
+    }
+  ]
+}

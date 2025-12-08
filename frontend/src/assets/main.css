@@ -1,0 +1,4481 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================
+   DEFAULT THEME (Dark/Tech Style)
+   Minimalistisch, Modern, Tech-Fokussiert
+   ========================================== */
+:root {
+  /* Primäre Akzentfarbe - Grün */
+  --fleet-orange: #28A745;
+  --fleet-orange-dark: #1E7E34;
+  --fleet-orange-light: #48D368;
+
+  /* Theme Farben - Sanfte Grautöne */
+  --bg-primary: #343A40;      /* Haupthintergrund */
+  --bg-secondary: #3D444B;    /* Karten/Panels */
+  --bg-tertiary: #495057;     /* Erhöhte Elemente */
+  --text-primary: #FFFFFF;    /* Haupttext */
+  --text-secondary: #ADB5BD;  /* Sekundärtext */
+  --accent-primary: #28A745;  /* Grün - Hauptaktion */
+  --accent-secondary: #1E90FF; /* Blau - Hover/Sekundär */
+  --accent-warning: #DC3545;  /* Rot - Warnung */
+  --border-color: #495057;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* Sans-serif Schriftarten wie spezifiziert */
+  font-family: 'Roboto', 'Arial', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================
+   ==========================================
+   TECH HELL - Modernes helles Theme mit Lila
+   Clean, Modern, Tech-Fokussiert
+   ==========================================
+   ========================================== */
+.theme-tech-light {
+  /* Lila/Indigo Farbpalette */
+  --fleet-orange: #8B5CF6;           /* Lila */
+  --fleet-orange-dark: #7C3AED;      /* Dunkles Lila */
+  --fleet-orange-light: #A78BFA;     /* Helles Lila */
+
+  /* Theme Farben - Hell mit Lila Akzenten */
+  --bg-primary: #F8FAFC;             /* Helles Grau */
+  --bg-secondary: #FFFFFF;           /* Weiß für Karten */
+  --bg-tertiary: #F1F5F9;            /* Leichtes Grau */
+  --text-primary: #6366F1;           /* Indigo Text (KONSISTENT!) */
+  --text-secondary: #8B5CF6;         /* Lila Sekundär */
+  --text-light: #FFFFFF;
+  --accent-primary: #8B5CF6;         /* Lila */
+  --accent-secondary: #6366F1;       /* Indigo */
+  --border-color: #E2E8F0;           /* Grauer Border */
+}
+
+/* Tech Hell - Basis */
+.theme-tech-light,
+.theme-tech-light .dark {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
+   SIDEBAR - Weiß mit Lila Akzenten
+   ========================================== */
+.theme-tech-light .sidebar-nav {
+  background: #FFFFFF !important;
+  border-right: 1px solid #E2E8F0 !important;
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .sidebar-nav * {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .sidebar-nav .text-gray-400,
+.theme-tech-light .sidebar-nav .text-gray-500 {
+  color: #8B5CF6 !important;
+}
+
+.theme-tech-light .sidebar-header {
+  background: #F8FAFC !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.theme-tech-light .sidebar-footer {
+  background: #F8FAFC !important;
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+.theme-tech-light .sidebar-footer * {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .sidebar-footer .text-purple-400,
+.theme-tech-light .sidebar-footer .text-fleet-orange-400 {
+  color: #8B5CF6 !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-tech-light .sidebar-footer .text-green-400,
+.theme-tech-light .sidebar-footer .bg-green-400 {
+  color: #22C55E !important;
+  background-color: #22C55E !important;
+}
+
+.theme-tech-light .sidebar-footer .text-red-400,
+.theme-tech-light .sidebar-footer .bg-red-400 {
+  color: #EF4444 !important;
+  background-color: #EF4444 !important;
+}
+
+.theme-tech-light .sidebar-footer button.hover\:text-red-400:hover {
+  color: #EF4444 !important;
+}
+
+.theme-tech-light .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Sidebar Hover */
+.theme-tech-light .sidebar-nav .hover\:bg-gray-800\/80:hover,
+.theme-tech-light .sidebar-nav [class*="hover:bg-"]:hover {
+  background: #F1F5F9 !important;
+}
+
+/* Sidebar Buttons - Lila Gradient */
+.theme-tech-light .sidebar-nav button[class*="from-purple"],
+.theme-tech-light .sidebar-nav button[class*="from-fleet-orange"],
+.theme-tech-light .sidebar-nav [class*="bg-gradient"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .sidebar-nav button[class*="from-purple"] *,
+.theme-tech-light .sidebar-nav button[class*="from-fleet-orange"] *,
+.theme-tech-light .sidebar-nav [class*="bg-gradient"] * {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   TOPBAR - Weiß mit Lila Akzenten
+   ========================================== */
+.theme-tech-light .topbar-nav {
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.theme-tech-light .topbar-nav,
+.theme-tech-light .topbar-nav * {
+  color: #6366F1 !important;
+}
+
+/* Fleet Navigator Logo - Lila Gradient */
+.theme-tech-light .topbar-nav h1 {
+  background: linear-gradient(to right, #8B5CF6, #6366F1) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* TopBar Buttons/Tiles */
+.theme-tech-light .topbar-nav button[class*="rounded-lg"],
+.theme-tech-light .topbar-nav div[class*="rounded-lg"] {
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.theme-tech-light .topbar-nav button[class*="rounded-lg"]:hover {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  border-color: #8B5CF6 !important;
+}
+
+.theme-tech-light .topbar-nav button[class*="rounded-lg"]:hover * {
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .topbar-nav button[class*="rounded-lg"] svg,
+.theme-tech-light .topbar-nav div[class*="rounded-lg"] svg {
+  color: #8B5CF6 !important;
+}
+
+/* ==========================================
+   HAUPTBEREICH - Helles Grau
+   ========================================== */
+.theme-tech-light .bg-gray-50,
+.theme-tech-light .dark\:bg-gray-900,
+.theme-tech-light .bg-gradient-to-b,
+.theme-tech-light [class*="from-gray-50"],
+.theme-tech-light [class*="from-gray-900"],
+.theme-tech-light [class*="to-gray-100"],
+.theme-tech-light [class*="to-gray-950"] {
+  background: #F8FAFC !important;
+  background-image: none !important;
+}
+
+.theme-tech-light .flex-1.flex.flex-col.overflow-hidden,
+.theme-tech-light .flex.flex-col.h-full.overflow-hidden {
+  background: #F8FAFC !important;
+}
+
+/* ==========================================
+   KARTEN & PANELS
+   ========================================== */
+.theme-tech-light .bg-gray-800,
+.theme-tech-light .bg-gray-900,
+.theme-tech-light .dark\:bg-gray-800,
+.theme-tech-light .dark\:bg-gray-900,
+.theme-tech-light .rounded-xl,
+.theme-tech-light .rounded-2xl {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* ==========================================
+   TEXT FARBEN - Indigo/Lila konsistent
+   ========================================== */
+.theme-tech-light .text-white,
+.theme-tech-light .dark\:text-white {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .text-gray-400,
+.theme-tech-light .text-gray-500,
+.theme-tech-light .dark\:text-gray-400,
+.theme-tech-light .dark\:text-gray-500 {
+  color: #8B5CF6 !important;
+}
+
+/* Untertitel "Wie kann ich dir heute helfen?" */
+.theme-tech-light p.text-gray-500,
+.theme-tech-light p.text-gray-400,
+.theme-tech-light .text-lg.text-gray-500 {
+  color: #8B5CF6 !important;
+}
+
+.theme-tech-light .text-purple-400,
+.theme-tech-light .text-purple-500,
+.theme-tech-light [class*="text-purple-"],
+.theme-tech-light [class*="text-indigo-"] {
+  color: #8B5CF6 !important;
+}
+
+.theme-tech-light .text-fleet-orange,
+.theme-tech-light .text-amber-400 {
+  color: #8B5CF6 !important;
+}
+
+/* ==========================================
+   BEGRÜSSUNGSTEXT - Lila Gradient
+   ========================================== */
+.theme-tech-light .greeting-text,
+.theme-tech-light h2[class*="bg-gradient"],
+.theme-tech-light [class*="from-fleet-orange"][class*="bg-clip-text"],
+.theme-tech-light [class*="bg-clip-text"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* ==========================================
+   INPUT FELDER
+   ========================================== */
+.theme-tech-light input,
+.theme-tech-light select {
+  background-color: #FFFFFF !important;
+  border: 2px solid #E2E8F0 !important;
+  color: #6366F1 !important;
+}
+
+.theme-tech-light input:focus,
+.theme-tech-light select:focus {
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* ==========================================
+   SCROLLBAR - Lila
+   ========================================== */
+.theme-tech-light ::-webkit-scrollbar-thumb {
+  background: #8B5CF6 !important;
+}
+
+.theme-tech-light ::-webkit-scrollbar-thumb:hover {
+  background: #7C3AED !important;
+}
+
+.theme-tech-light ::-webkit-scrollbar-track {
+  background: #F8FAFC !important;
+}
+
+/* ==========================================
+   CHAT NACHRICHTEN
+   ========================================== */
+.theme-tech-light .message-user {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3) !important;
+}
+
+.theme-tech-light .message-assistant {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #6366F1 !important;
+  border-radius: 1rem !important;
+}
+
+/* ==========================================
+   INPUT TILE - Weiß mit Lila Akzenten
+   ========================================== */
+.theme-tech-light .input-tile {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.theme-tech-light .input-tile-button {
+  background: #F1F5F9 !important;
+  color: #6366F1 !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+.theme-tech-light .input-tile-button:hover {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #8B5CF6 !important;
+}
+
+.theme-tech-light .input-tile-button svg {
+  color: #8B5CF6 !important;
+}
+
+.theme-tech-light .input-tile-button:hover svg {
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .input-tile-textarea {
+  background: transparent !important;
+  border: none !important;
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .input-tile-textarea::placeholder {
+  color: #8B5CF6 !important;
+  opacity: 0.7 !important;
+}
+
+.theme-tech-light .input-tile-textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.theme-tech-light .input-tile-send {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .input-tile-send:hover {
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%) !important;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+.theme-tech-light .input-tile-send:disabled {
+  background: #E2E8F0 !important;
+  opacity: 0.5 !important;
+}
+
+.theme-tech-light .input-tile-send svg {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   ANWALT HELL - Style wie rechtsanwaltatlas.com
+   Klassisch-Professionell mit Serif-Schriften
+   ========================================== */
+.theme-lawyer-light {
+  /* Navy Blue Farbpalette für Anwälte - ECHTES NAVY BLUE (nicht fast-schwarz!) */
+  --fleet-orange: #1E4D7B;    /* Klassisches Navy Blue */
+  --fleet-orange-dark: #153A5C;
+  --fleet-orange-light: #2C6AA0;
+
+  /* Theme Farben - WEISS mit Navy Blue Schrift */
+  --bg-primary: #FFFFFF;      /* Weißer Hintergrund */
+  --bg-secondary: #FFFFFF;    /* Weiß für Karten */
+  --bg-tertiary: #F5F5F5;     /* Leichtes Grau für Kontrast */
+  --bg-dark: #1E4D7B;         /* Navy für Sidebar */
+  --text-primary: #1E4D7B;    /* Echtes Navy Blue Text - DEUTLICH ERKENNBAR! */
+  --text-secondary: #2C6AA0;  /* Helleres Navy */
+  --text-light: #FFFFFF;
+  --accent-primary: #1E4D7B;  /* Navy Blue */
+  --accent-secondary: #2C6AA0;
+  --border-color: #E0E0E0;
+}
+
+/* Lawyer Theme - Schriften */
+.theme-lawyer-light {
+  font-family: 'Lora', Georgia, serif !important;
+  font-weight: 400;
+}
+
+.theme-lawyer-light h1,
+.theme-lawyer-light h2,
+.theme-lawyer-light h3,
+.theme-lawyer-light h4,
+.theme-lawyer-light h5,
+.theme-lawyer-light h6,
+.theme-lawyer-light .font-bold,
+.theme-lawyer-light .font-semibold,
+.theme-lawyer-light .font-medium {
+  font-family: 'Merriweather', Georgia, serif !important;
+  font-weight: 500;
+}
+
+/* Lawyer Theme - Basis */
+.theme-lawyer-light,
+.theme-lawyer-light .dark {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
+   SIDEBAR - WEISS wie rechtsanwaltatlas.com
+   ========================================== */
+.theme-lawyer-light .sidebar-nav {
+  background: #FFFFFF !important;
+  border-right: 1px solid #DEE2E6 !important;
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .sidebar-nav * {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .sidebar-nav .text-gray-400,
+.theme-lawyer-light .sidebar-nav .text-gray-500 {
+  color: #2C6AA0 !important;
+}
+
+/* Sidebar Header */
+.theme-lawyer-light .sidebar-nav .bg-gray-900\/50,
+.theme-lawyer-light .sidebar-nav .border-b {
+  background: #F8F9FA !important;
+  border-color: #DEE2E6 !important;
+}
+
+/* Sidebar Hover */
+.theme-lawyer-light .sidebar-nav .hover\:bg-gray-800\/80:hover,
+.theme-lawyer-light .sidebar-nav [class*="hover:bg-"]:hover {
+  background: #E9ECEF !important;
+}
+
+/* Sidebar Buttons - Navy Blue */
+.theme-lawyer-light .sidebar-nav button[class*="from-purple"],
+.theme-lawyer-light .sidebar-nav button[class*="from-fleet-orange"],
+.theme-lawyer-light .sidebar-nav [class*="bg-gradient"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .sidebar-nav button[class*="from-purple"] *,
+.theme-lawyer-light .sidebar-nav button[class*="from-fleet-orange"] *,
+.theme-lawyer-light .sidebar-nav [class*="bg-gradient"] * {
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .sidebar-nav button:hover {
+  background: #2C6AA0 !important;
+}
+
+/* Sidebar Border */
+.theme-lawyer-light .sidebar-nav .border-gray-700\/50 {
+  border-color: #DEE2E6 !important;
+}
+
+/* ==========================================
+   TOPBAR - Navy Blue Header
+   ========================================== */
+.theme-lawyer-light .topbar-nav {
+  background: #1E4D7B !important;
+  border-bottom: none !important;
+}
+
+.theme-lawyer-light .topbar-nav,
+.theme-lawyer-light .topbar-nav * {
+  color: #FFFFFF !important;
+}
+
+/* Fleet Navigator Logo auf dunklem Header - weiß */
+.theme-lawyer-light .topbar-nav h1 {
+  background: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* ==========================================
+   SIDEBAR HEADER - WEISS (Projekt/Chat Buttons)
+   ========================================== */
+.theme-lawyer-light .sidebar-header {
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #DEE2E6 !important;
+}
+
+/* ==========================================
+   SIDEBAR FOOTER - Schlicht passend zum transparenten Style
+   ========================================== */
+.theme-lawyer-light .sidebar-footer {
+  background: #F8F9FA !important;
+  border-top: 1px solid #DEE2E6 !important;
+  padding: 16px !important;
+  padding-bottom: 20px !important;
+}
+
+/* Sidebar Footer Text - Navy Blue auf hellem Hintergrund */
+.theme-lawyer-light .sidebar-footer,
+.theme-lawyer-light .sidebar-footer * {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .sidebar-footer .text-gray-400,
+.theme-lawyer-light .sidebar-footer .text-gray-500 {
+  color: #2C6AA0 !important;
+}
+
+/* Sidebar Footer Zahlen - Navy Blue für Kontrast */
+.theme-lawyer-light .sidebar-footer .text-purple-400,
+.theme-lawyer-light .sidebar-footer .text-fleet-orange-400 {
+  color: #1E4D7B !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-lawyer-light .sidebar-footer .text-green-400,
+.theme-lawyer-light .sidebar-footer .bg-green-400 {
+  color: #22C55E !important;
+  background-color: #22C55E !important;
+}
+
+.theme-lawyer-light .sidebar-footer .text-red-400,
+.theme-lawyer-light .sidebar-footer .bg-red-400 {
+  color: #EF4444 !important;
+  background-color: #EF4444 !important;
+}
+
+.theme-lawyer-light .sidebar-footer button.hover\:text-red-400:hover {
+  color: #EF4444 !important;
+}
+
+.theme-lawyer-light .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* TopBar Info-Elemente - Anthrazit (konservativ) */
+.theme-lawyer-light .topbar-nav [class*="bg-gradient"],
+.theme-lawyer-light .topbar-nav [class*="from-green-"],
+.theme-lawyer-light .topbar-nav [class*="to-green-"],
+.theme-lawyer-light .topbar-nav [class*="bg-green-"],
+.theme-lawyer-light .topbar-nav [class*="from-purple-"],
+.theme-lawyer-light .topbar-nav [class*="to-purple-"],
+.theme-lawyer-light .topbar-nav [class*="bg-purple-"],
+.theme-lawyer-light .topbar-nav [class*="from-indigo-"],
+.theme-lawyer-light .topbar-nav [class*="to-indigo-"],
+.theme-lawyer-light .topbar-nav [class*="from-blue-"],
+.theme-lawyer-light .topbar-nav [class*="to-blue-"],
+.theme-lawyer-light .topbar-nav [class*="from-gray-"],
+.theme-lawyer-light .topbar-nav [class*="to-gray-"],
+.theme-lawyer-light .topbar-nav [class*="from-fleet-orange"],
+.theme-lawyer-light .topbar-nav [class*="to-fleet-orange"],
+.theme-lawyer-light .topbar-nav [class*="from-orange-"],
+.theme-lawyer-light .topbar-nav [class*="to-orange-"],
+.theme-lawyer-light .topbar-nav [class*="from-amber-"],
+.theme-lawyer-light .topbar-nav [class*="to-amber-"],
+.theme-lawyer-light .topbar-nav .bg-fleet-orange-500,
+.theme-lawyer-light .topbar-nav .bg-fleet-orange-600 {
+  background: #1E4D7B !important;
+  border: 1px solid #2C6AA0 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .topbar-nav [class*="bg-gradient"] *,
+.theme-lawyer-light .topbar-nav [class*="from-green-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-purple-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-indigo-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-blue-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-gray-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-fleet-orange"] *,
+.theme-lawyer-light .topbar-nav [class*="from-orange-"] *,
+.theme-lawyer-light .topbar-nav [class*="from-amber-"] * {
+  color: #FFFFFF !important;
+}
+
+/* TopBar Icons auch weiß */
+.theme-lawyer-light .topbar-nav svg {
+  color: #FFFFFF !important;
+}
+
+/* Sidebar Buttons - Navy Blue */
+.theme-lawyer-light .sidebar-nav [class*="from-purple-"],
+.theme-lawyer-light .sidebar-nav [class*="from-fleet-orange"] {
+  background: #1E4D7B !important;
+  border: none !important;
+}
+
+.theme-lawyer-light .sidebar-nav [class*="from-purple-"] *,
+.theme-lawyer-light .sidebar-nav [class*="from-fleet-orange"] * {
+  color: #FFFFFF !important;
+}
+
+/* Senden Button und alle Aktions-Buttons - Navy Blue */
+.theme-lawyer-light .bg-fleet-orange-500,
+.theme-lawyer-light .bg-fleet-orange-600 {
+  background: #1E4D7B !important;
+}
+
+/* Alle Gradient-Buttons auf Navy Blue */
+.theme-lawyer-light [class*="from-green-"],
+.theme-lawyer-light [class*="from-purple-"],
+.theme-lawyer-light [class*="from-fleet-orange"],
+.theme-lawyer-light [class*="bg-gradient"] {
+  background: #1E4D7B !important;
+  background-image: none !important;
+}
+
+/* Hover für Buttons */
+.theme-lawyer-light button[class*="bg-"]:hover {
+  filter: brightness(1.1);
+}
+
+/* Fleet Navigator Logo - Navy Blue */
+.theme-lawyer-light h1.bg-gradient-to-r,
+.theme-lawyer-light .bg-gradient-to-r.from-fleet-orange-400 {
+  background: linear-gradient(to right, #1E4D7B, #2C6AA0) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* ==========================================
+   HAUPTBEREICH - WEISS
+   ========================================== */
+.theme-lawyer-light .bg-gray-50,
+.theme-lawyer-light .dark\:bg-gray-900,
+.theme-lawyer-light .bg-gradient-to-b,
+.theme-lawyer-light [class*="from-gray-50"],
+.theme-lawyer-light [class*="from-gray-900"],
+.theme-lawyer-light [class*="to-gray-100"],
+.theme-lawyer-light [class*="to-gray-950"] {
+  background: #FFFFFF !important;
+  background-image: none !important;
+}
+
+.theme-lawyer-light .flex-1.flex.flex-col.overflow-hidden,
+.theme-lawyer-light .flex.flex-col.h-full.overflow-hidden {
+  background: #FFFFFF !important;
+}
+
+/* ==========================================
+   KARTEN & PANELS - Weiß mit Schatten
+   ========================================== */
+.theme-lawyer-light .bg-gray-800,
+.theme-lawyer-light .bg-gray-900,
+.theme-lawyer-light .dark\:bg-gray-800,
+.theme-lawyer-light .dark\:bg-gray-900,
+.theme-lawyer-light .rounded-xl,
+.theme-lawyer-light .rounded-2xl {
+  background-color: #FFFFFF !important;
+  border: 1px solid #DEE2E6 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
+}
+
+/* ==========================================
+   TEXT FARBEN
+   ========================================== */
+.theme-lawyer-light .text-white,
+.theme-lawyer-light .dark\:text-white {
+  color: var(--text-primary) !important;
+}
+
+.theme-lawyer-light .text-gray-400,
+.theme-lawyer-light .text-gray-500,
+.theme-lawyer-light .dark\:text-gray-400,
+.theme-lawyer-light .dark\:text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.theme-lawyer-light .text-purple-400,
+.theme-lawyer-light .text-purple-500,
+.theme-lawyer-light .text-purple-600,
+.theme-lawyer-light [class*="text-purple-"],
+.theme-lawyer-light [class*="text-indigo-"] {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .text-fleet-orange,
+.theme-lawyer-light .text-amber-400,
+.theme-lawyer-light .text-amber-500 {
+  color: #1E4D7B !important;
+}
+
+/* ==========================================
+   INPUT FELDER
+   ========================================== */
+.theme-lawyer-light input,
+.theme-lawyer-light textarea,
+.theme-lawyer-light select {
+  background-color: #FFFFFF !important;
+  border: 2px solid #DEE2E6 !important;
+  color: var(--text-primary) !important;
+  font-family: 'Lora', Georgia, serif !important;
+}
+
+.theme-lawyer-light input:focus,
+.theme-lawyer-light textarea:focus,
+.theme-lawyer-light select:focus {
+  border-color: #1E4D7B !important;
+  box-shadow: 0 0 0 3px rgba(30, 77, 123, 0.15) !important;
+}
+
+/* ==========================================
+   BEGRÜSSUNGSTEXT - Navy Blue auf weiß
+   ========================================== */
+.theme-lawyer-light .greeting-text,
+.theme-lawyer-light h2[class*="bg-gradient"],
+.theme-lawyer-light [class*="from-fleet-orange"][class*="bg-clip-text"],
+.theme-lawyer-light [class*="bg-clip-text"] {
+  background: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: #1E4D7B !important;
+  color: #1E4D7B !important;
+}
+
+/* Untertitel "Wie kann ich dir heute helfen?" - Navy Blue */
+.theme-lawyer-light p.text-gray-500,
+.theme-lawyer-light p.text-gray-400,
+.theme-lawyer-light .text-lg.text-gray-500 {
+  color: #2C6AA0 !important;
+}
+
+/* ==========================================
+   BUTTONS - Navy Blue
+   ========================================== */
+.theme-lawyer-light .btn-primary,
+.theme-lawyer-light button[class*="bg-gradient"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  font-family: 'Merriweather', Georgia, serif !important;
+}
+
+.theme-lawyer-light .btn-primary:hover {
+  background: #2C6AA0 !important;
+}
+
+/* ==========================================
+   SCROLLBAR - Navy Blue
+   ========================================== */
+.theme-lawyer-light ::-webkit-scrollbar-thumb {
+  background: #1E4D7B !important;
+  border-radius: 4px;
+}
+
+.theme-lawyer-light ::-webkit-scrollbar-thumb:hover {
+  background: #2C6AA0 !important;
+}
+
+.theme-lawyer-light ::-webkit-scrollbar-track {
+  background: #F5F5F5 !important;
+}
+
+/* ==========================================
+   CHAT NACHRICHTEN
+   ========================================== */
+.theme-lawyer-light .message-user {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .message-assistant {
+  background-color: #FFFFFF !important;
+  border: 1px solid #1E4D7B !important;
+  color: #0D2840 !important;
+}
+
+/* Prose/Markdown Inhalte in Assistenten-Nachricht - ALLE Text-Elemente dunkel */
+.theme-lawyer-light .message-assistant .prose,
+.theme-lawyer-light .message-assistant .prose *,
+.theme-lawyer-light .message-assistant .message-content,
+.theme-lawyer-light .message-assistant .message-content * {
+  color: #0D2840 !important;
+}
+
+/* Paragraphen explizit */
+.theme-lawyer-light .message-assistant p,
+.theme-lawyer-light .message-assistant .prose p {
+  color: #0D2840 !important;
+}
+
+/* Überschriften */
+.theme-lawyer-light .message-assistant h1,
+.theme-lawyer-light .message-assistant h2,
+.theme-lawyer-light .message-assistant h3,
+.theme-lawyer-light .message-assistant h4,
+.theme-lawyer-light .message-assistant .prose h1,
+.theme-lawyer-light .message-assistant .prose h2,
+.theme-lawyer-light .message-assistant .prose h3,
+.theme-lawyer-light .message-assistant .prose h4 {
+  color: #1E4D7B !important;
+}
+
+/* Listen */
+.theme-lawyer-light .message-assistant ul,
+.theme-lawyer-light .message-assistant ol,
+.theme-lawyer-light .message-assistant li,
+.theme-lawyer-light .message-assistant .prose ul,
+.theme-lawyer-light .message-assistant .prose ol,
+.theme-lawyer-light .message-assistant .prose li {
+  color: #0D2840 !important;
+}
+
+/* Code-Blöcke in Assistenten-Nachricht */
+.theme-lawyer-light .message-assistant pre,
+.theme-lawyer-light .message-assistant code,
+.theme-lawyer-light .message-assistant .prose pre,
+.theme-lawyer-light .message-assistant .prose code {
+  background: #F0F4F8 !important;
+  color: #1E4D7B !important;
+}
+
+/* Links in Assistenten-Nachricht */
+.theme-lawyer-light .message-assistant a,
+.theme-lawyer-light .message-assistant .prose a {
+  color: #1E4D7B !important;
+  text-decoration: underline !important;
+}
+
+/* Strong/Bold Text */
+.theme-lawyer-light .message-assistant strong,
+.theme-lawyer-light .message-assistant b,
+.theme-lawyer-light .message-assistant .prose strong {
+  color: #0D2840 !important;
+}
+
+/* Quellen-Box speziell - die hat auch hellen Text */
+.theme-lawyer-light .message-assistant .bg-orange-50,
+.theme-lawyer-light .message-assistant [class*="bg-orange"],
+.theme-lawyer-light .message-assistant [class*="sources"] {
+  background: #F0F4F8 !important;
+  border-color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .message-assistant .bg-orange-50 *,
+.theme-lawyer-light .message-assistant [class*="sources"] * {
+  color: #1E4D7B !important;
+}
+
+/* ==========================================
+   CHAT INPUT - Transparent für ALLE Themes
+   Das Tile "schwebt" über dem Inhalt
+   ========================================== */
+
+/* Glassmorphism Backdrop transparent für ALLE Themes */
+.glassmorphism-backdrop {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: none !important;
+}
+
+/* Message Input Container transparent für ALLE Themes */
+.message-input-container {
+  background: transparent !important;
+}
+
+/* ==========================================
+   ANWALT HELL - Navy Blue Tile
+   ========================================== */
+.theme-lawyer-light .input-tile {
+  background: #1E4D7B !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 16px rgba(30, 77, 123, 0.4) !important;
+}
+
+.theme-lawyer-light .input-tile-button {
+  background: #2C6AA0 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #3B82C0 !important;
+}
+
+.theme-lawyer-light .input-tile-button:hover {
+  background: #3B82C0 !important;
+}
+
+.theme-lawyer-light .input-tile-button svg {
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .input-tile-textarea {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.75rem !important;
+  color: #FFFFFF !important;
+  padding: 1rem 1.25rem !important;
+  margin: 0.5rem !important;
+}
+
+.theme-lawyer-light .input-tile-textarea::placeholder {
+  color: #8BA4C4 !important;
+}
+
+.theme-lawyer-light .input-tile-textarea:focus {
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-lawyer-light .input-tile-send {
+  background: #3B82C0 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .input-tile-send:hover {
+  background: #4A9BD4 !important;
+}
+
+.theme-lawyer-light .input-tile-send:disabled {
+  background: #2C6AA0 !important;
+  opacity: 0.5 !important;
+}
+
+.theme-lawyer-light .input-tile-send svg {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   ANWALT HELL - MODALS (Professioneller Kontrast)
+   ========================================== */
+
+/* Modal Hintergrund */
+.theme-lawyer-light .fixed.inset-0.bg-black\/70 {
+  background: rgba(30, 77, 123, 0.85) !important;
+}
+
+/* Modal Container - Weißer Hintergrund mit Navy Akzenten */
+.theme-lawyer-light .bg-white.dark\:bg-gray-800.rounded-2xl,
+.theme-lawyer-light [class*="rounded-2xl"][class*="shadow-2xl"] {
+  background: #FFFFFF !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+/* Modal Header - Navy Blue Gradient */
+.theme-lawyer-light [class*="from-blue-500"][class*="to-blue-600"],
+.theme-lawyer-light [class*="from-blue-600"][class*="to-blue-700"],
+.theme-lawyer-light .bg-gradient-to-r[class*="blue"] {
+  background: linear-gradient(to right, #1E4D7B, #2C6AA0) !important;
+}
+
+/* Modal Header Text - Weiß */
+.theme-lawyer-light [class*="from-blue-500"] h2,
+.theme-lawyer-light [class*="from-blue-500"] p,
+.theme-lawyer-light [class*="from-blue-500"] .text-white,
+.theme-lawyer-light [class*="from-blue-500"] .text-blue-100 {
+  color: #FFFFFF !important;
+}
+
+/* Progress Prozent - DUNKEL Navy auf weiß */
+.theme-lawyer-light .text-6xl.font-bold.text-gray-900,
+.theme-lawyer-light .text-6xl.font-bold {
+  color: #1E4D7B !important;
+}
+
+/* Download Size Text - Navy Blue */
+.theme-lawyer-light .text-lg.text-gray-600 {
+  color: #2C6AA0 !important;
+}
+
+/* Progress Bar Container */
+.theme-lawyer-light .bg-gray-200.dark\:bg-gray-700.rounded-full {
+  background: #E8EEF4 !important;
+  border: 1px solid #C5D5E8 !important;
+}
+
+/* Progress Bar Fill - Navy Blue Gradient */
+.theme-lawyer-light [class*="from-blue-500"][class*="to-blue-600"].h-6,
+.theme-lawyer-light .bg-gradient-to-r.from-blue-500 {
+  background: linear-gradient(to right, #1E4D7B, #2C6AA0) !important;
+}
+
+/* Speed & Time Boxes - Navy Blue Styling */
+.theme-lawyer-light .bg-blue-50,
+.theme-lawyer-light .dark\:bg-blue-900\/20 {
+  background: #E8F0F8 !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+.theme-lawyer-light .bg-purple-50,
+.theme-lawyer-light .dark\:bg-purple-900\/20 {
+  background: #E8F0F8 !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+/* Speed/Time Labels - DUNKEL Navy */
+.theme-lawyer-light .text-sm.text-blue-600,
+.theme-lawyer-light .text-sm.text-purple-600,
+.theme-lawyer-light .dark\:text-blue-400,
+.theme-lawyer-light .dark\:text-purple-400 {
+  color: #2C6AA0 !important;
+  font-weight: 600 !important;
+}
+
+/* Speed/Time Values - SEHR DUNKEL Navy für maximalen Kontrast */
+.theme-lawyer-light .text-2xl.font-bold.text-blue-900,
+.theme-lawyer-light .text-2xl.font-bold.text-purple-900,
+.theme-lawyer-light .dark\:text-blue-100,
+.theme-lawyer-light .dark\:text-purple-100 {
+  color: #0D2840 !important;
+  font-weight: 700 !important;
+}
+
+/* Info Box (Gelbe Warnung) - Navy Blue statt Gelb! */
+.theme-lawyer-light .bg-yellow-50,
+.theme-lawyer-light .dark\:bg-yellow-900\/20 {
+  background: #E8F0F8 !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+.theme-lawyer-light .border-yellow-200,
+.theme-lawyer-light .dark\:border-yellow-800 {
+  border-color: #1E4D7B !important;
+}
+
+/* Info Box Icon - Navy Blue statt Gelb */
+.theme-lawyer-light .text-yellow-600,
+.theme-lawyer-light .dark\:text-yellow-400 {
+  color: #1E4D7B !important;
+}
+
+/* Info Box Title - DUNKEL Navy */
+.theme-lawyer-light .font-semibold.text-yellow-900,
+.theme-lawyer-light .dark\:text-yellow-100 {
+  color: #0D2840 !important;
+  font-weight: 700 !important;
+}
+
+/* Info Box Text - Mittleres Navy */
+.theme-lawyer-light .text-sm.text-yellow-800,
+.theme-lawyer-light .dark\:text-yellow-200 {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .text-sm.text-yellow-800 strong {
+  color: #0D2840 !important;
+  font-weight: 700 !important;
+}
+
+/* Status Messages Box */
+.theme-lawyer-light .bg-gray-50.dark\:bg-gray-900\/50 {
+  background: #F5F8FA !important;
+  border: 1px solid #C5D5E8 !important;
+}
+
+/* Status Messages Text (Monospace) - DUNKEL für Lesbarkeit */
+.theme-lawyer-light .text-sm.text-gray-600.dark\:text-gray-400.font-mono {
+  color: #1E4D7B !important;
+  font-weight: 500 !important;
+}
+
+/* Modal Footer */
+.theme-lawyer-light .bg-gray-50.dark\:bg-gray-900\/50.px-8.py-5 {
+  background: #F5F8FA !important;
+  border-top: 2px solid #E0E8F0 !important;
+}
+
+/* Footer Info Text */
+.theme-lawyer-light .text-sm.text-gray-500.dark\:text-gray-400 {
+  color: #2C6AA0 !important;
+}
+
+/* Abbrechen Button - ROT für Sichtbarkeit */
+.theme-lawyer-light .bg-red-100,
+.theme-lawyer-light .dark\:bg-red-900\/30 {
+  background: #FEE2E2 !important;
+  border: 2px solid #DC2626 !important;
+}
+
+.theme-lawyer-light .text-red-700,
+.theme-lawyer-light .dark\:text-red-300 {
+  color: #DC2626 !important;
+  font-weight: 600 !important;
+}
+
+.theme-lawyer-light .bg-red-100:hover,
+.theme-lawyer-light button[class*="bg-red"]:hover {
+  background: #FECACA !important;
+}
+
+/* ==========================================
+   ANWALT HELL - Alle Modals generisch
+   ========================================== */
+
+/* Modal Dialoge generell */
+.theme-lawyer-light [class*="modal"] .bg-white,
+.theme-lawyer-light [class*="Modal"] .bg-white {
+  background: #FFFFFF !important;
+}
+
+/* Alle blauen Hintergründe in Modals → Navy */
+.theme-lawyer-light [class*="bg-blue-"] {
+  background-color: #E8F0F8 !important;
+}
+
+.theme-lawyer-light [class*="border-blue-"] {
+  border-color: #1E4D7B !important;
+}
+
+/* Alle blauen Texte → Navy */
+.theme-lawyer-light [class*="text-blue-600"],
+.theme-lawyer-light [class*="text-blue-700"],
+.theme-lawyer-light [class*="text-blue-800"],
+.theme-lawyer-light [class*="text-blue-900"] {
+  color: #1E4D7B !important;
+}
+
+/* Alle lila Texte → Navy */
+.theme-lawyer-light [class*="text-purple-600"],
+.theme-lawyer-light [class*="text-purple-700"],
+.theme-lawyer-light [class*="text-purple-800"],
+.theme-lawyer-light [class*="text-purple-900"] {
+  color: #1E4D7B !important;
+}
+
+/* Alle gelben Hintergründe → Hellblau/Navy */
+.theme-lawyer-light [class*="bg-yellow-50"] {
+  background-color: #E8F0F8 !important;
+}
+
+.theme-lawyer-light [class*="border-yellow-"] {
+  border-color: #1E4D7B !important;
+}
+
+/* Alle gelben Texte → Navy */
+.theme-lawyer-light [class*="text-yellow-600"],
+.theme-lawyer-light [class*="text-yellow-700"],
+.theme-lawyer-light [class*="text-yellow-800"],
+.theme-lawyer-light [class*="text-yellow-900"] {
+  color: #1E4D7B !important;
+}
+
+/* Alle grünen Hintergründe → Navy-Hellblau */
+.theme-lawyer-light [class*="bg-green-50"] {
+  background-color: #E8F0F8 !important;
+}
+
+.theme-lawyer-light [class*="border-green-"] {
+  border-color: #1E4D7B !important;
+}
+
+/* Alle grünen Texte → Navy */
+.theme-lawyer-light [class*="text-green-600"],
+.theme-lawyer-light [class*="text-green-700"],
+.theme-lawyer-light [class*="text-green-800"],
+.theme-lawyer-light [class*="text-green-900"] {
+  color: #1E4D7B !important;
+}
+
+/* ==========================================
+   ANWALT HELL - ALLE MODALS (ModelManager, Settings, etc.)
+   KOMPLETTER FIX für Scroll + Sichtbarkeit
+   ========================================== */
+
+/* --- MODAL GRUNDSTRUKTUR --- */
+
+/* Modal Backdrop - Navy-getönt */
+.theme-lawyer-light .fixed.inset-0.bg-black\/60,
+.theme-lawyer-light .fixed.inset-0[class*="bg-black"] {
+  background: rgba(30, 77, 123, 0.6) !important;
+}
+
+/* Modal Card - Der weiße Kasten mit FIXER HÖHE */
+.theme-lawyer-light .fixed.inset-0 .rounded-2xl.shadow-2xl.flex.flex-col,
+.theme-lawyer-light .fixed.inset-0 .bg-white\/90.rounded-2xl,
+.theme-lawyer-light .fixed.inset-0 > .flex > .bg-white\/90,
+.theme-lawyer-light .fixed.inset-0 > .flex > div[class*="rounded-2xl"][class*="flex-col"] {
+  background: #FFFFFF !important;
+  height: 85vh !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+/* --- MODAL HEADER (flex-shrink: 0) --- */
+
+.theme-lawyer-light .fixed.inset-0 .rounded-2xl > div:first-child,
+.theme-lawyer-light .fixed.inset-0 [class*="from-purple-500\/10"],
+.theme-lawyer-light .fixed.inset-0 [class*="bg-gradient-to-r"][class*="border-b"] {
+  flex-shrink: 0 !important;
+  background: linear-gradient(to right, #E8F0F8, #F0F5FA) !important;
+  border-bottom: 2px solid #1E4D7B !important;
+}
+
+/* Header Titel */
+.theme-lawyer-light .fixed.inset-0 h2,
+.theme-lawyer-light .fixed.inset-0 .text-2xl {
+  color: #1E4D7B !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #1E4D7B !important;
+}
+
+/* --- CLOSE BUTTON (X) - MUSS SICHTBAR SEIN! --- */
+.theme-lawyer-light .fixed.inset-0 button.text-gray-400,
+.theme-lawyer-light .fixed.inset-0 button[class*="text-gray-400"],
+.theme-lawyer-light .fixed.inset-0 button.p-2.rounded-lg {
+  color: #1E4D7B !important;
+  background: #E8F0F8 !important;
+  border: 1px solid #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 button.text-gray-400:hover,
+.theme-lawyer-light .fixed.inset-0 button[class*="text-gray-400"]:hover,
+.theme-lawyer-light .fixed.inset-0 button.p-2.rounded-lg:hover {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+/* X-Icon im Close-Button */
+.theme-lawyer-light .fixed.inset-0 button.text-gray-400 svg,
+.theme-lawyer-light .fixed.inset-0 button.p-2.rounded-lg svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* --- TABS (flex-shrink: 0) --- */
+
+.theme-lawyer-light .fixed.inset-0 .border-b[class*="bg-gray"],
+.theme-lawyer-light .fixed.inset-0 [class*="border-b"][class*="border-gray"] {
+  flex-shrink: 0 !important;
+  background: #F8F9FA !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Tab Buttons */
+.theme-lawyer-light .fixed.inset-0 .border-b button {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .border-b button:hover {
+  background: #E8F0F8 !important;
+}
+
+/* Aktiver Tab */
+.theme-lawyer-light .fixed.inset-0 .border-b button[class*="text-purple"],
+.theme-lawyer-light .fixed.inset-0 .border-b button[class*="border-purple"] {
+  color: #1E4D7B !important;
+  border-bottom: 3px solid #1E4D7B !important;
+  font-weight: 600 !important;
+}
+
+/* --- SCROLL CONTAINER (flex: 1, overflow-y: auto) --- */
+
+/* Der flex-1.overflow-y-auto Container MUSS wachsen und scrollen */
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Scrollbar Styling - Navy Blue, BREIT und SICHTBAR */
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar {
+  width: 16px !important;
+  background: #D0DCE8 !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-track {
+  background: #D0DCE8 !important;
+  border-radius: 8px !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #1E4D7B !important;
+  border-radius: 8px !important;
+  border: 3px solid #D0DCE8 !important;
+  min-height: 50px !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #2C6AA0 !important;
+}
+
+/* Firefox Scrollbar */
+.theme-lawyer-light .fixed.inset-0 .flex-1.overflow-y-auto {
+  scrollbar-width: thick !important;
+  scrollbar-color: #1E4D7B #D0DCE8 !important;
+}
+
+/* --- MODEL CARDS --- */
+
+/* Model Cards - Korrekte Darstellung */
+.theme-lawyer-light .space-y-3 > div {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Downloaded Models Cards - Sichtbar mit Navy-Akzent */
+.theme-lawyer-light .bg-purple-50,
+.theme-lawyer-light .dark\:bg-purple-900\/20 {
+  background: #F0F5FA !important;
+  border: 1px solid #1E4D7B !important;
+}
+
+/* Model Card Text deutlich lesbar */
+.theme-lawyer-light .bg-purple-50 h3,
+.theme-lawyer-light .bg-purple-50 .text-lg {
+  color: #0D2840 !important;
+}
+
+.theme-lawyer-light .bg-purple-50 .text-sm,
+.theme-lawyer-light .bg-purple-50 .text-gray-600 {
+  color: #1E4D7B !important;
+}
+
+/* ==========================================
+   ANWALT HELL - Model Store Buttons (KONTRAST!)
+   ========================================== */
+
+/* Alle Action-Buttons in Model Cards - WEISS auf Navy */
+.theme-lawyer-light button[class*="from-purple"],
+.theme-lawyer-light button[class*="from-indigo"],
+.theme-lawyer-light button[class*="from-blue"],
+.theme-lawyer-light button[class*="from-green"],
+.theme-lawyer-light button[class*="from-fleet-orange"],
+.theme-lawyer-light button[class*="bg-gradient-to-r"] {
+  background: #1E4D7B !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 2px solid #0D2840 !important;
+  font-weight: 600 !important;
+}
+
+.theme-lawyer-light button[class*="from-purple"]:hover,
+.theme-lawyer-light button[class*="from-indigo"]:hover,
+.theme-lawyer-light button[class*="from-blue"]:hover,
+.theme-lawyer-light button[class*="from-green"]:hover,
+.theme-lawyer-light button[class*="from-fleet-orange"]:hover,
+.theme-lawyer-light button[class*="bg-gradient-to-r"]:hover {
+  background: #2C6AA0 !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Button Text IMMER weiß */
+.theme-lawyer-light button[class*="from-purple"] span,
+.theme-lawyer-light button[class*="from-indigo"] span,
+.theme-lawyer-light button[class*="from-blue"] span,
+.theme-lawyer-light button[class*="from-green"] span,
+.theme-lawyer-light button[class*="from-fleet-orange"] span,
+.theme-lawyer-light button[class*="bg-gradient-to-r"] span {
+  color: #FFFFFF !important;
+}
+
+/* Button Icons IMMER weiß */
+.theme-lawyer-light button[class*="from-purple"] svg,
+.theme-lawyer-light button[class*="from-indigo"] svg,
+.theme-lawyer-light button[class*="from-blue"] svg,
+.theme-lawyer-light button[class*="from-green"] svg,
+.theme-lawyer-light button[class*="from-fleet-orange"] svg,
+.theme-lawyer-light button[class*="bg-gradient-to-r"] svg {
+  color: #FFFFFF !important;
+}
+
+/* Download/Auswählen Buttons - Prominent Navy mit weißem Text */
+.theme-lawyer-light .min-w-\[200px\] button,
+.theme-lawyer-light .flex.flex-col.gap-2 button {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  border: 2px solid #0D2840 !important;
+}
+
+.theme-lawyer-light .min-w-\[200px\] button:hover,
+.theme-lawyer-light .flex.flex-col.gap-2 button:hover {
+  background: #2C6AA0 !important;
+}
+
+/* Konfigurieren Button - Helleres Navy */
+.theme-lawyer-light button[title="GGUF Model konfigurieren"],
+.theme-lawyer-light button[title="Konfigurieren"] {
+  background: #2C6AA0 !important;
+  color: #FFFFFF !important;
+}
+
+/* Auswählen Button - Dunkles Navy */
+.theme-lawyer-light button[title="Model auswählen"],
+.theme-lawyer-light button[title="Auswählen"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+/* "Neuer Experte" Button - Navy Blue mit weißer Schrift (startet Wizard) */
+.theme-lawyer-light .fixed.inset-0 .border-b button[class*="from-indigo"],
+.theme-lawyer-light .fixed.inset-0 .flex.items-center.justify-between button[class*="from-indigo"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  border: 2px solid #0D2840 !important;
+  box-shadow: 0 2px 4px rgba(30, 77, 123, 0.3) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .border-b button[class*="from-indigo"]:hover,
+.theme-lawyer-light .fixed.inset-0 .flex.items-center.justify-between button[class*="from-indigo"]:hover {
+  background: #2C6AA0 !important;
+  color: #FFFFFF !important;
+  border-color: #1E4D7B !important;
+  box-shadow: 0 4px 8px rgba(30, 77, 123, 0.4) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .border-b button[class*="from-indigo"] svg,
+.theme-lawyer-light .fixed.inset-0 .flex.items-center.justify-between button[class*="from-indigo"] svg {
+  color: #FFFFFF !important;
+}
+
+/* Bearbeiten Button - Gold/Amber für Anwalt */
+.theme-lawyer-light button[title="Bearbeiten"],
+.theme-lawyer-light button[class*="from-amber"],
+.theme-lawyer-light button[class*="from-orange"] {
+  background: #B8860B !important;
+  color: #FFFFFF !important;
+  border: 2px solid #8B6914 !important;
+}
+
+.theme-lawyer-light button[title="Bearbeiten"]:hover,
+.theme-lawyer-light button[class*="from-amber"]:hover,
+.theme-lawyer-light button[class*="from-orange"]:hover {
+  background: #DAA520 !important;
+}
+
+/* Löschen Button - Rot bleibt Rot */
+.theme-lawyer-light button[title="Löschen"],
+.theme-lawyer-light button.bg-red-500 {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #B91C1C !important;
+}
+
+.theme-lawyer-light button[title="Löschen"]:hover,
+.theme-lawyer-light button.bg-red-500:hover {
+  background: #EF4444 !important;
+}
+
+/* Model Store - Herunterladen Button besonders prominent */
+.theme-lawyer-light [class*="rounded-lg"] button[class*="rounded-xl"],
+.theme-lawyer-light .p-6 button[class*="shadow"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  border: 2px solid #0D2840 !important;
+  box-shadow: 0 2px 8px rgba(30, 77, 123, 0.3) !important;
+}
+
+/* Tags/Badges in Model Cards - Navy auf Hell */
+.theme-lawyer-light .px-2.py-1.rounded,
+.theme-lawyer-light .px-3.py-1.rounded-lg,
+.theme-lawyer-light [class*="rounded-full"][class*="text-xs"] {
+  background: #E8F0F8 !important;
+  color: #1E4D7B !important;
+  border: 1px solid #1E4D7B !important;
+}
+
+/* Standard Badge - Gold für Anwalt */
+.theme-lawyer-light .bg-fleet-orange-500.text-white.text-xs.rounded-full {
+  background: #B8860B !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   ANWALT HELL - Tabs & Navigation (KONTRAST!)
+   ========================================== */
+
+/* Main Tabs - Installierte/Verfügbare Modelle */
+.theme-lawyer-light .border-b button {
+  color: #1E4D7B !important;
+  font-weight: 500 !important;
+}
+
+.theme-lawyer-light .border-b button:hover {
+  color: #0D2840 !important;
+  background: rgba(30, 77, 123, 0.1) !important;
+}
+
+/* Aktiver Tab - Navy mit Unterstrich */
+.theme-lawyer-light .border-b button.text-fleet-orange-500,
+.theme-lawyer-light .border-b button[class*="text-fleet-orange"] {
+  color: #0D2840 !important;
+  font-weight: 700 !important;
+}
+
+/* Tab Unterstrich - Navy statt Orange */
+.theme-lawyer-light .border-b .h-0\.5.bg-gradient-to-r,
+.theme-lawyer-light .border-b [class*="from-fleet-orange"],
+.theme-lawyer-light .border-b .bg-fleet-orange-500,
+.theme-lawyer-light .absolute.bottom-0.h-0\.5 {
+  background: #1E4D7B !important;
+  background-image: none !important;
+}
+
+/* Sub-Tabs - Experten/Heruntergeladene/Eigene */
+.theme-lawyer-light .bg-gray-50\/30 button,
+.theme-lawyer-light .dark\:bg-gray-900\/30 button {
+  color: #2C6AA0 !important;
+}
+
+.theme-lawyer-light .bg-gray-50\/30 button:hover,
+.theme-lawyer-light .dark\:bg-gray-900\/30 button:hover {
+  color: #0D2840 !important;
+}
+
+/* Aktiver Sub-Tab */
+.theme-lawyer-light .bg-gray-50\/30 button.text-indigo-600,
+.theme-lawyer-light .bg-gray-50\/30 button[class*="text-indigo"] {
+  color: #0D2840 !important;
+  font-weight: 600 !important;
+}
+
+/* Sub-Tab Unterstrich */
+.theme-lawyer-light .bg-gray-50\/30 .h-0\.5.bg-indigo-500,
+.theme-lawyer-light .bg-gray-50\/30 .bg-blue-500 {
+  background: #1E4D7B !important;
+}
+
+/* Tab Counter Badges */
+.theme-lawyer-light .bg-indigo-100,
+.theme-lawyer-light .dark\:bg-indigo-900\/30 {
+  background: #E8F0F8 !important;
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .text-indigo-600,
+.theme-lawyer-light .dark\:text-indigo-400 {
+  color: #1E4D7B !important;
+}
+
+/* Filter Buttons - Alle/Coder/Vision/Allgemein */
+.theme-lawyer-light .flex.flex-wrap.gap-2 button {
+  background: #E8F0F8 !important;
+  color: #1E4D7B !important;
+  border: 1px solid #C5D5E8 !important;
+}
+
+.theme-lawyer-light .flex.flex-wrap.gap-2 button:hover {
+  background: #D0E0F0 !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Aktiver Filter */
+.theme-lawyer-light .flex.flex-wrap.gap-2 button.bg-fleet-orange-500,
+.theme-lawyer-light .flex.flex-wrap.gap-2 button[class*="from-fleet-orange"],
+.theme-lawyer-light .flex.flex-wrap.gap-2 button.text-white {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  border-color: #0D2840 !important;
+}
+
+/* Search Input */
+.theme-lawyer-light input[placeholder*="durchsuchen"],
+.theme-lawyer-light input[placeholder*="suchen"] {
+  background: #FFFFFF !important;
+  border: 2px solid #1E4D7B !important;
+  color: #0D2840 !important;
+}
+
+.theme-lawyer-light input[placeholder*="durchsuchen"]::placeholder,
+.theme-lawyer-light input[placeholder*="suchen"]::placeholder {
+  color: #6B8CAB !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - Navy Tiles
+   ========================================== */
+.theme-lawyer-dark .input-tile {
+  background: #1B263B !important;
+  border-radius: 1rem !important;
+  border: 1px solid #2E4A6B !important;
+  box-shadow: 0 4px 16px rgba(13, 27, 42, 0.5) !important;
+}
+
+.theme-lawyer-dark .input-tile-button {
+  background: #1E3A5F !important;
+  color: #F0F4F8 !important;
+  border: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .input-tile-button:hover {
+  background: #2E5077 !important;
+}
+
+.theme-lawyer-dark .input-tile-button svg {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .input-tile-textarea {
+  background: transparent !important;
+  border: none !important;
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .input-tile-textarea::placeholder {
+  color: #8BA4C4 !important;
+}
+
+.theme-lawyer-dark .input-tile-textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.theme-lawyer-dark .input-tile-send {
+  background: #2E5077 !important;
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .input-tile-send:hover {
+  background: #4A7098 !important;
+}
+
+.theme-lawyer-dark .input-tile-send:disabled {
+  background: #1E3A5F !important;
+  opacity: 0.5 !important;
+}
+
+.theme-lawyer-dark .input-tile-send svg {
+  color: #F0F4F8 !important;
+}
+
+/* ==========================================
+   TECH HELL - Weißes/Helles Tile mit Lila
+   ========================================== */
+.theme-tech-light .input-tile {
+  background: #FFFFFF !important;
+  border-radius: 1rem !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-tech-light .input-tile-button {
+  background: #F1F5F9 !important;
+  color: #1E293B !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+.theme-tech-light .input-tile-button:hover {
+  background: #E2E8F0 !important;
+}
+
+.theme-tech-light .input-tile-button svg {
+  color: #64748B !important;
+}
+
+.theme-tech-light .input-tile-textarea {
+  background: transparent !important;
+  border: none !important;
+  color: #1E293B !important;
+}
+
+.theme-tech-light .input-tile-textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.theme-tech-light .input-tile-textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.theme-tech-light .input-tile-send {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .input-tile-send:hover {
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%) !important;
+}
+
+.theme-tech-light .input-tile-send:disabled {
+  background: #E2E8F0 !important;
+  opacity: 0.5 !important;
+}
+
+.theme-tech-light .input-tile-send svg {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   TECH DUNKEL (Default) - Minimalistisch mit Grün/Blau
+   Basierend auf: #343A40 Grau, #28A745 Grün, #1E90FF Blau
+   ========================================== */
+.input-tile,
+.theme-slate-dark .input-tile {
+  background: #3D444B !important;
+  border-radius: 1rem !important;
+  border: 1px solid #495057 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.input-tile-button,
+.theme-slate-dark .input-tile-button {
+  background: #495057 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #5A6268 !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.input-tile-button:hover,
+.theme-slate-dark .input-tile-button:hover {
+  background: #1E90FF !important;
+  border-color: #1E90FF !important;
+}
+
+.input-tile-button svg,
+.theme-slate-dark .input-tile-button svg {
+  color: #ADB5BD !important;
+}
+
+.input-tile-button:hover svg,
+.theme-slate-dark .input-tile-button:hover svg {
+  color: #FFFFFF !important;
+}
+
+.input-tile-textarea,
+.theme-slate-dark .input-tile-textarea {
+  background: #495057 !important;
+  border: 1px solid #5A6268 !important;
+  color: #FFFFFF !important;
+  border-radius: 0.5rem !important;
+}
+
+.input-tile-textarea::placeholder,
+.theme-slate-dark .input-tile-textarea::placeholder {
+  color: #6C757D !important;
+}
+
+.input-tile-textarea:focus,
+.theme-slate-dark .input-tile-textarea:focus {
+  border-color: #28A745 !important;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3) !important;
+}
+
+.input-tile-send,
+.theme-slate-dark .input-tile-send {
+  background: #28A745 !important;
+  color: #FFFFFF !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.input-tile-send:hover,
+.theme-slate-dark .input-tile-send:hover {
+  background: #1E90FF !important;
+  transform: scale(1.05) !important;
+}
+
+.input-tile-send:disabled,
+.theme-slate-dark .input-tile-send:disabled {
+  background: #495057 !important;
+  opacity: 0.5 !important;
+}
+
+.input-tile-send svg,
+.theme-slate-dark .input-tile-send svg {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   ==========================================
+   ANWALT DUNKEL - Konservatives Navy Blue
+   Elegant, Seriös, Klassisch
+   ==========================================
+   ========================================== */
+.theme-lawyer-dark {
+  --fleet-orange: #2E5077;
+  --fleet-orange-dark: #1E3A5F;
+  --fleet-orange-light: #4A7098;
+
+  /* NAVY BLAU - Professionell & Seriös */
+  --bg-primary: #0D1B2A;         /* Tiefes Navy */
+  --bg-secondary: #1B263B;       /* Mittleres Navy */
+  --bg-tertiary: #1E3A5F;        /* Helleres Navy für Tiles */
+  --text-primary: #F0F4F8;       /* Leicht blaustichiges Weiß */
+  --text-secondary: #8BA4C4;     /* Gedämpftes Blaugrau */
+  --accent-primary: #4A7098;     /* Akzent Navy */
+  --accent-secondary: #2E5077;   /* Dunklerer Akzent */
+  --border-color: #2E4A6B;       /* Navy Border */
+}
+
+/* Anwalt Dunkel - Schriften */
+.theme-lawyer-dark {
+  font-family: 'Lora', Georgia, serif !important;
+  font-weight: 400;
+}
+
+.theme-lawyer-dark h1,
+.theme-lawyer-dark h2,
+.theme-lawyer-dark h3,
+.theme-lawyer-dark h4,
+.theme-lawyer-dark h5,
+.theme-lawyer-dark h6,
+.theme-lawyer-dark .font-bold,
+.theme-lawyer-dark .font-semibold,
+.theme-lawyer-dark .font-medium {
+  font-family: 'Merriweather', Georgia, serif !important;
+  font-weight: 500;
+}
+
+/* Anwalt Dunkel - Basis */
+.theme-lawyer-dark,
+.theme-lawyer-dark .dark {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - SIDEBAR
+   ========================================== */
+.theme-lawyer-dark .sidebar-nav {
+  background: #0D1B2A !important;
+  border-right: 1px solid #2E4A6B !important;
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .sidebar-nav * {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .sidebar-nav .text-gray-400,
+.theme-lawyer-dark .sidebar-nav .text-gray-500 {
+  color: #8BA4C4 !important;
+}
+
+.theme-lawyer-dark .sidebar-header {
+  background: #1B263B !important;
+  border-bottom: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .sidebar-footer {
+  background: #1B263B !important;
+  border-top: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .sidebar-footer * {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .sidebar-footer .text-purple-400,
+.theme-lawyer-dark .sidebar-footer .text-fleet-orange-400 {
+  color: #4A7098 !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-lawyer-dark .sidebar-footer .text-green-400,
+.theme-lawyer-dark .sidebar-footer .bg-green-400 {
+  color: #4ADE80 !important;
+  background-color: #4ADE80 !important;
+}
+
+.theme-lawyer-dark .sidebar-footer .text-red-400,
+.theme-lawyer-dark .sidebar-footer .bg-red-400 {
+  color: #F87171 !important;
+  background-color: #F87171 !important;
+}
+
+/* Logout-Button Hover-Effekt */
+.theme-lawyer-dark .sidebar-footer button:hover .text-red-400,
+.theme-lawyer-dark .sidebar-footer button.hover\:text-red-400:hover {
+  color: #F87171 !important;
+}
+
+.theme-lawyer-dark .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Sidebar Hover */
+.theme-lawyer-dark .sidebar-nav .hover\:bg-gray-800\/80:hover,
+.theme-lawyer-dark .sidebar-nav [class*="hover:bg-"]:hover {
+  background: #1E3A5F !important;
+}
+
+/* Sidebar Buttons - Navy */
+.theme-lawyer-dark .sidebar-nav button[class*="from-purple"],
+.theme-lawyer-dark .sidebar-nav button[class*="from-fleet-orange"],
+.theme-lawyer-dark .sidebar-nav [class*="bg-gradient"] {
+  background: #1E3A5F !important;
+  color: #F0F4F8 !important;
+  border: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .sidebar-nav button:hover {
+  background: #2E5077 !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - TOPBAR
+   ========================================== */
+.theme-lawyer-dark .topbar-nav {
+  background: #0D1B2A !important;
+  border-bottom: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .topbar-nav,
+.theme-lawyer-dark .topbar-nav * {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .topbar-nav h1 {
+  background: none !important;
+  color: #F0F4F8 !important;
+  -webkit-text-fill-color: #F0F4F8 !important;
+}
+
+/* TopBar Buttons - Navy */
+.theme-lawyer-dark .topbar-nav [class*="bg-gradient"],
+.theme-lawyer-dark .topbar-nav button[class*="from-"] {
+  background: #1E3A5F !important;
+  border: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark .topbar-nav button:hover {
+  background: #2E5077 !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - HAUPTBEREICH
+   ========================================== */
+.theme-lawyer-dark .bg-gray-50,
+.theme-lawyer-dark .dark\:bg-gray-900,
+.theme-lawyer-dark .bg-gradient-to-b,
+.theme-lawyer-dark [class*="from-gray-50"],
+.theme-lawyer-dark [class*="from-gray-900"],
+.theme-lawyer-dark [class*="to-gray-100"],
+.theme-lawyer-dark [class*="to-gray-950"] {
+  background: #0D1B2A !important;
+  background-image: none !important;
+}
+
+.theme-lawyer-dark .flex-1.flex.flex-col.overflow-hidden,
+.theme-lawyer-dark .flex.flex-col.h-full.overflow-hidden {
+  background: #0D1B2A !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - KARTEN & PANELS (Navy Tiles)
+   ========================================== */
+.theme-lawyer-dark .bg-gray-800,
+.theme-lawyer-dark .bg-gray-900,
+.theme-lawyer-dark .dark\:bg-gray-800,
+.theme-lawyer-dark .dark\:bg-gray-900,
+.theme-lawyer-dark .rounded-xl,
+.theme-lawyer-dark .rounded-2xl {
+  background-color: #1B263B !important;
+  border: 1px solid #2E4A6B !important;
+  box-shadow: 0 2px 8px rgba(13, 27, 42, 0.5) !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - TEXT
+   ========================================== */
+.theme-lawyer-dark .text-white,
+.theme-lawyer-dark .dark\:text-white {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .text-gray-400,
+.theme-lawyer-dark .text-gray-500,
+.theme-lawyer-dark .dark\:text-gray-400,
+.theme-lawyer-dark .dark\:text-gray-500 {
+  color: #F0F4F8 !important;
+}
+
+/* Begrüßungstext (Guten Morgen, etc.) - ALLES entfernen! */
+.theme-lawyer-dark .greeting-text,
+.theme-lawyer-dark h2[class*="bg-gradient"],
+.theme-lawyer-dark [class*="from-fleet-orange"][class*="bg-clip-text"],
+.theme-lawyer-dark h2.text-transparent,
+.theme-lawyer-dark .text-transparent,
+.theme-lawyer-dark h2[class*="text-transparent"],
+.theme-lawyer-dark [class*="bg-clip-text"] {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: #F0F4F8 !important;
+  color: #F0F4F8 !important;
+  border: none !important;
+  border-style: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  outline: none !important;
+  -webkit-text-stroke: 0px transparent !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  -webkit-text-decoration: none !important;
+  border-image: none !important;
+  filter: none !important;
+  paint-order: normal !important;
+}
+
+.theme-lawyer-dark .text-gray-800,
+.theme-lawyer-dark .text-gray-900 {
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .text-purple-400,
+.theme-lawyer-dark .text-purple-500,
+.theme-lawyer-dark .text-purple-600,
+.theme-lawyer-dark [class*="text-purple-"],
+.theme-lawyer-dark [class*="text-indigo-"] {
+  color: #4A7098 !important;
+}
+
+.theme-lawyer-dark .text-fleet-orange,
+.theme-lawyer-dark .text-amber-400,
+.theme-lawyer-dark .text-amber-500 {
+  color: #4A7098 !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - BUTTONS (Navy)
+   ========================================== */
+.theme-lawyer-dark [class*="from-green-"],
+.theme-lawyer-dark [class*="to-green-"],
+.theme-lawyer-dark [class*="bg-green-"],
+.theme-lawyer-dark [class*="from-purple-"],
+.theme-lawyer-dark [class*="to-purple-"],
+.theme-lawyer-dark [class*="bg-purple-"],
+.theme-lawyer-dark [class*="from-indigo-"],
+.theme-lawyer-dark [class*="to-indigo-"],
+.theme-lawyer-dark [class*="from-blue-"],
+.theme-lawyer-dark [class*="to-blue-"],
+.theme-lawyer-dark [class*="from-fleet-orange"],
+.theme-lawyer-dark [class*="to-fleet-orange"],
+.theme-lawyer-dark [class*="from-orange-"],
+.theme-lawyer-dark [class*="to-orange-"],
+.theme-lawyer-dark .bg-fleet-orange-500,
+.theme-lawyer-dark .bg-fleet-orange-600 {
+  background: #1E3A5F !important;
+  border: 1px solid #2E4A6B !important;
+}
+
+.theme-lawyer-dark button[class*="bg-"]:hover {
+  background: #2E5077 !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - INPUT FELDER
+   ========================================== */
+.theme-lawyer-dark input,
+.theme-lawyer-dark textarea,
+.theme-lawyer-dark select {
+  background-color: transparent !important;
+  border: none !important;
+  color: #F0F4F8 !important;
+  font-family: 'Lora', Georgia, serif !important;
+}
+
+.theme-lawyer-dark input:focus,
+.theme-lawyer-dark textarea:focus,
+.theme-lawyer-dark select:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Placeholder Text - Weiß für gute Sichtbarkeit */
+.theme-lawyer-dark input::placeholder,
+.theme-lawyer-dark textarea::placeholder {
+  color: #F0F4F8 !important;
+  opacity: 0.7 !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - SCROLLBAR (Navy)
+   ========================================== */
+.theme-lawyer-dark ::-webkit-scrollbar-thumb {
+  background: #2E5077 !important;
+  border-radius: 4px;
+}
+
+.theme-lawyer-dark ::-webkit-scrollbar-thumb:hover {
+  background: #4A7098 !important;
+}
+
+.theme-lawyer-dark ::-webkit-scrollbar-track {
+  background: #0D1B2A !important;
+}
+
+/* ==========================================
+   ANWALT DUNKEL - CHAT NACHRICHTEN
+   ========================================== */
+.theme-lawyer-dark .message-user {
+  background: #1E3A5F !important;
+  border: 1px solid #2E4A6B !important;
+  color: #F0F4F8 !important;
+}
+
+.theme-lawyer-dark .message-assistant {
+  background-color: #1B263B !important;
+  border: 1px solid #2E4A6B !important;
+  color: #F0F4F8 !important;
+}
+
+/* ==========================================
+   ==========================================
+   CRAZY HELL - Neon Pink & Violett Theme (Hell)
+   Lebhaft, Kreativ, Expressiv
+   ==========================================
+   ========================================== */
+.theme-crazy-light {
+  /* Crazy Farbpalette - Neon Pink & Violett */
+  --fleet-orange: #FF0D57;           /* Neon Pink */
+  --fleet-orange-dark: #6A0dad;      /* Violett */
+  --fleet-orange-light: #FF69B4;     /* Hot Pink */
+
+  /* Theme Farben - Heller Hintergrund mit Neon-Akzenten */
+  --bg-primary: #FFF5F7;             /* Zartes Rosa */
+  --bg-secondary: #FFFFFF;           /* Weiß für Karten */
+  --bg-tertiary: #FFE4EC;            /* Hellrosa */
+  --text-primary: #6A0dad;           /* Violett Text (KONSISTENT!) */
+  --text-secondary: #813c8a;         /* Mittleres Violett */
+  --text-light: #FFFFFF;
+  --accent-primary: #FF0D57;         /* Neon Pink */
+  --accent-secondary: #6A0dad;       /* Violett */
+  --border-color: #FFB3C6;           /* Rosa Border */
+}
+
+/* Crazy Hell - Basis */
+.theme-crazy-light,
+.theme-crazy-light .dark {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
+   SIDEBAR - Gradient mit Rosa/Violett
+   ========================================== */
+.theme-crazy-light .sidebar-nav {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF0F5 100%) !important;
+  border-right: 2px solid #FF0D57 !important;
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .sidebar-nav * {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .sidebar-nav .text-gray-400,
+.theme-crazy-light .sidebar-nav .text-gray-500 {
+  color: #813c8a !important;
+}
+
+.theme-crazy-light .sidebar-header {
+  background: linear-gradient(90deg, #FFE4EC 0%, #E8D5FF 100%) !important;
+  border-bottom: 2px solid #6A0dad !important;
+}
+
+.theme-crazy-light .sidebar-footer {
+  background: linear-gradient(90deg, #E8D5FF 0%, #FFE4EC 100%) !important;
+  border-top: 2px solid #FF0D57 !important;
+}
+
+.theme-crazy-light .sidebar-footer * {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .sidebar-footer .text-purple-400,
+.theme-crazy-light .sidebar-footer .text-fleet-orange-400 {
+  color: #FF0D57 !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-crazy-light .sidebar-footer .text-green-400,
+.theme-crazy-light .sidebar-footer .bg-green-400 {
+  color: #22C55E !important;
+  background-color: #22C55E !important;
+}
+
+.theme-crazy-light .sidebar-footer .text-red-400,
+.theme-crazy-light .sidebar-footer .bg-red-400 {
+  color: #EF4444 !important;
+  background-color: #EF4444 !important;
+}
+
+.theme-crazy-light .sidebar-footer button.hover\:text-red-400:hover {
+  color: #EF4444 !important;
+}
+
+.theme-crazy-light .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Crazy Hell - Sidebar Buttons */
+.theme-crazy-light .sidebar-nav button[class*="from-purple"],
+.theme-crazy-light .sidebar-nav button[class*="from-fleet-orange"],
+.theme-crazy-light .sidebar-nav [class*="bg-gradient"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.4) !important;
+}
+
+.theme-crazy-light .sidebar-nav button[class*="from-purple"] *,
+.theme-crazy-light .sidebar-nav button[class*="from-fleet-orange"] *,
+.theme-crazy-light .sidebar-nav [class*="bg-gradient"] * {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .sidebar-nav button[class*="from-purple"]:hover,
+.theme-crazy-light .sidebar-nav button[class*="from-fleet-orange"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 20px rgba(106, 13, 173, 0.5) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Sidebar Hover */
+.theme-crazy-light .sidebar-nav .hover\:bg-gray-800\/80:hover,
+.theme-crazy-light .sidebar-nav [class*="hover:bg-"]:hover {
+  background: #FFE4EC !important;
+}
+
+/* ==========================================
+   TOPBAR - Weiß/Rosa Gradient
+   ========================================== */
+.theme-crazy-light .topbar-nav {
+  background: linear-gradient(90deg, #FFFFFF 0%, #FFF5F7 100%) !important;
+  border-bottom: 2px solid #FF0D57 !important;
+}
+
+.theme-crazy-light .topbar-nav,
+.theme-crazy-light .topbar-nav * {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .top-bar,
+.theme-crazy-light nav.flex.items-center {
+  background: linear-gradient(90deg, #FFFFFF 0%, #FFF5F7 100%) !important;
+  border-bottom: 2px solid #FF0D57 !important;
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .top-bar * {
+  color: #6A0dad !important;
+}
+
+/* ==========================================
+   HAUPTBEREICH - Rosa/Violett Gradient
+   ========================================== */
+.theme-crazy-light .bg-gray-50,
+.theme-crazy-light .dark\:bg-gray-900,
+.theme-crazy-light .bg-gradient-to-b,
+.theme-crazy-light [class*="from-gray-50"],
+.theme-crazy-light [class*="from-gray-900"],
+.theme-crazy-light [class*="to-gray-100"],
+.theme-crazy-light [class*="to-gray-950"] {
+  background: linear-gradient(135deg, #FFF5F7 0%, #F5E6FF 50%, #FFE4EC 100%) !important;
+  background-image: linear-gradient(135deg, #FFF5F7 0%, #F5E6FF 50%, #FFE4EC 100%) !important;
+}
+
+.theme-crazy-light .flex-1.flex.flex-col.overflow-hidden,
+.theme-crazy-light .flex.flex-col.h-full.overflow-hidden {
+  background: linear-gradient(135deg, #FFF5F7 0%, #F5E6FF 50%, #FFE4EC 100%) !important;
+}
+
+/* Crazy Hell - Chat Bereich */
+.theme-crazy-light .chat-container,
+.theme-crazy-light main.flex-1 {
+  background: linear-gradient(135deg, #FFF5F7 0%, #F5E6FF 50%, #FFE4EC 100%) !important;
+}
+
+/* ==========================================
+   TEXT FARBEN - Violett konsistent
+   ========================================== */
+.theme-crazy-light .text-white,
+.theme-crazy-light .dark\:text-white {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .text-gray-400,
+.theme-crazy-light .text-gray-500,
+.theme-crazy-light .dark\:text-gray-400,
+.theme-crazy-light .dark\:text-gray-500 {
+  color: #813c8a !important;
+}
+
+/* Untertitel "Wie kann ich dir heute helfen?" - Violett */
+.theme-crazy-light p.text-gray-500,
+.theme-crazy-light p.text-gray-400,
+.theme-crazy-light .text-lg.text-gray-500 {
+  color: #813c8a !important;
+}
+
+/* ==========================================
+   CHAT NACHRICHTEN
+   ========================================== */
+.theme-crazy-light .message-user {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-light .message-assistant {
+  background: #FFFFFF !important;
+  border: 2px solid #6A0dad !important;
+  color: #6A0dad !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2) !important;
+}
+
+/* ==========================================
+   INPUT FELDER
+   ========================================== */
+.theme-crazy-light input,
+.theme-crazy-light select {
+  background-color: #FFFFFF !important;
+  border: 2px solid #FFB3C6 !important;
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light input:focus,
+.theme-crazy-light select:focus {
+  border-color: #FF0D57 !important;
+  box-shadow: 0 0 0 3px rgba(255, 13, 87, 0.2) !important;
+}
+
+/* Crazy Hell - Textarea Input */
+.theme-crazy-light .message-input-container,
+.theme-crazy-light textarea {
+  background: transparent !important;
+  border: none !important;
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .message-input-container:focus-within,
+.theme-crazy-light textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Crazy Hell - Buttons allgemein */
+.theme-crazy-light .bg-fleet-orange-500,
+.theme-crazy-light .bg-fleet-orange-600,
+.theme-crazy-light button[class*="bg-fleet-orange"],
+.theme-crazy-light button[class*="from-fleet-orange"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-light .bg-fleet-orange-500:hover,
+.theme-crazy-light .bg-fleet-orange-600:hover,
+.theme-crazy-light button[class*="bg-fleet-orange"]:hover,
+.theme-crazy-light button[class*="from-fleet-orange"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 20px rgba(106, 13, 173, 0.4) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Crazy Hell - Alle Buttons mit Gradient */
+.theme-crazy-light button[class*="rounded-xl"],
+.theme-crazy-light button[class*="rounded-lg"] {
+  transition: all 0.3s ease !important;
+}
+
+.theme-crazy-light .input-tile button[class*="bg-fleet-orange"],
+.theme-crazy-light .input-tile button[class*="from-fleet-orange"],
+.theme-crazy-light .send-button.bg-fleet-orange-500 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.4) !important;
+}
+
+.theme-crazy-light .send-button.bg-fleet-orange-500:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 20px rgba(255, 13, 87, 0.5), 0 0 25px rgba(106, 13, 173, 0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+/* ==========================================
+   CRAZY HELL - Input Tile Styling
+   ========================================== */
+.theme-crazy-light .input-tile {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F7 100%) !important;
+  border: 2px solid #FFB3C6 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 16px rgba(255, 13, 87, 0.15) !important;
+}
+
+.theme-crazy-light .input-tile-button {
+  background: linear-gradient(135deg, #FFE4EC 0%, #E8D5FF 100%) !important;
+  color: #6A0dad !important;
+  border: 1px solid #FFB3C6 !important;
+}
+
+.theme-crazy-light .input-tile-button:hover {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #FF0D57 !important;
+}
+
+.theme-crazy-light .input-tile-button svg {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .input-tile-button:hover svg {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .input-tile-send {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .input-tile-send:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+.theme-crazy-light .input-tile-send:disabled {
+  background: #FFE4EC !important;
+  opacity: 0.5 !important;
+}
+
+.theme-crazy-light .input-tile-send svg {
+  color: #FFFFFF !important;
+}
+
+/* Crazy Hell - Fleet Navigator Schriftzug mit Gradient */
+.theme-crazy-light .topbar-nav h1 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Crazy Hell - Begrüßungstext mit Gradient */
+.theme-crazy-light .greeting-text {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Crazy Hell - TopBar Tiles mit Gradienten */
+.theme-crazy-light .topbar-nav button[class*="rounded-lg"],
+.theme-crazy-light .topbar-nav div[class*="rounded-lg"] {
+  background: linear-gradient(135deg, #FFE4EC 0%, #E8D5FF 100%) !important;
+  border: 1px solid #FF0D57 !important;
+  transition: all 0.3s ease !important;
+}
+
+.theme-crazy-light .topbar-nav button[class*="rounded-lg"]:hover {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #6A0dad !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-light .topbar-nav button[class*="rounded-lg"]:hover * {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .topbar-nav button[class*="rounded-lg"] span,
+.theme-crazy-light .topbar-nav div[class*="rounded-lg"] span {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .topbar-nav button[class*="rounded-lg"] svg,
+.theme-crazy-light .topbar-nav div[class*="rounded-lg"] svg {
+  color: #6A0dad !important;
+}
+
+
+.theme-crazy-light .input-tile textarea {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .input-tile textarea::placeholder {
+  color: #813c8a !important;
+}
+
+/* Crazy Hell - Scrollbar */
+.theme-crazy-light ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FF0D57 0%, #6A0dad 100%) !important;
+  border-radius: 4px !important;
+}
+
+.theme-crazy-light ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6A0dad 0%, #FF0D57 100%) !important;
+}
+
+.theme-crazy-light ::-webkit-scrollbar-track {
+  background: #FFE4EC !important;
+}
+
+/* ==========================================
+   ==========================================
+   CRAZY DUNKEL - Neon & Violett Theme (Dunkel)
+   ==========================================
+   ========================================== */
+.theme-crazy-dark {
+  --fleet-orange: #FF0D57;
+  --fleet-orange-dark: #6A0dad;
+  --fleet-orange-light: #ffcccb;
+
+  --bg-primary: #0D0015;
+  --bg-secondary: #1A0A1F;
+  --bg-tertiary: #2D1A35;
+  --text-primary: #FFFFFF;
+  --text-secondary: #E8D5FF;
+  --accent-primary: #FF0D57;
+  --accent-secondary: #6A0dad;
+  --border-color: #813c8a;
+}
+
+/* Crazy Dunkel - Basis */
+.theme-crazy-dark,
+.theme-crazy-dark .dark {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Crazy Dunkel - Sidebar */
+.theme-crazy-dark .sidebar-nav {
+  background: linear-gradient(180deg, #1A0A1F 0%, #0D0015 100%) !important;
+  border-right: 2px solid #FF0D57 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .sidebar-nav * {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .sidebar-nav .text-gray-400,
+.theme-crazy-dark .sidebar-nav .text-gray-500 {
+  color: #E8D5FF !important;
+}
+
+.theme-crazy-dark .sidebar-header {
+  background: linear-gradient(90deg, #2D1A35 0%, #1A0A1F 100%) !important;
+  border-bottom: 2px solid #6A0dad !important;
+}
+
+.theme-crazy-dark .sidebar-footer {
+  background: linear-gradient(90deg, #1A0A1F 0%, #2D1A35 100%) !important;
+  border-top: 2px solid #FF0D57 !important;
+}
+
+.theme-crazy-dark .sidebar-footer * {
+  color: #FFFFFF !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-crazy-dark .sidebar-footer .text-green-400,
+.theme-crazy-dark .sidebar-footer .bg-green-400 {
+  color: #4ADE80 !important;
+  background-color: #4ADE80 !important;
+}
+
+.theme-crazy-dark .sidebar-footer .text-red-400,
+.theme-crazy-dark .sidebar-footer .bg-red-400 {
+  color: #F87171 !important;
+  background-color: #F87171 !important;
+}
+
+.theme-crazy-dark .sidebar-footer button.hover\:text-red-400:hover {
+  color: #F87171 !important;
+}
+
+.theme-crazy-dark .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Crazy Dunkel - Sidebar Buttons */
+.theme-crazy-dark .sidebar-nav button[class*="from-purple"],
+.theme-crazy-dark .sidebar-nav button[class*="from-fleet-orange"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 20px rgba(255, 13, 87, 0.5), 0 0 30px rgba(106, 13, 173, 0.3) !important;
+}
+
+.theme-crazy-dark .sidebar-nav button[class*="from-purple"]:hover,
+.theme-crazy-dark .sidebar-nav button[class*="from-fleet-orange"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 25px rgba(255, 13, 87, 0.6), 0 0 40px rgba(106, 13, 173, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Crazy Dunkel - TopBar */
+.theme-crazy-dark .top-bar,
+.theme-crazy-dark nav.flex.items-center {
+  background: linear-gradient(90deg, #1A0A1F 0%, #0D0015 100%) !important;
+  border-bottom: 2px solid #FF0D57 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .top-bar * {
+  color: #FFFFFF !important;
+}
+
+/* Crazy Dunkel - Fleet Navigator Schriftzug mit Gradient */
+.theme-crazy-dark .topbar-nav h1 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Crazy Dunkel - Begrüßungstext mit Gradient */
+.theme-crazy-dark .greeting-text {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Crazy Dunkel - TopBar Tiles mit Gradienten */
+.theme-crazy-dark .topbar-nav button[class*="rounded-lg"],
+.theme-crazy-dark .topbar-nav div[class*="rounded-lg"] {
+  background: linear-gradient(135deg, #2D1A35 0%, #1A0A1F 100%) !important;
+  border: 1px solid #6A0dad !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 10px rgba(255, 13, 87, 0.2) !important;
+}
+
+.theme-crazy-dark .topbar-nav button[class*="rounded-lg"]:hover {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #FF0D57 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 20px rgba(255, 13, 87, 0.5), 0 0 25px rgba(106, 13, 173, 0.3) !important;
+}
+
+.theme-crazy-dark .topbar-nav button[class*="rounded-lg"]:hover * {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .topbar-nav button[class*="rounded-lg"] span,
+.theme-crazy-dark .topbar-nav div[class*="rounded-lg"] span {
+  color: #E8D5FF !important;
+}
+
+.theme-crazy-dark .topbar-nav button[class*="rounded-lg"] svg,
+.theme-crazy-dark .topbar-nav div[class*="rounded-lg"] svg {
+  color: #FF0D57 !important;
+}
+
+/* Crazy Dunkel - Chat Bereich */
+.theme-crazy-dark .chat-container,
+.theme-crazy-dark main.flex-1 {
+  background: linear-gradient(135deg, #0D0015 0%, #1A0A1F 50%, #2D1A35 100%) !important;
+}
+
+/* Crazy Dunkel - Chat Nachrichten */
+.theme-crazy-dark .message-user {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 20px rgba(255, 13, 87, 0.4), 0 0 30px rgba(255, 13, 87, 0.2) !important;
+}
+
+.theme-crazy-dark .message-assistant {
+  background: linear-gradient(135deg, #1A0A1F 0%, #2D1A35 100%) !important;
+  border: 2px solid #6A0dad !important;
+  color: #FFFFFF !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 20px rgba(106, 13, 173, 0.3), 0 0 30px rgba(106, 13, 173, 0.1) !important;
+}
+
+/* Crazy Dunkel - Input */
+.theme-crazy-dark .message-input-container,
+.theme-crazy-dark textarea {
+  background: transparent !important;
+  border: none !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .message-input-container:focus-within,
+.theme-crazy-dark textarea:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Crazy Dunkel - Buttons allgemein */
+.theme-crazy-dark .bg-fleet-orange-500,
+.theme-crazy-dark .bg-fleet-orange-600,
+.theme-crazy-dark button[class*="bg-fleet-orange"],
+.theme-crazy-dark button[class*="from-fleet-orange"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 13, 87, 0.5), 0 0 30px rgba(106, 13, 173, 0.3) !important;
+}
+
+.theme-crazy-dark .bg-fleet-orange-500:hover,
+.theme-crazy-dark .bg-fleet-orange-600:hover,
+.theme-crazy-dark button[class*="bg-fleet-orange"]:hover,
+.theme-crazy-dark button[class*="from-fleet-orange"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 25px rgba(255, 13, 87, 0.6), 0 0 40px rgba(106, 13, 173, 0.4) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Crazy Dunkel - Alle Buttons mit Gradient und Glow */
+.theme-crazy-dark button[class*="rounded-xl"],
+.theme-crazy-dark button[class*="rounded-lg"] {
+  transition: all 0.3s ease !important;
+}
+
+.theme-crazy-dark .input-tile button[class*="bg-fleet-orange"],
+.theme-crazy-dark .input-tile button[class*="from-fleet-orange"],
+.theme-crazy-dark .send-button.bg-fleet-orange-500 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 13, 87, 0.5), 0 0 25px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-dark .send-button.bg-fleet-orange-500:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 6px 25px rgba(255, 13, 87, 0.6), 0 0 35px rgba(106, 13, 173, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Crazy Dunkel - Input Tile Styling (seamless, no border) */
+.theme-crazy-dark .input-tile {
+  background: linear-gradient(135deg, #1A0A1F 0%, #2D1A35 100%) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+.theme-crazy-dark .input-tile textarea {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-dark .input-tile textarea::placeholder {
+  color: #E8D5FF !important;
+}
+
+/* Crazy Dunkel - Icon Buttons im Input */
+.theme-crazy-dark .input-tile button[class*="text-gray"] {
+  color: #E8D5FF !important;
+}
+
+.theme-crazy-dark .input-tile button[class*="text-gray"]:hover {
+  color: #FF0D57 !important;
+  background: rgba(255, 13, 87, 0.2) !important;
+}
+
+/* Crazy Dunkel - Scrollbar */
+.theme-crazy-dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FF0D57 0%, #6A0dad 100%) !important;
+  border-radius: 4px !important;
+}
+
+.theme-crazy-dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6A0dad 0%, #FF0D57 100%) !important;
+}
+
+.theme-crazy-dark ::-webkit-scrollbar-track {
+  background: #1A0A1F !important;
+}
+
+/* Crazy Dunkel - Neon Glow Effekte */
+.theme-crazy-dark .sidebar-nav {
+  box-shadow: inset -5px 0 20px rgba(255, 13, 87, 0.1) !important;
+}
+
+.theme-crazy-dark .top-bar {
+  box-shadow: 0 5px 20px rgba(255, 13, 87, 0.2) !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fleet-orange);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fleet-orange-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ==========================================
+   ==========================================
+   TECH DARK - Echtes Tech/Cyberpunk Theme
+   Cyan Glow, tiefes Schwarz, Sci-Fi Look
+   ==========================================
+   ========================================== */
+.theme-tech-dark {
+  --fleet-orange: #00D9FF;       /* Cyan - Primär */
+  --fleet-orange-dark: #0099CC;
+  --fleet-orange-light: #66E5FF;
+
+  --bg-primary: #0A0A0F;         /* Fast Schwarz */
+  --bg-secondary: #12121A;       /* Dunkles Blau-Schwarz */
+  --bg-tertiary: #1A1A25;
+  --text-primary: #E0E0E0;
+  --text-secondary: #808090;
+  --accent-primary: #00D9FF;     /* Cyan */
+  --accent-secondary: #FF006E;   /* Magenta für Warnungen */
+  --accent-tertiary: #00FF88;    /* Neon Grün für Erfolg */
+  --border-color: #2A2A35;
+  --glow-cyan: 0 0 20px rgba(0, 217, 255, 0.4);
+  --glow-cyan-strong: 0 0 30px rgba(0, 217, 255, 0.6), 0 0 60px rgba(0, 217, 255, 0.3);
+}
+
+/* Cyber Dark - Monospace Font für Tech-Feeling */
+.theme-tech-dark {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+}
+
+.theme-tech-dark h1,
+.theme-tech-dark h2,
+.theme-tech-dark h3,
+.theme-tech-dark .font-bold,
+.theme-tech-dark .font-semibold {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  letter-spacing: 0.05em;
+}
+
+/* Cyber Dark - Basis mit Grid-Pattern */
+.theme-tech-dark,
+.theme-tech-dark .dark {
+  background-color: #0A0A0F !important;
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  color: #E0E0E0 !important;
+}
+
+/* Cyber Dark - Sidebar */
+.theme-tech-dark .sidebar-nav {
+  background: linear-gradient(180deg, #12121A 0%, #0A0A0F 100%) !important;
+  border-right: 1px solid #00D9FF40 !important;
+  box-shadow: inset -2px 0 20px rgba(0, 217, 255, 0.1) !important;
+}
+
+.theme-tech-dark .sidebar-nav * {
+  color: #E0E0E0 !important;
+}
+
+.theme-tech-dark .sidebar-nav .text-gray-400,
+.theme-tech-dark .sidebar-nav .text-gray-500 {
+  color: #808090 !important;
+}
+
+.theme-tech-dark .sidebar-header {
+  background: #0A0A0F !important;
+  border-bottom: 1px solid #00D9FF30 !important;
+}
+
+.theme-tech-dark .sidebar-footer {
+  background: linear-gradient(0deg, #0A0A0F 0%, #12121A 100%) !important;
+  border-top: 1px solid #00D9FF30 !important;
+}
+
+.theme-tech-dark .sidebar-footer * {
+  color: #E0E0E0 !important;
+}
+
+.theme-tech-dark .sidebar-footer .text-purple-400,
+.theme-tech-dark .sidebar-footer .text-fleet-orange-400 {
+  color: #00D9FF !important;
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.5) !important;
+}
+
+/* Status-Farben im Sidebar-Footer erhalten */
+.theme-tech-dark .sidebar-footer .text-green-400,
+.theme-tech-dark .sidebar-footer .bg-green-400 {
+  color: #4ADE80 !important;
+  background-color: #4ADE80 !important;
+}
+
+.theme-tech-dark .sidebar-footer .text-red-400,
+.theme-tech-dark .sidebar-footer .bg-red-400 {
+  color: #F87171 !important;
+  background-color: #F87171 !important;
+}
+
+.theme-tech-dark .sidebar-footer button.hover\:text-red-400:hover {
+  color: #F87171 !important;
+}
+
+.theme-tech-dark .sidebar-footer button.hover\:bg-red-500\/10:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Cyber Dark - Sidebar Hover mit Glow */
+.theme-tech-dark .sidebar-nav .hover\:bg-gray-800\/80:hover,
+.theme-tech-dark .sidebar-nav [class*="hover:bg-"]:hover {
+  background: #1A1A2540 !important;
+  box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.1) !important;
+}
+
+/* Cyber Dark - Sidebar Buttons mit Glow */
+.theme-tech-dark .sidebar-nav button[class*="from-purple"],
+.theme-tech-dark .sidebar-nav button[class*="from-fleet-orange"],
+.theme-tech-dark .sidebar-nav [class*="bg-gradient"] {
+  background: linear-gradient(135deg, #00D9FF20 0%, #00D9FF10 100%) !important;
+  border: 1px solid #00D9FF !important;
+  color: #00D9FF !important;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3) !important;
+}
+
+.theme-tech-dark .sidebar-nav button[class*="from-purple"] *,
+.theme-tech-dark .sidebar-nav button[class*="from-fleet-orange"] *,
+.theme-tech-dark .sidebar-nav [class*="bg-gradient"] * {
+  color: #00D9FF !important;
+}
+
+.theme-tech-dark .sidebar-nav button:hover {
+  background: linear-gradient(135deg, #00D9FF40 0%, #00D9FF20 100%) !important;
+  box-shadow: 0 0 25px rgba(0, 217, 255, 0.5), 0 0 50px rgba(0, 217, 255, 0.2) !important;
+}
+
+/* Cyber Dark - TopBar */
+.theme-tech-dark .topbar-nav {
+  background: linear-gradient(90deg, #0A0A0F 0%, #12121A 100%) !important;
+  border-bottom: 1px solid #00D9FF40 !important;
+  box-shadow: 0 2px 20px rgba(0, 217, 255, 0.1) !important;
+}
+
+.theme-tech-dark .topbar-nav,
+.theme-tech-dark .topbar-nav * {
+  color: #E0E0E0 !important;
+}
+
+/* Fleet Navigator Logo - Cyan Glow */
+.theme-tech-dark .topbar-nav h1 {
+  background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.5)) !important;
+}
+
+/* Cyber Dark - TopBar Buttons */
+.theme-tech-dark .topbar-nav [class*="bg-gradient"],
+.theme-tech-dark .topbar-nav [class*="from-green-"],
+.theme-tech-dark .topbar-nav [class*="from-purple-"],
+.theme-tech-dark .topbar-nav [class*="from-blue-"],
+.theme-tech-dark .topbar-nav [class*="from-gray-"],
+.theme-tech-dark .topbar-nav [class*="from-fleet-orange"],
+.theme-tech-dark .topbar-nav [class*="from-orange-"] {
+  background: #12121A !important;
+  border: 1px solid #00D9FF50 !important;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.2) !important;
+}
+
+.theme-tech-dark .topbar-nav [class*="bg-gradient"]:hover,
+.theme-tech-dark .topbar-nav button:hover {
+  background: #1A1A25 !important;
+  border-color: #00D9FF !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4) !important;
+}
+
+/* Cyber Dark - Hauptbereich mit Grid */
+.theme-tech-dark .bg-gray-50,
+.theme-tech-dark .dark\:bg-gray-900,
+.theme-tech-dark .bg-gradient-to-b,
+.theme-tech-dark [class*="from-gray-50"],
+.theme-tech-dark [class*="from-gray-900"],
+.theme-tech-dark [class*="to-gray-100"],
+.theme-tech-dark [class*="to-gray-950"] {
+  background: #0A0A0F !important;
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.02) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+}
+
+.theme-tech-dark .flex-1.flex.flex-col.overflow-hidden,
+.theme-tech-dark .flex.flex-col.h-full.overflow-hidden {
+  background: #0A0A0F !important;
+}
+
+/* Cyber Dark - Karten & Panels */
+.theme-tech-dark .bg-gray-800,
+.theme-tech-dark .bg-gray-900,
+.theme-tech-dark .dark\:bg-gray-800,
+.theme-tech-dark .dark\:bg-gray-900,
+.theme-tech-dark .rounded-xl,
+.theme-tech-dark .rounded-2xl {
+  background-color: #12121A !important;
+  border: 1px solid #00D9FF30 !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.1) !important;
+}
+
+/* Cyber Dark - Text */
+.theme-tech-dark .text-white,
+.theme-tech-dark .dark\:text-white {
+  color: #E0E0E0 !important;
+}
+
+.theme-tech-dark .text-gray-400,
+.theme-tech-dark .text-gray-500,
+.theme-tech-dark .dark\:text-gray-400,
+.theme-tech-dark .dark\:text-gray-500 {
+  color: #808090 !important;
+}
+
+/* Akzentfarben */
+.theme-tech-dark .text-purple-400,
+.theme-tech-dark .text-purple-500,
+.theme-tech-dark [class*="text-purple-"],
+.theme-tech-dark [class*="text-indigo-"] {
+  color: #00D9FF !important;
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.3) !important;
+}
+
+.theme-tech-dark .text-fleet-orange,
+.theme-tech-dark .text-amber-400 {
+  color: #00D9FF !important;
+}
+
+/* Cyber Dark - Input Felder */
+.theme-tech-dark input,
+.theme-tech-dark textarea,
+.theme-tech-dark select {
+  background-color: transparent !important;
+  border: none !important;
+  color: #E0E0E0 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.theme-tech-dark input:focus,
+.theme-tech-dark textarea:focus,
+.theme-tech-dark select:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.theme-tech-dark input::placeholder,
+.theme-tech-dark textarea::placeholder {
+  color: #505060 !important;
+}
+
+/* Cyber Dark - Scrollbar mit Glow */
+.theme-tech-dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00D9FF 0%, #0099CC 100%) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.5) !important;
+}
+
+.theme-tech-dark ::-webkit-scrollbar-thumb:hover {
+  background: #00D9FF !important;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.7) !important;
+}
+
+.theme-tech-dark ::-webkit-scrollbar-track {
+  background: #0A0A0F !important;
+}
+
+/* Cyber Dark - Chat Nachrichten */
+.theme-tech-dark .message-user {
+  background: linear-gradient(135deg, #00D9FF20 0%, #00D9FF10 100%) !important;
+  border: 1px solid #00D9FF !important;
+  color: #E0E0E0 !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3) !important;
+}
+
+.theme-tech-dark .message-assistant {
+  background-color: #12121A !important;
+  border: 1px solid #2A2A35 !important;
+  color: #E0E0E0 !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Cyber Dark - Buttons mit Glow */
+.theme-tech-dark .bg-fleet-orange-500,
+.theme-tech-dark .bg-fleet-orange-600 {
+  background: linear-gradient(135deg, #00D9FF 0%, #0099CC 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4) !important;
+}
+
+.theme-tech-dark .bg-fleet-orange-500:hover,
+.theme-tech-dark .bg-fleet-orange-600:hover {
+  background: linear-gradient(135deg, #00FF88 0%, #00D9FF 100%) !important;
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.6), 0 0 60px rgba(0, 255, 136, 0.3) !important;
+}
+
+/* Cyber Dark - Warnung/Fehler Buttons */
+.theme-tech-dark .bg-red-500,
+.theme-tech-dark .bg-red-600 {
+  background: linear-gradient(135deg, #FF006E 0%, #CC0058 100%) !important;
+  box-shadow: 0 0 15px rgba(255, 0, 110, 0.4) !important;
+}
+
+/* Cyber Dark - Input Tile */
+.theme-tech-dark .input-tile {
+  background: #12121A !important;
+  border: 1px solid #00D9FF40 !important;
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.15) !important;
+}
+
+.theme-tech-dark .input-tile-button {
+  background: #1A1A25 !important;
+  border: 1px solid #00D9FF40 !important;
+  color: #00D9FF !important;
+}
+
+.theme-tech-dark .input-tile-button:hover {
+  background: #00D9FF20 !important;
+  border-color: #00D9FF !important;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3) !important;
+}
+
+.theme-tech-dark .input-tile-button svg {
+  color: #00D9FF !important;
+}
+
+.theme-tech-dark .input-tile-send {
+  background: linear-gradient(135deg, #00D9FF 0%, #0099CC 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.5) !important;
+}
+
+.theme-tech-dark .input-tile-send:hover {
+  background: linear-gradient(135deg, #00FF88 0%, #00D9FF 100%) !important;
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.7), 0 0 50px rgba(0, 255, 136, 0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+.theme-tech-dark .input-tile-send:disabled {
+  background: #1A1A25 !important;
+  box-shadow: none !important;
+  opacity: 0.5 !important;
+}
+
+/* Cyber Dark - Begrüßungstext */
+.theme-tech-dark .greeting-text {
+  background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  filter: drop-shadow(0 0 15px rgba(0, 217, 255, 0.4)) !important;
+}
+
+/* Cyber Dark - Scanline Effekt (optional) */
+.theme-tech-dark::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.15;
+}
+
+/* ==========================================
+   TECH HELL - Modal Button Kontrast-Fix
+   Lila (#8B5CF6) Buttons mit weißer Schrift
+   ========================================== */
+
+/* Modal Container - Höhe fixieren */
+.theme-tech-light .fixed.inset-0 .rounded-2xl.shadow-2xl.flex.flex-col,
+.theme-tech-light .fixed.inset-0 .bg-white\/90.rounded-2xl {
+  background: #FFFFFF !important;
+  height: 85vh !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border: 2px solid #8B5CF6 !important;
+}
+
+/* Modal Header */
+.theme-tech-light .fixed.inset-0 .rounded-2xl > div:first-child,
+.theme-tech-light .fixed.inset-0 [class*="from-purple-500\/10"] {
+  flex-shrink: 0 !important;
+  background: linear-gradient(to right, #F5F3FF, #EEF2FF) !important;
+  border-bottom: 2px solid #8B5CF6 !important;
+}
+
+/* Modal Titel */
+.theme-tech-light .fixed.inset-0 h2,
+.theme-tech-light .fixed.inset-0 .text-2xl {
+  color: #6366F1 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #6366F1 !important;
+}
+
+/* Close Button (X) */
+.theme-tech-light .fixed.inset-0 button.text-gray-400,
+.theme-tech-light .fixed.inset-0 button.p-2.rounded-lg {
+  color: #6366F1 !important;
+  background: #EEF2FF !important;
+  border: 1px solid #8B5CF6 !important;
+}
+
+.theme-tech-light .fixed.inset-0 button.text-gray-400:hover,
+.theme-tech-light .fixed.inset-0 button.p-2.rounded-lg:hover {
+  background: #8B5CF6 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .fixed.inset-0 button.p-2.rounded-lg svg {
+  color: inherit !important;
+}
+
+/* Scroll Container */
+.theme-tech-light .fixed.inset-0 .flex-1.overflow-y-auto {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Scrollbar - Lila */
+.theme-tech-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar {
+  width: 14px !important;
+  background: #F5F3FF !important;
+}
+
+.theme-tech-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #8B5CF6 !important;
+  border-radius: 7px !important;
+  border: 3px solid #F5F3FF !important;
+}
+
+.theme-tech-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #7C3AED !important;
+}
+
+/* Tabs */
+.theme-tech-light .fixed.inset-0 .border-b[class*="bg-gray"] {
+  flex-shrink: 0 !important;
+  background: #F8FAFC !important;
+  border-color: #8B5CF6 !important;
+}
+
+.theme-tech-light .fixed.inset-0 .border-b button {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .fixed.inset-0 .border-b button:hover {
+  background: #EEF2FF !important;
+}
+
+/* Alle Gradient-Buttons in Modals - Lila mit weißer Schrift */
+.theme-tech-light .fixed.inset-0 button[class*="from-purple"],
+.theme-tech-light .fixed.inset-0 button[class*="from-indigo"],
+.theme-tech-light .fixed.inset-0 button[class*="bg-gradient-to-r"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3) !important;
+}
+
+.theme-tech-light .fixed.inset-0 button[class*="from-purple"]:hover,
+.theme-tech-light .fixed.inset-0 button[class*="from-indigo"]:hover,
+.theme-tech-light .fixed.inset-0 button[class*="bg-gradient-to-r"]:hover {
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+}
+
+.theme-tech-light .fixed.inset-0 button[class*="from-purple"] svg,
+.theme-tech-light .fixed.inset-0 button[class*="from-indigo"] svg,
+.theme-tech-light .fixed.inset-0 button[class*="bg-gradient-to-r"] svg {
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .fixed.inset-0 button[class*="from-purple"] span,
+.theme-tech-light .fixed.inset-0 button[class*="from-indigo"] span {
+  color: #FFFFFF !important;
+}
+
+/* Löschen Button - Rot */
+.theme-tech-light .fixed.inset-0 button.bg-red-500,
+.theme-tech-light .fixed.inset-0 button[class*="bg-red"] {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .fixed.inset-0 button.bg-red-500:hover,
+.theme-tech-light .fixed.inset-0 button[class*="bg-red"]:hover {
+  background: #DC2626 !important;
+}
+
+/* ==========================================
+   CRAZY HELL - Modal Button Kontrast-Fix
+   Neon Pink (#FF0D57) & Violett (#6A0dad)
+   ========================================== */
+
+/* Modal Container */
+.theme-crazy-light .fixed.inset-0 .rounded-2xl.shadow-2xl.flex.flex-col,
+.theme-crazy-light .fixed.inset-0 .bg-white\/90.rounded-2xl {
+  background: #FFFFFF !important;
+  height: 85vh !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border: 2px solid #FF0D57 !important;
+}
+
+/* Modal Header */
+.theme-crazy-light .fixed.inset-0 .rounded-2xl > div:first-child,
+.theme-crazy-light .fixed.inset-0 [class*="from-purple-500\/10"] {
+  flex-shrink: 0 !important;
+  background: linear-gradient(to right, #FFE4EC, #E8D5FF) !important;
+  border-bottom: 2px solid #6A0dad !important;
+}
+
+/* Modal Titel */
+.theme-crazy-light .fixed.inset-0 h2,
+.theme-crazy-light .fixed.inset-0 .text-2xl {
+  color: #6A0dad !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #6A0dad !important;
+}
+
+/* Close Button (X) */
+.theme-crazy-light .fixed.inset-0 button.text-gray-400,
+.theme-crazy-light .fixed.inset-0 button.p-2.rounded-lg {
+  color: #6A0dad !important;
+  background: #FFE4EC !important;
+  border: 1px solid #FF0D57 !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button.text-gray-400:hover,
+.theme-crazy-light .fixed.inset-0 button.p-2.rounded-lg:hover {
+  background: #FF0D57 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button.p-2.rounded-lg svg {
+  color: inherit !important;
+}
+
+/* Scroll Container */
+.theme-crazy-light .fixed.inset-0 .flex-1.overflow-y-auto {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Scrollbar - Pink/Violett Gradient */
+.theme-crazy-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar {
+  width: 14px !important;
+  background: #FFE4EC !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FF0D57 0%, #6A0dad 100%) !important;
+  border-radius: 7px !important;
+  border: 3px solid #FFE4EC !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .flex-1.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6A0dad 0%, #FF0D57 100%) !important;
+}
+
+/* Tabs */
+.theme-crazy-light .fixed.inset-0 .border-b[class*="bg-gray"] {
+  flex-shrink: 0 !important;
+  background: #FFF5F7 !important;
+  border-color: #FF0D57 !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .border-b button {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .border-b button:hover {
+  background: #FFE4EC !important;
+}
+
+/* Alle Gradient-Buttons in Modals - Pink/Violett mit weißer Schrift */
+.theme-crazy-light .fixed.inset-0 button[class*="from-purple"],
+.theme-crazy-light .fixed.inset-0 button[class*="from-indigo"],
+.theme-crazy-light .fixed.inset-0 button[class*="bg-gradient-to-r"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button[class*="from-purple"]:hover,
+.theme-crazy-light .fixed.inset-0 button[class*="from-indigo"]:hover,
+.theme-crazy-light .fixed.inset-0 button[class*="bg-gradient-to-r"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.4) !important;
+  transform: scale(1.02) !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button[class*="from-purple"] svg,
+.theme-crazy-light .fixed.inset-0 button[class*="from-indigo"] svg,
+.theme-crazy-light .fixed.inset-0 button[class*="bg-gradient-to-r"] svg {
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button[class*="from-purple"] span,
+.theme-crazy-light .fixed.inset-0 button[class*="from-indigo"] span {
+  color: #FFFFFF !important;
+}
+
+/* Löschen Button - Rot */
+.theme-crazy-light .fixed.inset-0 button.bg-red-500,
+.theme-crazy-light .fixed.inset-0 button[class*="bg-red"] {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button.bg-red-500:hover,
+.theme-crazy-light .fixed.inset-0 button[class*="bg-red"]:hover {
+  background: #DC2626 !important;
+}
+
+/* ==========================================
+   CUSTOM MODEL DIALOGE - THEME SPEZIFISCH
+   CreateCustomModelModal, CustomModelDetailsModal,
+   GgufModelConfigModal, ModelDownloadModal
+   ========================================== */
+
+/* ==========================================
+   ANWALT HELL - Custom Model Dialoge
+   Navy Blue Palette
+   ========================================== */
+
+/* Modal Container */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] > div {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+/* Modal Header - Navy Blue Gradient */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-indigo"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-purple"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-blue"] {
+  background: linear-gradient(135deg, rgba(30, 77, 123, 0.15) 0%, rgba(44, 106, 160, 0.1) 100%) !important;
+  border-bottom: 2px solid #1E4D7B !important;
+}
+
+/* Header Icon Box - Navy Blue */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .p-3.rounded-xl.bg-gradient-to-br {
+  background: linear-gradient(135deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+}
+
+/* Header Title */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] h2.bg-gradient-to-r,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] h2[class*="text-2xl"] {
+  background: linear-gradient(135deg, #1E4D7B 0%, #0D2840 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Close Button - Sichtbar machen */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400 {
+  color: #1E4D7B !important;
+  background: rgba(30, 77, 123, 0.1) !important;
+  border: 1px solid #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400:hover {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+/* Form Labels - Navy Blue */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label.text-gray-700,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label[class*="text-sm"][class*="font-medium"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .text-gray-700 {
+  color: #1E4D7B !important;
+}
+
+/* Subtitles und Help Text */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .text-gray-600,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .text-gray-500,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] p.text-xs {
+  color: #2C6AA0 !important;
+}
+
+/* Input Felder */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] input[type="text"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] input[type="number"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] select,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] textarea {
+  background: #FFFFFF !important;
+  border: 2px solid #2C6AA0 !important;
+  color: #0D2840 !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] input:focus,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] select:focus,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] textarea:focus {
+  border-color: #1E4D7B !important;
+  box-shadow: 0 0 0 3px rgba(30, 77, 123, 0.2) !important;
+}
+
+/* "Aus Datei laden" Button */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.text-indigo-600,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="text-indigo"] {
+  color: #1E4D7B !important;
+  border-color: #1E4D7B !important;
+  background: rgba(30, 77, 123, 0.05) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.text-indigo-600:hover,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="text-indigo"]:hover {
+  background: rgba(30, 77, 123, 0.15) !important;
+}
+
+/* Erweiterte Parameter Toggle */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="text-indigo-600"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .text-indigo-600 {
+  color: #1E4D7B !important;
+}
+
+/* Tabs - GgufModelConfigModal */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .border-b button.text-purple-600,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .border-b button[class*="border-purple"] {
+  color: #1E4D7B !important;
+  border-color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .border-b button.text-gray-500 {
+  color: #4A7BA7 !important;
+}
+
+/* Context Size Buttons */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.border-purple-500,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="border-purple-500"] {
+  border-color: #1E4D7B !important;
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="border-gray-300"]:hover {
+  border-color: #2C6AA0 !important;
+}
+
+/* Footer Buttons */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .bg-gray-50\/50 button.text-gray-700,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] .border-t button.text-gray-700 {
+  color: #1E4D7B !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Primärer Action Button - Navy Blue mit weißer Schrift */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(30, 77, 123, 0.3) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"]:hover,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"]:hover {
+  background: #0D2840 !important;
+  box-shadow: 0 4px 15px rgba(30, 77, 123, 0.4) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] svg,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] svg,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] span,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] span {
+  color: #FFFFFF !important;
+}
+
+/* File Upload Button - Navy */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label[class*="from-purple"],
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label.bg-gradient-to-r {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label[class*="from-purple"]:hover,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] label.bg-gradient-to-r:hover {
+  background: #0D2840 !important;
+}
+
+/* Löschen Button bleibt Rot */
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button.text-red-600,
+.theme-lawyer-light .fixed.inset-0[class*="z-[60]"] button[class*="text-red"] {
+  color: #DC2626 !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+  border-color: #DC2626 !important;
+}
+
+/* ==========================================
+   TECH HELL - Custom Model Dialoge
+   Lila/Indigo Palette
+   ========================================== */
+
+/* Modal Container */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] > div {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #8B5CF6 !important;
+}
+
+/* Modal Header - Lila Gradient */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-indigo"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-purple"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-blue"] {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
+  border-bottom: 2px solid #8B5CF6 !important;
+}
+
+/* Header Icon Box */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .p-3.rounded-xl.bg-gradient-to-br {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+}
+
+/* Header Title */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] h2.bg-gradient-to-r,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] h2[class*="text-2xl"] {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Close Button */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400 {
+  color: #6366F1 !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid #6366F1 !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400:hover {
+  background: #6366F1 !important;
+  color: #FFFFFF !important;
+}
+
+/* Form Labels - Indigo */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] label.text-gray-700,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] label[class*="text-sm"][class*="font-medium"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .text-gray-700 {
+  color: #6366F1 !important;
+}
+
+/* Subtitles */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .text-gray-600,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .text-gray-500,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] p.text-xs {
+  color: #8B5CF6 !important;
+}
+
+/* Input Felder */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] input[type="text"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] input[type="number"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] select,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] textarea {
+  background: #FFFFFF !important;
+  border: 2px solid #A78BFA !important;
+  color: #4C1D95 !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] input:focus,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] select:focus,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] textarea:focus {
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Footer Buttons */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .bg-gray-50\/50 button.text-gray-700,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] .border-t button.text-gray-700 {
+  color: #6366F1 !important;
+  border-color: #8B5CF6 !important;
+}
+
+/* Primärer Action Button */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3) !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"]:hover,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"]:hover {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] svg,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] svg,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] span,
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] span {
+  color: #FFFFFF !important;
+}
+
+/* File Upload Button */
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] label[class*="from-purple"],
+.theme-tech-light .fixed.inset-0[class*="z-[60]"] label.bg-gradient-to-r {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   CRAZY HELL - Custom Model Dialoge
+   Pink/Violett Palette
+   ========================================== */
+
+/* Modal Container */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] > div {
+  background: rgba(255, 245, 247, 0.98) !important;
+  border: 2px solid #FF0D57 !important;
+}
+
+/* Modal Header - Pink Gradient */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-indigo"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-purple"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .bg-gradient-to-r[class*="from-blue"] {
+  background: linear-gradient(135deg, rgba(255, 13, 87, 0.15) 0%, rgba(106, 13, 173, 0.1) 100%) !important;
+  border-bottom: 2px solid #FF0D57 !important;
+}
+
+/* Header Icon Box */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .p-3.rounded-xl.bg-gradient-to-br {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+}
+
+/* Header Title */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] h2.bg-gradient-to-r,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] h2[class*="text-2xl"] {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Close Button */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400 {
+  color: #6A0dad !important;
+  background: rgba(106, 13, 173, 0.1) !important;
+  border: 1px solid #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button.text-gray-400:hover {
+  background: #6A0dad !important;
+  color: #FFFFFF !important;
+}
+
+/* Form Labels - Violett */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] label.text-gray-700,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] label[class*="text-sm"][class*="font-medium"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .text-gray-700 {
+  color: #6A0dad !important;
+}
+
+/* Subtitles */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .text-gray-600,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .text-gray-500,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] p.text-xs {
+  color: #813c8a !important;
+}
+
+/* Input Felder */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] input[type="text"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] input[type="number"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] select,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] textarea {
+  background: #FFFFFF !important;
+  border: 2px solid #FF69B4 !important;
+  color: #4A0D5C !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] input:focus,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] select:focus,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] textarea:focus {
+  border-color: #FF0D57 !important;
+  box-shadow: 0 0 0 3px rgba(255, 13, 87, 0.2) !important;
+}
+
+/* Footer Buttons */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .bg-gray-50\/50 button.text-gray-700,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] .border-t button.text-gray-700 {
+  color: #6A0dad !important;
+  border-color: #FF0D57 !important;
+}
+
+/* Primärer Action Button */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(255, 13, 87, 0.3) !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"]:hover,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 13, 87, 0.4) !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] svg,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] svg,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-indigo-500"] span,
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] button[class*="from-purple-500"] span {
+  color: #FFFFFF !important;
+}
+
+/* File Upload Button */
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] label[class*="from-purple"],
+.theme-crazy-light .fixed.inset-0[class*="z-[60]"] label.bg-gradient-to-r {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   MODEL DOWNLOAD MODAL - Alle hellen Themes
+   ========================================== */
+
+/* Anwalt Hell */
+.theme-lawyer-light .fixed.inset-0[class*="z-[100]"] .bg-gradient-to-r.from-blue-500 {
+  background: linear-gradient(135deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[100]"] .bg-blue-50 {
+  background: rgba(30, 77, 123, 0.1) !important;
+  border-color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[100]"] .text-blue-600,
+.theme-lawyer-light .fixed.inset-0[class*="z-[100]"] .text-blue-900 {
+  color: #1E4D7B !important;
+}
+
+/* Tech Hell */
+.theme-tech-light .fixed.inset-0[class*="z-[100]"] .bg-gradient-to-r.from-blue-500 {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[100]"] .bg-blue-50 {
+  background: rgba(139, 92, 246, 0.1) !important;
+  border-color: #8B5CF6 !important;
+}
+
+.theme-tech-light .fixed.inset-0[class*="z-[100]"] .text-blue-600,
+.theme-tech-light .fixed.inset-0[class*="z-[100]"] .text-blue-900 {
+  color: #6366F1 !important;
+}
+
+/* Crazy Hell */
+.theme-crazy-light .fixed.inset-0[class*="z-[100]"] .bg-gradient-to-r.from-blue-500 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[100]"] .bg-blue-50 {
+  background: rgba(255, 13, 87, 0.1) !important;
+  border-color: #FF0D57 !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[100]"] .text-blue-600,
+.theme-crazy-light .fixed.inset-0[class*="z-[100]"] .text-blue-900 {
+  color: #6A0dad !important;
+}
+
+/* ==========================================
+   EXPERTEN-WIZARD - THEME SPEZIFISCH
+   z-index: 70
+   ========================================== */
+
+/* ==========================================
+   ANWALT HELL - Experten-Wizard
+   ========================================== */
+
+/* Wizard Container */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] > div {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #1E4D7B !important;
+}
+
+/* Wizard Header */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-r[class*="from-purple"] {
+  background: linear-gradient(135deg, rgba(30, 77, 123, 0.15) 0%, rgba(44, 106, 160, 0.1) 100%) !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Progress Bar */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-r.from-purple-500 {
+  background: linear-gradient(90deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+}
+
+/* Step Indicators - Active */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button.bg-purple-500 {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+/* Step Indicators - Completed */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button.bg-purple-100 {
+  background: rgba(30, 77, 123, 0.15) !important;
+  color: #1E4D7B !important;
+}
+
+/* Section Titles */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] h2.text-2xl {
+  color: #1E4D7B !important;
+}
+
+/* Model Cards - Selected */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button.border-purple-500 {
+  border-color: #1E4D7B !important;
+  background: rgba(30, 77, 123, 0.1) !important;
+}
+
+/* Model Card Icon */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-br.from-purple-500 {
+  background: linear-gradient(135deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+}
+
+/* Checkmark Icon */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-purple-500 {
+  color: #1E4D7B !important;
+}
+
+/* Badges */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-purple-600 {
+  color: #1E4D7B !important;
+}
+
+/* Sliders */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] input[type="range"]::-webkit-slider-thumb {
+  background: #1E4D7B !important;
+}
+
+/* Footer Navigation */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-gray-50 {
+  background: rgba(30, 77, 123, 0.05) !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Navigation Buttons */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button[class*="from-purple-500"] {
+  background: #1E4D7B !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button[class*="from-purple-500"]:hover {
+  background: #0D2840 !important;
+}
+
+/* Create Button (Green) */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] button[class*="from-green-500"] {
+  background: linear-gradient(135deg, #1E7B4D 0%, #28A745 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* Summary Cards */
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-purple-50 {
+  background: rgba(30, 77, 123, 0.1) !important;
+  border-color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-purple-900,
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-purple-700 {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .bg-indigo-50 {
+  background: rgba(30, 77, 123, 0.08) !important;
+  border-color: #2C6AA0 !important;
+}
+
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-indigo-900,
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-indigo-700,
+.theme-lawyer-light .fixed.inset-0[class*="z-[70]"] .text-indigo-500 {
+  color: #2C6AA0 !important;
+}
+
+/* ==========================================
+   TECH HELL - Experten-Wizard
+   ========================================== */
+
+/* Wizard Container */
+.theme-tech-light .fixed.inset-0[class*="z-[70]"] > div {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #8B5CF6 !important;
+}
+
+/* Wizard Header */
+.theme-tech-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-r[class*="from-purple"] {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
+  border-color: #8B5CF6 !important;
+}
+
+/* Section Titles */
+.theme-tech-light .fixed.inset-0[class*="z-[70]"] h2.text-2xl {
+  color: #6366F1 !important;
+}
+
+/* Model Cards - Selected */
+.theme-tech-light .fixed.inset-0[class*="z-[70]"] button.border-purple-500 {
+  border-color: #8B5CF6 !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+}
+
+/* Navigation Buttons */
+.theme-tech-light .fixed.inset-0[class*="z-[70]"] button[class*="from-purple-500"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================
+   CRAZY HELL - Experten-Wizard
+   ========================================== */
+
+/* Wizard Container */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] > div {
+  background: rgba(255, 245, 247, 0.98) !important;
+  border: 2px solid #FF0D57 !important;
+}
+
+/* Wizard Header */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-r[class*="from-purple"] {
+  background: linear-gradient(135deg, rgba(255, 13, 87, 0.15) 0%, rgba(106, 13, 173, 0.1) 100%) !important;
+  border-color: #FF0D57 !important;
+}
+
+/* Progress Bar */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-r.from-purple-500 {
+  background: linear-gradient(90deg, #FF0D57 0%, #6A0dad 100%) !important;
+}
+
+/* Step Indicators - Active */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] button.bg-purple-500 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* Step Indicators - Completed */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] button.bg-purple-100 {
+  background: rgba(255, 13, 87, 0.15) !important;
+  color: #6A0dad !important;
+}
+
+/* Section Titles */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] h2.text-2xl {
+  color: #6A0dad !important;
+}
+
+/* Model Cards - Selected */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] button.border-purple-500 {
+  border-color: #FF0D57 !important;
+  background: rgba(255, 13, 87, 0.1) !important;
+}
+
+/* Model Card Icon */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .bg-gradient-to-br.from-purple-500 {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+}
+
+/* Checkmark Icon */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-purple-500 {
+  color: #FF0D57 !important;
+}
+
+/* Navigation Buttons */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] button[class*="from-purple-500"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] button[class*="from-purple-500"]:hover {
+  background: linear-gradient(135deg, #6A0dad 0%, #FF0D57 100%) !important;
+}
+
+/* Summary Cards */
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .bg-purple-50 {
+  background: rgba(106, 13, 173, 0.1) !important;
+  border-color: #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-purple-900,
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-purple-700 {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .bg-indigo-50 {
+  background: rgba(255, 13, 87, 0.08) !important;
+  border-color: #FF69B4 !important;
+}
+
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-indigo-900,
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-indigo-700,
+.theme-crazy-light .fixed.inset-0[class*="z-[70]"] .text-indigo-500 {
+  color: #FF0D57 !important;
+}
+
+/* ==========================================
+   MODAL DIALOGS - THEME OVERRIDES
+   Konsistente Styles für alle Modals:
+   - Confirm Dialog (z-[100])
+   - Settings Modal (z-50)
+   - Model Manager (z-50, z-[60])
+   ========================================== */
+
+/* ========== LAWYER DARK ========== */
+/* Modal Hintergründe */
+.theme-lawyer-dark .fixed.inset-0.z-50 > div:not(.absolute),
+.theme-lawyer-dark .fixed.inset-0.z-\[50\] > div:not(.absolute),
+.theme-lawyer-dark .fixed.inset-0.z-\[60\] > div:not(.absolute),
+.theme-lawyer-dark .fixed.inset-0.z-\[100\] > div:not(.absolute) {
+  background: #0D1B2A !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Modal Container mit weißem/grauem Hintergrund */
+.theme-lawyer-dark .fixed.inset-0 .bg-white,
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:bg-gray-800"],
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:bg-gray-900"] {
+  background: #0D1B2A !important;
+  border-color: #1E4D7B !important;
+}
+
+/* Modal Header/Footer Bereiche */
+.theme-lawyer-dark .fixed.inset-0 .bg-gray-50,
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:bg-gray-900/50"] {
+  background: rgba(30, 77, 123, 0.15) !important;
+}
+
+/* Modal Überschriften */
+.theme-lawyer-dark .fixed.inset-0 h2,
+.theme-lawyer-dark .fixed.inset-0 h3,
+.theme-lawyer-dark .fixed.inset-0 .text-gray-900,
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:text-white"] {
+  color: #F0F4F8 !important;
+}
+
+/* Modal Text */
+.theme-lawyer-dark .fixed.inset-0 .text-gray-600,
+.theme-lawyer-dark .fixed.inset-0 .text-gray-500,
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:text-gray-400"],
+.theme-lawyer-dark .fixed.inset-0 [class*="dark:text-gray-300"] {
+  color: #A0B4C8 !important;
+}
+
+/* Modal Labels */
+.theme-lawyer-dark .fixed.inset-0 .text-gray-700,
+.theme-lawyer-dark .fixed.inset-0 label {
+  color: #C0D0E0 !important;
+}
+
+/* Modal Input Felder */
+.theme-lawyer-dark .fixed.inset-0 input,
+.theme-lawyer-dark .fixed.inset-0 select,
+.theme-lawyer-dark .fixed.inset-0 textarea {
+  background: #162635 !important;
+  border-color: #1E4D7B !important;
+  color: #F0F4F8 !important;
+}
+
+/* Modal Buttons - Primary */
+.theme-lawyer-dark .fixed.inset-0 button[class*="bg-purple"],
+.theme-lawyer-dark .fixed.inset-0 button[class*="bg-blue"],
+.theme-lawyer-dark .fixed.inset-0 button[class*="bg-fleet-orange"] {
+  background: linear-gradient(135deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* Modal Sections/Cards */
+.theme-lawyer-dark .fixed.inset-0 .bg-gradient-to-br,
+.theme-lawyer-dark .fixed.inset-0 [class*="from-gray-50"],
+.theme-lawyer-dark .fixed.inset-0 [class*="from-gray-900"] {
+  background: rgba(30, 77, 123, 0.1) !important;
+}
+
+/* Modal Tabs */
+.theme-lawyer-dark .fixed.inset-0 button[class*="border-b-2"][class*="border-purple"],
+.theme-lawyer-dark .fixed.inset-0 button[class*="border-b-2"][class*="border-fleet-orange"] {
+  border-color: #4A90C2 !important;
+  color: #4A90C2 !important;
+}
+
+/* ========== LAWYER LIGHT ========== */
+.theme-lawyer-light .fixed.inset-0 .bg-white,
+.theme-lawyer-light .fixed.inset-0 [class*="dark:bg-gray-800"] {
+  background: #FFFFFF !important;
+  border-color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 h2,
+.theme-lawyer-light .fixed.inset-0 h3 {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .text-gray-600,
+.theme-lawyer-light .fixed.inset-0 .text-gray-500,
+.theme-lawyer-light .fixed.inset-0 p {
+  color: #2C6AA0 !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .text-gray-700,
+.theme-lawyer-light .fixed.inset-0 label {
+  color: #1E4D7B !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 .bg-gray-50 {
+  background: #F8FAFC !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 button[class*="bg-purple"],
+.theme-lawyer-light .fixed.inset-0 button[class*="bg-blue"],
+.theme-lawyer-light .fixed.inset-0 button[class*="bg-fleet-orange"] {
+  background: linear-gradient(135deg, #1E4D7B 0%, #2C6AA0 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-lawyer-light .fixed.inset-0 button[class*="border-b-2"][class*="border-purple"],
+.theme-lawyer-light .fixed.inset-0 button[class*="border-b-2"][class*="border-fleet-orange"] {
+  border-color: #1E4D7B !important;
+  color: #1E4D7B !important;
+}
+
+/* ========== TECH DARK ========== */
+.theme-tech-dark .fixed.inset-0 .bg-white,
+.theme-tech-dark .fixed.inset-0 [class*="dark:bg-gray-800"] {
+  background: #1A1A2E !important;
+  border-color: #00D9FF !important;
+}
+
+.theme-tech-dark .fixed.inset-0 h2,
+.theme-tech-dark .fixed.inset-0 h3 {
+  color: #00D9FF !important;
+}
+
+.theme-tech-dark .fixed.inset-0 .bg-gray-50 {
+  background: rgba(0, 217, 255, 0.05) !important;
+}
+
+/* ========== TECH LIGHT ========== */
+.theme-tech-light .fixed.inset-0 .bg-white,
+.theme-tech-light .fixed.inset-0 [class*="dark:bg-gray-800"] {
+  background: #FFFFFF !important;
+  border-color: #8B5CF6 !important;
+}
+
+.theme-tech-light .fixed.inset-0 h2,
+.theme-tech-light .fixed.inset-0 h3 {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .fixed.inset-0 .text-gray-600,
+.theme-tech-light .fixed.inset-0 .text-gray-500,
+.theme-tech-light .fixed.inset-0 p {
+  color: #8B5CF6 !important;
+}
+
+.theme-tech-light .fixed.inset-0 .text-gray-700,
+.theme-tech-light .fixed.inset-0 label {
+  color: #6366F1 !important;
+}
+
+.theme-tech-light .fixed.inset-0 button[class*="bg-purple"],
+.theme-tech-light .fixed.inset-0 button[class*="bg-fleet-orange"] {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tech-light .fixed.inset-0 button[class*="border-b-2"][class*="border-purple"],
+.theme-tech-light .fixed.inset-0 button[class*="border-b-2"][class*="border-fleet-orange"] {
+  border-color: #8B5CF6 !important;
+  color: #8B5CF6 !important;
+}
+
+/* ========== CRAZY DARK ========== */
+.theme-crazy-dark .fixed.inset-0 .bg-white,
+.theme-crazy-dark .fixed.inset-0 [class*="dark:bg-gray-800"] {
+  background: #1A0A1F !important;
+  border-color: #FF0D57 !important;
+}
+
+.theme-crazy-dark .fixed.inset-0 h2,
+.theme-crazy-dark .fixed.inset-0 h3 {
+  color: #FF0D57 !important;
+}
+
+.theme-crazy-dark .fixed.inset-0 .text-gray-600,
+.theme-crazy-dark .fixed.inset-0 .text-gray-500,
+.theme-crazy-dark .fixed.inset-0 p {
+  color: #E0A0D0 !important;
+}
+
+.theme-crazy-dark .fixed.inset-0 .bg-gray-50 {
+  background: rgba(255, 13, 87, 0.1) !important;
+}
+
+.theme-crazy-dark .fixed.inset-0 button[class*="bg-purple"],
+.theme-crazy-dark .fixed.inset-0 button[class*="bg-fleet-orange"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* ========== CRAZY LIGHT ========== */
+.theme-crazy-light .fixed.inset-0 .bg-white,
+.theme-crazy-light .fixed.inset-0 [class*="dark:bg-gray-800"] {
+  background: #FFF0F5 !important;
+  border-color: #FF0D57 !important;
+}
+
+.theme-crazy-light .fixed.inset-0 h2,
+.theme-crazy-light .fixed.inset-0 h3 {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .text-gray-600,
+.theme-crazy-light .fixed.inset-0 .text-gray-500,
+.theme-crazy-light .fixed.inset-0 p {
+  color: #813c8a !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .text-gray-700,
+.theme-crazy-light .fixed.inset-0 label {
+  color: #6A0dad !important;
+}
+
+.theme-crazy-light .fixed.inset-0 .bg-gray-50 {
+  background: #FFE4EC !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button[class*="bg-purple"],
+.theme-crazy-light .fixed.inset-0 button[class*="bg-fleet-orange"] {
+  background: linear-gradient(135deg, #FF0D57 0%, #6A0dad 100%) !important;
+  color: #FFFFFF !important;
+}
+
+.theme-crazy-light .fixed.inset-0 button[class*="border-b-2"][class*="border-purple"],
+.theme-crazy-light .fixed.inset-0 button[class*="border-b-2"][class*="border-fleet-orange"] {
+  border-color: #FF0D57 !important;
+  color: #6A0dad !important;
+}
+
+/* ==========================================
+   SCHRIFTGRÖSSE - GLOBAL
+   Wird via settingsStore gesteuert
+   ========================================== */
+
+/* Klein (Small) */
+.font-size-small {
+  font-size: 14px !important;
+}
+
+.font-size-small body,
+.font-size-small .text-sm {
+  font-size: 12px !important;
+}
+
+.font-size-small .text-base {
+  font-size: 14px !important;
+}
+
+.font-size-small .text-lg {
+  font-size: 16px !important;
+}
+
+.font-size-small .text-xl {
+  font-size: 18px !important;
+}
+
+.font-size-small .text-2xl {
+  font-size: 20px !important;
+}
+
+.font-size-small .text-xs {
+  font-size: 10px !important;
+}
+
+/* Normal (Medium) - Default, keine Änderungen nötig */
+.font-size-medium {
+  font-size: 16px;
+}
+
+/* Groß (Large) */
+.font-size-large {
+  font-size: 18px !important;
+}
+
+.font-size-large body,
+.font-size-large .text-sm {
+  font-size: 16px !important;
+}
+
+.font-size-large .text-base {
+  font-size: 18px !important;
+}
+
+.font-size-large .text-lg {
+  font-size: 20px !important;
+}
+
+.font-size-large .text-xl {
+  font-size: 22px !important;
+}
+
+.font-size-large .text-2xl {
+  font-size: 26px !important;
+}
+
+.font-size-large .text-xs {
+  font-size: 14px !important;
+}
+
+/* Extra Large (XLarge) */
+.font-size-xlarge {
+  font-size: 20px !important;
+}
+
+.font-size-xlarge body,
+.font-size-xlarge .text-sm {
+  font-size: 18px !important;
+}
+
+.font-size-xlarge .text-base {
+  font-size: 20px !important;
+}
+
+.font-size-xlarge .text-lg {
+  font-size: 22px !important;
+}
+
+.font-size-xlarge .text-xl {
+  font-size: 26px !important;
+}
+
+.font-size-xlarge .text-2xl {
+  font-size: 30px !important;
+}
+
+.font-size-xlarge .text-xs {
+  font-size: 16px !important;
+}

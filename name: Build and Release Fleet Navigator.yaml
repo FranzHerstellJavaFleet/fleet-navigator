@@ -1,0 +1,195 @@
+name: Build and Release Fleet Navigator
+
+on:
+  push:
+    tags:
+      - "v*.*.*"    # z.B. v1.0.0 → löst den Workflow aus
+
+jobs:
+  # =========================
+  # Linux-Build
+  # =========================
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build with Maven (Linux)
+        run: mvn -B clean package
+
+      - name: Package Linux distribution
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          DIST_DIR="fleet-navigator-${VERSION}-linux-x64"
+
+          mkdir -p "$DIST_DIR"/bin
+          mkdir -p "$DIST_DIR"/native/ocr
+          mkdir -p "$DIST_DIR"/native/llama
+          mkdir -p "$DIST_DIR"/models
+          mkdir -p "$DIST_DIR"/config
+
+          # JAR
+          cp target/fleet-navigator.jar "$DIST_DIR/bin/"
+
+          # OCR (Tesseract + tessdata)
+          cp -r packaging/linux-x64/ocr/* "$DIST_DIR/native/ocr/"
+
+          # llama.cpp JNI
+          cp -r packaging/linux-x64/native/llama/* "$DIST_DIR/native/llama/"
+
+          # Modelle (.gguf)
+          cp -r models/* "$DIST_DIR/models/"
+
+          # Konfiguration
+          cp config/application-linux.yml "$DIST_DIR/config/application.yml"
+
+          # Tarball erzeugen
+          tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
+
+          mkdir -p dist
+          mv "${DIST_DIR}.tar.gz" dist/
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-linux
+          path: dist/*
+
+  # =========================
+  # Windows-Build
+  # =========================
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build with Maven (Windows)
+        run: mvn -B clean package
+
+      - name: Package Windows distribution
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          $distDir = "fleet-navigator-$version-windows-x64"
+
+          New-Item -ItemType Directory -Path "$distDir/bin","$distDir/native/ocr","$distDir/native/llama","$distDir/models","$distDir/config" | Out-Null
+
+          # JAR
+          Copy-Item "target/fleet-navigator.jar" "$distDir/bin/"
+
+          # OCR
+          Copy-Item "packaging/win-x64/ocr/*" "$distDir/native/ocr/" -Recurse
+
+          # llama.cpp JNI
+          Copy-Item "packaging/win-x64/native/llama/*" "$distDir/native/llama/" -Recurse
+
+          # Modelle
+          Copy-Item "models/*" "$distDir/models/" -Recurse
+
+          # Konfiguration
+          Copy-Item "config/application-windows.yml" "$distDir/config/application.yml"
+
+          # ZIP erzeugen
+          $zipPath = "$distDir.zip"
+          Compress-Archive -Path "$distDir/*" -DestinationPath $zipPath
+
+          New-Item -ItemType Directory -Path "dist" -ErrorAction SilentlyContinue | Out-Null
+          Move-Item $zipPath dist/
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-windows
+          path: dist/*
+
+  # =========================
+  # macOS-Build
+  # =========================
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build with Maven (macOS)
+        run: mvn -B clean package
+
+      - name: Package macOS distribution
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          DIST_DIR="fleet-navigator-${VERSION}-macos-arm64"
+
+          mkdir -p "$DIST_DIR"/bin
+          mkdir -p "$DIST_DIR"/native/ocr
+          mkdir -p "$DIST_DIR"/native/llama
+          mkdir -p "$DIST_DIR"/models
+          mkdir -p "$DIST_DIR"/config
+
+          # JAR
+          cp target/fleet-navigator.jar "$DIST_DIR/bin/"
+
+          # OCR
+          cp -r packaging/macos-arm64/ocr/* "$DIST_DIR/native/ocr/"
+
+          # llama.cpp JNI
+          cp -r packaging/macos-arm64/native/llama/* "$DIST_DIR/native/llama/"
+
+          # Modelle
+          cp -r models/* "$DIST_DIR/models/"
+
+          # Konfiguration
+          cp config/application-macos.yml "$DIST_DIR/config/application.yml"
+
+          # Tarball erzeugen
+          tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
+
+          mkdir -p dist
+          mv "${DIST_DIR}.tar.gz" dist/
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-macos
+          path: dist/*
+
+  # =========================
+  # Release erstellen
+  # =========================
+  create-release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-linux
+      - build-windows
+      - build-macos
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*    # hängt alle erzeugten Dateien an den Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
