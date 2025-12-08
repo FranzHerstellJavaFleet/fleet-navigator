@@ -53,7 +53,12 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Forward all routes that don't start with /api to index.html
+        // Auth routes - MUST be forwarded to index.html for Vue Router
+        registry.addViewController("/login").setViewName("forward:/index.html");
+        registry.addViewController("/register").setViewName("forward:/index.html");
+
+        // Main app routes
+        registry.addViewController("/").setViewName("forward:/index.html");
         registry.addViewController("/agents/**").setViewName("forward:/index.html");
         registry.addViewController("/experts").setViewName("forward:/index.html");
         registry.addViewController("/experts/**").setViewName("forward:/index.html");
