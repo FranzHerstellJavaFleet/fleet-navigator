@@ -111,6 +111,8 @@
         </dependency>
 
         <!-- java-llama.cpp (Native JNI Binding für llama.cpp) -->
+        <!-- Im Default-Build: Volle Version mit allen Natives -->
+        <!-- Mit Profil (-Plinux-x64, -Pwindows-x64, -Pmacos-arm64): Nur plattformspezifische Natives -->
         <dependency>
             <groupId>de.kherud</groupId>
             <artifactId>llama</artifactId>
@@ -375,8 +377,33 @@
         </plugins>
     </build>
 
-    <!-- Profile for Native Image Build -->
+    <!-- Platform-specific profiles for smaller JAR files -->
     <profiles>
+        <!-- Linux x86_64 Profile - Entfernt unnötige Native Libs nach dem Build -->
+        <profile>
+            <id>linux-x64</id>
+            <properties>
+                <platform.classifier>linux-x64</platform.classifier>
+            </properties>
+        </profile>
+
+        <!-- Windows x86_64 Profile -->
+        <profile>
+            <id>windows-x64</id>
+            <properties>
+                <platform.classifier>windows-x64</platform.classifier>
+            </properties>
+        </profile>
+
+        <!-- macOS ARM64 (Apple Silicon) Profile -->
+        <profile>
+            <id>macos-arm64</id>
+            <properties>
+                <platform.classifier>macos-arm64</platform.classifier>
+            </properties>
+        </profile>
+
+        <!-- Profile for Native Image Build -->
         <profile>
             <id>native</id>
             <build>
