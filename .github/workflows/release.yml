@@ -53,6 +53,12 @@ jobs:
           printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\ncd "$SCRIPT_DIR"\njava -jar bin/fleet-navigator.jar\n' > "$DIST_DIR/start.sh"
           chmod +x "$DIST_DIR/start.sh"
 
+          # Uninstall-Skript kopieren
+          if [ -f "packaging/linux-x64/uninstall.sh" ]; then
+            cp packaging/linux-x64/uninstall.sh "$DIST_DIR/"
+            chmod +x "$DIST_DIR/uninstall.sh"
+          fi
+
           tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
           mkdir -p dist
           mv "${DIST_DIR}.tar.gz" dist/
@@ -180,6 +186,14 @@ jobs:
             Copy-Item "packaging/win-x64/setup.ps1" "$distDir/"
           }
 
+          # Uninstall-Scripts kopieren
+          if (Test-Path "packaging/win-x64/uninstall.bat") {
+            Copy-Item "packaging/win-x64/uninstall.bat" "$distDir/"
+          }
+          if (Test-Path "packaging/win-x64/uninstall.ps1") {
+            Copy-Item "packaging/win-x64/uninstall.ps1" "$distDir/"
+          }
+
           # Einfaches Start-Script (falls Benutzer nicht installieren will)
           $startScript = "@echo off`r`ncd /d `"%~dp0`"`r`njava -jar bin\fleet-navigator.jar`r`npause"
           $startScript | Out-File -FilePath "$distDir/start.bat" -Encoding ASCII
@@ -242,6 +256,12 @@ jobs:
 
           printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\ncd "$SCRIPT_DIR"\njava -jar bin/fleet-navigator.jar\n' > "$DIST_DIR/start.sh"
           chmod +x "$DIST_DIR/start.sh"
+
+          # Uninstall-Skript kopieren (Linux-Version funktioniert auch auf macOS)
+          if [ -f "packaging/linux-x64/uninstall.sh" ]; then
+            cp packaging/linux-x64/uninstall.sh "$DIST_DIR/"
+            chmod +x "$DIST_DIR/uninstall.sh"
+          fi
 
           tar czf "${DIST_DIR}.tar.gz" "$DIST_DIR"
           mkdir -p dist
