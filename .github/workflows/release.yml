@@ -54,6 +54,142 @@ jobs:
           mkdir -p dist
           mv "${DIST_DIR}.tar.gz" dist/
 
+      - name: Build DEB package
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          PKG_NAME="fleet-navigator"
+          PKG_DIR="${PKG_NAME}_${VERSION}_amd64"
+
+          # DEB-Struktur erstellen
+          mkdir -p "$PKG_DIR/DEBIAN"
+          mkdir -p "$PKG_DIR/opt/fleet-navigator/bin"
+          mkdir -p "$PKG_DIR/opt/fleet-navigator/config"
+          mkdir -p "$PKG_DIR/opt/fleet-navigator/native/llama"
+          mkdir -p "$PKG_DIR/opt/fleet-navigator/native/ocr"
+          mkdir -p "$PKG_DIR/usr/share/applications"
+          mkdir -p "$PKG_DIR/usr/share/icons/hicolor/256x256/apps"
+          mkdir -p "$PKG_DIR/usr/bin"
+
+          # JAR kopieren
+          cp target/fleet-navigator-*.jar "$PKG_DIR/opt/fleet-navigator/bin/fleet-navigator.jar"
+
+          # Konfiguration kopieren
+          if [ -f "config/application-linux.yml" ]; then
+            cp config/application-linux.yml "$PKG_DIR/opt/fleet-navigator/config/application.yml"
+          else
+            cp src/main/resources/application.properties "$PKG_DIR/opt/fleet-navigator/config/"
+          fi
+
+          # Native Libraries kopieren (falls vorhanden)
+          if [ -d "packaging/linux-x64/native/llama" ] && [ "$(ls -A packaging/linux-x64/native/llama 2>/dev/null)" ]; then
+            cp -r packaging/linux-x64/native/llama/* "$PKG_DIR/opt/fleet-navigator/native/llama/"
+          fi
+
+          # Start-Skript erstellen
+          cat > "$PKG_DIR/opt/fleet-navigator/start.sh" << 'STARTEOF'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+java -jar bin/fleet-navigator.jar "$@"
+STARTEOF
+          chmod +x "$PKG_DIR/opt/fleet-navigator/start.sh"
+
+          # Symlink-Skript für /usr/bin
+          cat > "$PKG_DIR/usr/bin/fleet-navigator" << 'BINEOF'
+#!/bin/bash
+exec /opt/fleet-navigator/start.sh "$@"
+BINEOF
+          chmod +x "$PKG_DIR/usr/bin/fleet-navigator"
+
+          # Desktop-Eintrag erstellen
+          cat > "$PKG_DIR/usr/share/applications/fleet-navigator.desktop" << 'DESKTOPEOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Fleet Navigator
+Comment=Lokale KI für alle
+Exec=/opt/fleet-navigator/start.sh
+Icon=fleet-navigator
+Terminal=false
+Categories=Development;Utility;
+Keywords=AI;LLM;Chat;
+DESKTOPEOF
+
+          # Icon kopieren (falls vorhanden, sonst Platzhalter)
+          if [ -f "frontend/public/javafleet-logo.png" ]; then
+            cp frontend/public/javafleet-logo.png "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/fleet-navigator.png"
+          fi
+
+          # DEBIAN/control erstellen
+          cat > "$PKG_DIR/DEBIAN/control" << CONTROLEOF
+Package: fleet-navigator
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: openjdk-17-jre | openjdk-21-jre | default-jre (>= 17)
+Maintainer: JavaFleet <info@javafleet.io>
+Description: Fleet Navigator - Lokale KI für alle
+ Fleet Navigator ist eine lokale KI-Anwendung mit Web-Interface.
+ Features:
+  - Chat mit lokalen LLM-Modellen
+  - Unterstützung für NVIDIA GPU (CUDA)
+  - Auto-Update System
+  - Multi-Experten System
+Homepage: https://github.com/FranzHerstellJavaFleet/Fleet-Navigator
+CONTROLEOF
+
+          # DEBIAN/postinst (nach Installation)
+          cat > "$PKG_DIR/DEBIAN/postinst" << 'POSTEOF'
+#!/bin/bash
+set -e
+
+# Berechtigungen setzen
+chmod +x /opt/fleet-navigator/start.sh
+chmod +x /usr/bin/fleet-navigator
+
+# Desktop-Datenbank aktualisieren
+if command -v update-desktop-database &> /dev/null; then
+    update-desktop-database -q /usr/share/applications 2>/dev/null || true
+fi
+
+# Icon-Cache aktualisieren
+if command -v gtk-update-icon-cache &> /dev/null; then
+    gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null || true
+fi
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║  Fleet Navigator wurde erfolgreich installiert!            ║"
+echo "║                                                            ║"
+echo "║  Starten mit:  fleet-navigator                             ║"
+echo "║  Oder:         /opt/fleet-navigator/start.sh               ║"
+echo "║                                                            ║"
+echo "║  Web-Interface: http://localhost:2025                      ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+
+exit 0
+POSTEOF
+          chmod +x "$PKG_DIR/DEBIAN/postinst"
+
+          # DEBIAN/prerm (vor Deinstallation)
+          cat > "$PKG_DIR/DEBIAN/prerm" << 'PRERMEOF'
+#!/bin/bash
+set -e
+echo "Fleet Navigator wird entfernt..."
+exit 0
+PRERMEOF
+          chmod +x "$PKG_DIR/DEBIAN/prerm"
+
+          # DEB-Paket bauen
+          dpkg-deb --build --root-owner-group "$PKG_DIR"
+
+          # In dist verschieben
+          mv "${PKG_DIR}.deb" "dist/fleet-navigator_${VERSION}_amd64.deb"
+
+          echo "DEB-Paket erstellt: dist/fleet-navigator_${VERSION}_amd64.deb"
+
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
@@ -174,6 +310,8 @@ jobs:
       - build-linux
       - build-windows
       - build-macos
+    permissions:
+      contents: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -189,20 +327,35 @@ jobs:
           files: |
             dist/**/*.tar.gz
             dist/**/*.zip
+            dist/**/*.deb
           generate_release_notes: true
           body: |
             ## Fleet Navigator ${{ github.ref_name }}
 
             ### Downloads
-            - **Linux (x64):** `fleet-navigator-*-linux-x64.tar.gz`
-            - **Windows (x64):** `fleet-navigator-*-windows-x64.zip`
-            - **macOS (ARM64):** `fleet-navigator-*-macos-arm64.tar.gz`
+            | Plattform | Datei | Installation |
+            |-----------|-------|--------------|
+            | **Linux (x64)** | `.tar.gz` | Entpacken, `./start.sh` |
+            | **Linux (DEB)** | `.deb` | `sudo apt install ./fleet-navigator_*.deb` |
+            | **Windows (x64)** | `.zip` | Entpacken, `start.bat` |
+            | **macOS (ARM64)** | `.tar.gz` | Entpacken, `./start.sh` |
+
+            ### Voraussetzungen
+            - Java 17 oder neuer
+            - Optional: NVIDIA GPU + CUDA für GPU-Beschleunigung
 
             ### Erste Schritte
-            1. Archiv entpacken
-            2. `start.sh` (Linux/macOS) oder `start.bat` (Windows) ausführen
-            3. Browser öffnen: http://localhost:2025
-            4. Beim ersten Start: Modell von Hugging Face herunterladen
+            1. Passende Datei herunterladen
+            2. Installieren/Entpacken
+            3. Starten
+            4. Browser öffnen: http://localhost:2025
+            5. Beim ersten Start: KI-Modell von Hugging Face herunterladen
+
+            ### DEB-Paket Installation (Ubuntu/Debian)
+            ```bash
+            sudo apt install ./fleet-navigator_*_amd64.deb
+            fleet-navigator
+            ```
 
             ---
             🚢 Fleet Navigator - Lokale KI für alle
