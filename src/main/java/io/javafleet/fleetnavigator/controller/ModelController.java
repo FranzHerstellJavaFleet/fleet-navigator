@@ -231,16 +231,29 @@ public class ModelController {
 
     /**
      * GET /api/models/default - Get the default model
-     * Priority: 1. User-selected default from DB, 2. Fallback to phi:latest (Microsoft Phi - small and efficient)
+     * Priority: 1. User-selected default from DB, 2. First available model, 3. Empty string (no model)
      */
     @GetMapping("/default")
     public ResponseEntity<Map<String, String>> getDefaultModel() {
         Optional<ModelMetadata> defaultModel = metadataService.getDefaultModel();
-        if (defaultModel.isPresent()) {
+        if (defaultModel.isPresent() && !"phi:latest".equals(defaultModel.get().getName())) {
             return ResponseEntity.ok(Map.of("model", defaultModel.get().getName()));
-        } else {
-            return ResponseEntity.ok(Map.of("model", "phi:latest")); // Fallback to Microsoft Phi
         }
+
+        // Try to get first available model as fallback
+        try {
+            List<ModelInfo> availableModels = llmProviderService.getAvailableModels();
+            if (!availableModels.isEmpty()) {
+                String firstModel = availableModels.get(0).getName();
+                log.info("No default model set, using first available: {}", firstModel);
+                return ResponseEntity.ok(Map.of("model", firstModel));
+            }
+        } catch (IOException e) {
+            log.warn("Could not fetch available models for fallback: {}", e.getMessage());
+        }
+
+        // No models available
+        return ResponseEntity.ok(Map.of("model", ""));
     }
 
     /**

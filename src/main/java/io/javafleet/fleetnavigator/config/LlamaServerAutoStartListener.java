@@ -4,6 +4,7 @@ import io.javafleet.fleetnavigator.service.LlamaServerProcessManager;
 import io.javafleet.fleetnavigator.service.SettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,9 @@ public class LlamaServerAutoStartListener implements ApplicationListener<Applica
     private final LlamaServerProcessManager llamaServerManager;
     private final SettingsService settingsService;
 
+    @Value("${llm.default-provider:java-llama-cpp}")
+    private String defaultProvider;
+
     // Startup-Status für Frontend-Abfrage
     private final AtomicBoolean startupInProgress = new AtomicBoolean(false);
     private final AtomicBoolean startupComplete = new AtomicBoolean(false);
@@ -44,6 +48,13 @@ public class LlamaServerAutoStartListener implements ApplicationListener<Applica
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        // Ollama braucht keinen Auto-Start - hat eigenen Service
+        if ("ollama".equals(defaultProvider)) {
+            log.info("📦 Ollama Provider aktiv - kein llama-server Auto-Start nötig");
+            startupComplete.set(true);
+            return;
+        }
+
         log.info("🚀 Fleet Navigator bereit - starte llama-server automatisch...");
 
         // Asynchron starten um App nicht zu blockieren
@@ -103,9 +114,16 @@ public class LlamaServerAutoStartListener implements ApplicationListener<Applica
                     startupMessage.set("AI bereit!");
                 }
             } else {
-                log.error("❌ llama-server Start fehlgeschlagen: {}", result.getMessage());
-                startupError.set(result.getMessage());
-                startupMessage.set("Startfehler");
+                // Binary nicht gefunden = Fallback auf java-llama-cpp (kein Fehler für User)
+                if (result.getMessage() != null && result.getMessage().contains("Binary nicht gefunden")) {
+                    log.info("🦙 llama-server Binary nicht verfügbar - nutze java-llama-cpp (JNI) als Fallback");
+                    startupMessage.set("JNI-basierte Inferenz bereit");
+                    // Kein Error setzen - ist ein normaler Fallback
+                } else {
+                    log.error("❌ llama-server Start fehlgeschlagen: {}", result.getMessage());
+                    startupError.set(result.getMessage());
+                    startupMessage.set("Startfehler");
+                }
             }
 
         } catch (InterruptedException e) {

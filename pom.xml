@@ -7,7 +7,7 @@
 
     <groupId>io.javafleet</groupId>
     <artifactId>fleet-navigator</artifactId>
-    <version>0.6.0</version>
+    <version>0.6.8</version>
     <packaging>jar</packaging>
 
     <name>Fleet Navigator</name>

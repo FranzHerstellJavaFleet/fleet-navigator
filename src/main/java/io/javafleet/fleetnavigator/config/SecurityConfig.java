@@ -66,7 +66,9 @@ public class SecurityConfig {
                     "/api/search/**",         // Search Settings API
                     "/api/files/**",          // File Upload API
                     "/api/projects/**",       // Project API (includes chat assignment)
-                    "/api/system-prompts/**"  // System Prompt API
+                    "/api/system-prompts/**", // System Prompt API
+                    "/api/models/**",         // Model API (includes setting default)
+                    "/api/model-store/**"     // Model Store API (downloads)
                 )
             )
 

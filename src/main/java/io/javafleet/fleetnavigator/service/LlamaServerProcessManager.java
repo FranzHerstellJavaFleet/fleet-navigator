@@ -107,8 +107,12 @@ public class LlamaServerProcessManager {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(new File(System.getProperty("user.dir")));
 
-            // Umgebungsvariablen setzen (LD_LIBRARY_PATH für CUDA)
-            pb.environment().put("LD_LIBRARY_PATH", "./bin:" + System.getenv().getOrDefault("LD_LIBRARY_PATH", ""));
+            // Umgebungsvariablen setzen (LD_LIBRARY_PATH für shared libraries)
+            // Ermittle das Verzeichnis des Binaries für LD_LIBRARY_PATH
+            Path binaryDir = Paths.get(binaryPath).getParent();
+            String libPath = binaryDir != null ? binaryDir.toString() : "./bin";
+            pb.environment().put("LD_LIBRARY_PATH", libPath + ":" + System.getenv().getOrDefault("LD_LIBRARY_PATH", ""));
+            log.debug("LD_LIBRARY_PATH set to: {}", pb.environment().get("LD_LIBRARY_PATH"));
 
             // Prozess starten
             llamaServerProcess = pb.start();
@@ -328,24 +332,74 @@ public class LlamaServerProcessManager {
         // 1. Konfigurierter Pfad
         String configPath = config.getLlamacpp().getBinaryPath();
         if (configPath != null && Files.exists(Paths.get(configPath))) {
+            log.info("🔧 Using configured llama-server path: {}", configPath);
             return configPath;
         }
 
-        // 2. Standard-Pfade prüfen
-        String[] possiblePaths = {
-            "./bin/llama-server",
-            "/usr/local/bin/llama-server",
-            "/opt/fleet-navigator/bin/llama-server",
-            System.getProperty("user.home") + "/.local/bin/llama-server"
-        };
+        // 2. GPU-Erkennung: Prüfe ob NVIDIA GPU verfügbar ist
+        boolean hasNvidiaGpu = checkNvidiaGpu();
+
+        // 3. Standard-Pfade prüfen (mit GPU/CPU Varianten)
+        // Priorität: CUDA wenn GPU vorhanden, sonst CPU
+        String[] possiblePaths;
+        if (hasNvidiaGpu) {
+            log.info("🎮 NVIDIA GPU erkannt - suche CUDA-Version von llama-server");
+            possiblePaths = new String[] {
+                // CUDA-Versionen zuerst
+                "./bin/llama-cuda/llama-server",
+                "./bin/llama-server-cuda",
+                "/opt/fleet-navigator/bin/llama-cuda/llama-server",
+                // Dann CPU-Fallback
+                "./bin/llama-b7325/llama-server",
+                "./bin/llama-server",
+                "/usr/local/bin/llama-server",
+                "/opt/fleet-navigator/bin/llama-server",
+                System.getProperty("user.home") + "/.local/bin/llama-server"
+            };
+        } else {
+            log.info("💻 Keine NVIDIA GPU erkannt - suche CPU-Version von llama-server");
+            possiblePaths = new String[] {
+                // CPU-Versionen
+                "./bin/llama-b7325/llama-server",
+                "./bin/llama-server",
+                "/usr/local/bin/llama-server",
+                "/opt/fleet-navigator/bin/llama-b7325/llama-server",
+                "/opt/fleet-navigator/bin/llama-server",
+                System.getProperty("user.home") + "/.local/bin/llama-server"
+            };
+        }
 
         for (String path : possiblePaths) {
             if (Files.exists(Paths.get(path))) {
+                log.info("✅ Found llama-server at: {}", path);
                 return path;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Prüft ob eine NVIDIA GPU verfügbar ist
+     */
+    private boolean checkNvidiaGpu() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("nvidia-smi", "--query-gpu=name", "--format=csv,noheader");
+            Process p = pb.start();
+            boolean finished = p.waitFor(5, TimeUnit.SECONDS);
+            if (finished && p.exitValue() == 0) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    String gpuName = reader.readLine();
+                    if (gpuName != null && !gpuName.isBlank()) {
+                        log.info("🎮 Detected NVIDIA GPU: {}", gpuName.trim());
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("nvidia-smi check failed: {}", e.getMessage());
+        }
+        return false;
     }
 
     private void killProcessOnPort(int port) {

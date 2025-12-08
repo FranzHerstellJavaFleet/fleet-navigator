@@ -284,6 +284,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(
             Exception ex, HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        // Bei statischen Ressourcen (JS, CSS, etc.) nicht mit JSON antworten
+        // da der Browser text/javascript oder text/css erwartet
+        if (isStaticResourceRequest(path)) {
+            log.debug("Fehler bei statischer Ressource ignoriert: {} - {}", path, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Bei Client-Abbruch (broken pipe) nicht als Fehler loggen
+        if (isClientAbortException(ex)) {
+            log.debug("Client-Verbindung abgebrochen für: {}", path);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+
         log.error("Unerwarteter Fehler: {}", ex.getMessage(), ex);
 
         ApiErrorResponse response = ApiErrorResponse.builder()
@@ -301,5 +317,43 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    /**
+     * Prüft ob der Request eine statische Ressource anfordert.
+     */
+    private boolean isStaticResourceRequest(String path) {
+        if (path == null) return false;
+        return path.endsWith(".js")
+            || path.endsWith(".css")
+            || path.endsWith(".map")
+            || path.endsWith(".ico")
+            || path.endsWith(".png")
+            || path.endsWith(".jpg")
+            || path.endsWith(".jpeg")
+            || path.endsWith(".gif")
+            || path.endsWith(".svg")
+            || path.endsWith(".woff")
+            || path.endsWith(".woff2")
+            || path.endsWith(".ttf")
+            || path.endsWith(".eot")
+            || path.startsWith("/assets/");
+    }
+
+    /**
+     * Prüft ob die Exception durch Client-Abbruch verursacht wurde (broken pipe).
+     */
+    private boolean isClientAbortException(Exception ex) {
+        Throwable cause = ex;
+        while (cause != null) {
+            String className = cause.getClass().getName();
+            String message = cause.getMessage();
+            if (className.contains("ClientAbortException")
+                || (message != null && message.contains("broken pipe"))) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }

@@ -5,7 +5,9 @@ import io.javafleet.fleetnavigator.dto.SystemStatus;
 import io.javafleet.fleetnavigator.llm.ModelRegistry;
 import io.javafleet.fleetnavigator.llm.ModelRegistryEntry;
 import io.javafleet.fleetnavigator.service.HuggingFaceService;
+import io.javafleet.fleetnavigator.service.LlamaServerProcessManager;
 import io.javafleet.fleetnavigator.service.ModelDownloadService;
+import io.javafleet.fleetnavigator.service.ModelMetadataService;
 import io.javafleet.fleetnavigator.service.SystemService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class ModelStoreController {
     private final ModelDownloadService downloadService;
     private final HuggingFaceService huggingFaceService;
     private final SystemService systemService;
+    private final ModelMetadataService modelMetadataService;
+    private final LlamaServerProcessManager llamaServerManager;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     /**
@@ -521,7 +525,38 @@ public class ModelStoreController {
                     }
                 });
 
-                // Download completed
+                // Download completed - set as default and start llama-server
+                try {
+                    // Check if there's already a default model
+                    var currentDefault = modelMetadataService.getDefaultModel();
+                    if (currentDefault.isEmpty() || "phi:latest".equals(currentDefault.get().getName())) {
+                        // No default or placeholder default - set this model as default
+                        modelMetadataService.setDefaultModel(filename);
+                        log.info("✅ Downloaded model {} set as default", filename);
+                    }
+
+                    // Start llama-server with the downloaded model if not already running
+                    LlamaServerProcessManager.ServerStatus status = llamaServerManager.getStatus();
+                    if (!status.isOnline()) {
+                        log.info("🚀 Starting llama-server with newly downloaded model: {}", filename);
+                        LlamaServerProcessManager.StartResult result = llamaServerManager.startServer(
+                            filename,
+                            2026,   // Standard-Port
+                            8192,   // Context Size
+                            99      // GPU Layers (alle)
+                        );
+                        if (result.isSuccess()) {
+                            log.info("✅ llama-server gestartet auf Port {}", result.getPort());
+                        } else {
+                            log.warn("⚠️ llama-server konnte nicht gestartet werden: {}", result.getMessage());
+                        }
+                    } else {
+                        log.info("ℹ️ llama-server läuft bereits auf Port {}", status.getPort());
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not set downloaded model as default or start llama-server: {}", e.getMessage());
+                }
+
                 emitter.send(SseEmitter.event()
                     .name("complete")
                     .data("✅ Download abgeschlossen!"));

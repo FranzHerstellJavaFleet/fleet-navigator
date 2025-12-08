@@ -21,8 +21,8 @@
           </div>
         </div>
 
-        <!-- Content -->
-        <div class="p-8">
+        <!-- Content (scrollable) -->
+        <div class="p-8 max-h-[60vh] overflow-y-auto">
 
           <!-- Step 1: No Model Found -->
           <div v-if="step === 1" class="space-y-6">
@@ -240,26 +240,29 @@ const osType = ref('')
 
 const recommendedModels = ref([
   {
-    name: 'qwen2.5:3b',
-    displayName: 'Qwen 2.5 3B',
+    name: 'Qwen/Qwen2.5-3B-Instruct-GGUF',
+    filename: 'qwen2.5-3b-instruct-q4_k_m.gguf',
+    displayName: 'Qwen 2.5 3B Instruct',
     description: 'Kompakt, schnell, gut für alltägliche Aufgaben. Ideal für den Einstieg.',
-    size: '~2 GB',
+    size: '~2.1 GB',
     params: '3B Parameter',
     recommended: true
   },
   {
-    name: 'qwen2.5:7b',
-    displayName: 'Qwen 2.5 7B',
+    name: 'Qwen/Qwen2.5-7B-Instruct-GGUF',
+    filename: 'qwen2.5-7b-instruct-q4_k_m.gguf',
+    displayName: 'Qwen 2.5 7B Instruct',
     description: 'Leistungsstärker, bessere Qualität. Empfohlen für anspruchsvolle Aufgaben.',
-    size: '~4.5 GB',
+    size: '~4.7 GB',
     params: '7B Parameter',
     recommended: false
   },
   {
-    name: 'llama3.2:3b',
-    displayName: 'Llama 3.2 3B',
+    name: 'bartowski/Llama-3.2-3B-Instruct-GGUF',
+    filename: 'Llama-3.2-3B-Instruct-Q4_K_M.gguf',
+    displayName: 'Llama 3.2 3B Instruct',
     description: 'Meta\'s neuestes kleines Modell. Gut ausbalanciert.',
-    size: '~2 GB',
+    size: '~2.0 GB',
     params: '3B Parameter',
     recommended: false
   }
@@ -287,50 +290,57 @@ onMounted(async () => {
 async function startDownload() {
   if (!selectedModel.value) return
 
+  // Find selected model details
+  const model = recommendedModels.value.find(m => m.name === selectedModel.value)
+  if (!model) return
+
   step.value = 2
   downloadProgress.value = 0
-  downloadStatus.value = 'Starte Download...'
+  downloadStatus.value = 'Starte Download von HuggingFace...'
 
   try {
-    // Start pull via SSE
-    const eventSource = new EventSource(`/api/ollama/pull/${encodeURIComponent(selectedModel.value)}`)
+    // Build HuggingFace download URL
+    const params = new URLSearchParams({
+      modelId: model.name,
+      filename: model.filename
+    })
+    const eventSource = new EventSource(`/api/model-store/huggingface/download?${params}`)
 
-    eventSource.onmessage = (event) => {
+    eventSource.addEventListener('progress', (event) => {
       try {
-        const data = JSON.parse(event.data)
+        const progressMsg = event.data
+        downloadStatus.value = progressMsg
 
-        if (data.status) {
-          downloadStatus.value = data.status
+        // Parse progress message like "📥 Downloading: 45% (1.2 GB / 2.6 GB)"
+        const percentMatch = progressMsg.match(/(\d+)%/)
+        if (percentMatch) {
+          downloadProgress.value = parseInt(percentMatch[1])
         }
 
-        if (data.completed && data.total) {
-          downloadProgress.value = Math.round((data.completed / data.total) * 100)
-
-          // Format sizes
-          const completedMB = (data.completed / (1024 * 1024)).toFixed(1)
-          const totalMB = (data.total / (1024 * 1024)).toFixed(1)
-
-          if (totalMB > 1024) {
-            downloadedSize.value = (completedMB / 1024).toFixed(2) + ' GB'
-            totalSize.value = (totalMB / 1024).toFixed(2) + ' GB'
-          } else {
-            downloadedSize.value = completedMB + ' MB'
-            totalSize.value = totalMB + ' MB'
-          }
-        }
-
-        // Check for completion
-        if (data.status === 'success' || data.status?.includes('success')) {
-          eventSource.close()
-          step.value = 3
+        // Extract sizes if available
+        const sizeMatch = progressMsg.match(/\(([^)]+)\s*\/\s*([^)]+)\)/)
+        if (sizeMatch) {
+          downloadedSize.value = sizeMatch[1].trim()
+          totalSize.value = sizeMatch[2].trim()
         }
       } catch (e) {
-        console.error('Error parsing SSE data:', e)
+        console.error('Error parsing progress:', e)
       }
-    }
+    })
+
+    eventSource.addEventListener('complete', (event) => {
+      console.log('Download complete:', event.data)
+      eventSource.close()
+      step.value = 3
+    })
+
+    eventSource.addEventListener('error', (event) => {
+      console.error('Download error event:', event.data)
+      downloadStatus.value = 'Fehler: ' + (event.data || 'Unbekannter Fehler')
+    })
 
     eventSource.onerror = (error) => {
-      console.error('SSE error:', error)
+      console.error('SSE connection error:', error)
       // Check if download completed
       if (downloadProgress.value >= 99) {
         eventSource.close()
