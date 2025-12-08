@@ -55,6 +55,7 @@ jobs:
           mv "${DIST_DIR}.tar.gz" dist/
 
       - name: Build DEB package
+        shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           PKG_NAME="fleet-navigator"
@@ -86,34 +87,15 @@ jobs:
           fi
 
           # Start-Skript erstellen
-          cat > "$PKG_DIR/opt/fleet-navigator/start.sh" << 'STARTEOF'
-#!/bin/bash
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
-java -jar bin/fleet-navigator.jar "$@"
-STARTEOF
+          printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\ncd "$SCRIPT_DIR"\njava -jar bin/fleet-navigator.jar "$@"\n' > "$PKG_DIR/opt/fleet-navigator/start.sh"
           chmod +x "$PKG_DIR/opt/fleet-navigator/start.sh"
 
           # Symlink-Skript für /usr/bin
-          cat > "$PKG_DIR/usr/bin/fleet-navigator" << 'BINEOF'
-#!/bin/bash
-exec /opt/fleet-navigator/start.sh "$@"
-BINEOF
+          printf '#!/bin/bash\nexec /opt/fleet-navigator/start.sh "$@"\n' > "$PKG_DIR/usr/bin/fleet-navigator"
           chmod +x "$PKG_DIR/usr/bin/fleet-navigator"
 
           # Desktop-Eintrag erstellen
-          cat > "$PKG_DIR/usr/share/applications/fleet-navigator.desktop" << 'DESKTOPEOF'
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Fleet Navigator
-Comment=Lokale KI für alle
-Exec=/opt/fleet-navigator/start.sh
-Icon=fleet-navigator
-Terminal=false
-Categories=Development;Utility;
-Keywords=AI;LLM;Chat;
-DESKTOPEOF
+          printf '[Desktop Entry]\nVersion=1.0\nType=Application\nName=Fleet Navigator\nComment=Lokale KI für alle\nExec=/opt/fleet-navigator/start.sh\nIcon=fleet-navigator\nTerminal=false\nCategories=Development;Utility;\nKeywords=AI;LLM;Chat;\n' > "$PKG_DIR/usr/share/applications/fleet-navigator.desktop"
 
           # Icon kopieren (falls vorhanden, sonst Platzhalter)
           if [ -f "frontend/public/javafleet-logo.png" ]; then
@@ -121,65 +103,14 @@ DESKTOPEOF
           fi
 
           # DEBIAN/control erstellen
-          cat > "$PKG_DIR/DEBIAN/control" << CONTROLEOF
-Package: fleet-navigator
-Version: ${VERSION}
-Section: utils
-Priority: optional
-Architecture: amd64
-Depends: openjdk-17-jre | openjdk-21-jre | default-jre (>= 17)
-Maintainer: JavaFleet <info@javafleet.io>
-Description: Fleet Navigator - Lokale KI für alle
- Fleet Navigator ist eine lokale KI-Anwendung mit Web-Interface.
- Features:
-  - Chat mit lokalen LLM-Modellen
-  - Unterstützung für NVIDIA GPU (CUDA)
-  - Auto-Update System
-  - Multi-Experten System
-Homepage: https://github.com/FranzHerstellJavaFleet/Fleet-Navigator
-CONTROLEOF
+          printf "Package: fleet-navigator\nVersion: ${VERSION}\nSection: utils\nPriority: optional\nArchitecture: amd64\nDepends: openjdk-17-jre | openjdk-21-jre | default-jre (>= 17)\nMaintainer: JavaFleet <info@javafleet.io>\nDescription: Fleet Navigator - Lokale KI fuer alle\n Fleet Navigator ist eine lokale KI-Anwendung mit Web-Interface.\nHomepage: https://github.com/FranzHerstellJavaFleet/Fleet-Navigator\n" > "$PKG_DIR/DEBIAN/control"
 
           # DEBIAN/postinst (nach Installation)
-          cat > "$PKG_DIR/DEBIAN/postinst" << 'POSTEOF'
-#!/bin/bash
-set -e
-
-# Berechtigungen setzen
-chmod +x /opt/fleet-navigator/start.sh
-chmod +x /usr/bin/fleet-navigator
-
-# Desktop-Datenbank aktualisieren
-if command -v update-desktop-database &> /dev/null; then
-    update-desktop-database -q /usr/share/applications 2>/dev/null || true
-fi
-
-# Icon-Cache aktualisieren
-if command -v gtk-update-icon-cache &> /dev/null; then
-    gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null || true
-fi
-
-echo ""
-echo "╔════════════════════════════════════════════════════════════╗"
-echo "║  Fleet Navigator wurde erfolgreich installiert!            ║"
-echo "║                                                            ║"
-echo "║  Starten mit:  fleet-navigator                             ║"
-echo "║  Oder:         /opt/fleet-navigator/start.sh               ║"
-echo "║                                                            ║"
-echo "║  Web-Interface: http://localhost:2025                      ║"
-echo "╚════════════════════════════════════════════════════════════╝"
-echo ""
-
-exit 0
-POSTEOF
+          printf '#!/bin/bash\nset -e\nchmod +x /opt/fleet-navigator/start.sh\nchmod +x /usr/bin/fleet-navigator\nif command -v update-desktop-database > /dev/null 2>&1; then update-desktop-database -q /usr/share/applications 2>/dev/null || true; fi\nif command -v gtk-update-icon-cache > /dev/null 2>&1; then gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null || true; fi\necho ""\necho "Fleet Navigator wurde erfolgreich installiert!"\necho "Starten mit: fleet-navigator"\necho "Web-Interface: http://localhost:2025"\necho ""\nexit 0\n' > "$PKG_DIR/DEBIAN/postinst"
           chmod +x "$PKG_DIR/DEBIAN/postinst"
 
           # DEBIAN/prerm (vor Deinstallation)
-          cat > "$PKG_DIR/DEBIAN/prerm" << 'PRERMEOF'
-#!/bin/bash
-set -e
-echo "Fleet Navigator wird entfernt..."
-exit 0
-PRERMEOF
+          printf '#!/bin/bash\nset -e\necho "Fleet Navigator wird entfernt..."\nexit 0\n' > "$PKG_DIR/DEBIAN/prerm"
           chmod +x "$PKG_DIR/DEBIAN/prerm"
 
           # DEB-Paket bauen
